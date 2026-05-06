@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Mathro&middot;Bati&middot;X Scroll Vault 0.5beta</title>
+    <title>Mathro&middot;batiX Scroll Vault 0.5beta</title>
 
     <!-- 
     /////////////////////////////////////////////////////////
@@ -13,25 +13,48 @@
     <style id="demoStyles">
       body {
         display: flex;
+        align-items: center;
         justify-content: center;
         padding-bottom: 100vh;
-        background-color: #333;
+        background-color: #111;
       }
       mathro-batix {
-        width: 100%;
+        padding-top: 10vh;
+        width: 70%;
+        font-size: 54px;
+      }
+
+      @media (orientation: portrait) {
+        mathro-batix {
+          font-size: 80px;
+          width: 100%;
+        }
       }
     </style>
 
     <style id="mathrobatixStyles">
       /* CONFIG */
       mathro-batix {
-        --trans-dur: 1800ms;
+        --animation-start: 50%;
+        --animation-end: 80%;
         --font-size: 3rem;
         --back-color: #111;
         --nose-h: 35;
-        --nose-s: 100%;
-        --nose-l: 50%;
+        --nose-s: 80%;
+        --nose-l: 40%;
         --nose-a: 1;
+      }
+
+      /* LAYOUT */
+      mathro-batix * {
+        box-sizing: border-box;
+      }
+      mathro-batix {
+        display: inline-flex;
+        flex-direction: column;
+        overflow: visible;
+        color: var(--main-color);
+        background-color: var(--back-color);
       }
 
       /* COLORS */
@@ -46,7 +69,7 @@
         --white-color: hsl(
           var(--nose-h),
           var(--nose-s),
-          calc(1.7 * var(--nose-l))
+          calc(2.7 * var(--nose-l))
         );
 
         --grey-color: hsl(
@@ -74,46 +97,35 @@
 
         --cank-00: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 94Q30 40 95 0L100 10Q33 43 10 100Z'/%3E%3C/svg%3E");
       }
-
-      /* LAYOUT */
-      mathro-batix {
-        display: inline-block;
-        position: relative;
-        text-align: center;
-        font-size: var(--font-size);
-        color: var(--main-color);
-        background-color: var(--back-color);
-      }
     </style>
 
     <style id="stepStyles">
-      /* LAYOUT */
       [data-step] {
+        display: inline-block;
+        position: relative;
+        margin-bottom: 30vh;
+      }
+      [data-step] > :nth-child(1) {
         /* don't use interpolate-size if possible */
         /* interpolate-size: allow-keywords; */
         display: flex;
         gap: 0.25em;
         align-items: baseline;
         justify-content: center;
-        margin-top: 50vh;
-        margin-bottom: 50vh;
         font-family: "Times New Roman", Times, serif;
-        font-size: var(--font-size);
       }
-
-      sup {
-        font-size: 0.55em;
-        vertical-align: 70%;
+      [data-step] > :nth-child(2) {
+        margin-top: 1.5em;
+        width: 100%;
       }
+    </style>
 
+    <style id="batixStyles">
       b {
         position: relative;
-        font-weight: normal;
         display: inline-block;
+        font-weight: normal;
         text-wrap: nowrap;
-
-        --animation-start: 60%;
-        --animation-end: 80%;
 
         --ani-start: 0;
         --ani-end: 1;
@@ -128,6 +140,11 @@
             var(--animation-start) +
               (var(--animation-end) - var(--animation-start)) * var(--ani-end)
           );
+      }
+
+      b sup {
+        font-size: 0.55em;
+        vertical-align: 70%;
       }
     </style>
 
@@ -284,6 +301,7 @@
     <style id="vivaStyles">
       [data-viva] {
         text-shadow: none;
+        --ani-start: 0.6;
         animation: viva linear both;
         animation-timeline: view();
         animation-range: var(--animation-range);
@@ -379,46 +397,34 @@
     <style id="rootStyles">
       [data-root] {
         --root-high: 120%;
-
-        --root-for-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30px' height='100px' preserveAspectRatio='none'%3E%3Cpath fill='hsl(35,100%,50%)' d='M8 46L14 30L19 52L18 0L23 1L24 90L11 43Z' /%3E%3C/svg%3E");
-
-        --root-aft-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none'%3E%3Cpath fill='hsl(35,100%,50%)' d='M0 0H 100V3L 2 7Z' /%3E%3C/svg%3E");
-
+        --root-for-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30px' height='100px' preserveAspectRatio='none'%3E%3Cpath d='M8 46L14 30L19 52L18 0L23 1L24 90L11 43Z' /%3E%3C/svg%3E");
+        --root-aft-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none'%3E%3Cpath d='M0 0H 100V3L 2 7Z' /%3E%3C/svg%3E");
         /* word-spacing: -0.2em; */
-
-        margin-left: 1.5ch;
-
+        margin-left: 0.6em;
         margin-right: 0.5ch;
       }
 
       [data-root]::before,
       [data-root]::after {
         content: "";
-
         position: absolute;
-
         height: var(--root-high);
-
         top: calc((100% - var(--root-high)) / 2);
-
         background-repeat: no-repeat;
-
         background-size: 100% 100%;
+        overflow: visible;
+        filter: url("#maincolor");
       }
 
       [data-root]::before {
         width: 1.2ch;
-
         left: -1.5ch;
-
         background-image: var(--root-for-dark);
       }
 
       [data-root]::after {
         width: calc(100% + 1.3ch);
-
         left: -0.75ch;
-
         background-image: var(--root-aft-dark);
       }
     </style>
@@ -428,6 +434,7 @@
         --cank-00: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 94Q30 40 95 0L100 10Q33 43 10 100Z'/%3E%3C/svg%3E");
         --cank-01: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 90Q55 55 90 0L100 8Q65 50 10 100Z'/%3E%3C/svg%3E");
         --cank-02: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 100Q30 75 55 30L55 50Q30 80 0 100ZM 100 0Q70 25 50 70L50 50Q70 20 100 0Z'/%3E%3C/svg%3E");
+        --back-mig: var(--cank-00);
       }
       [data-cank]::before {
         content: "";
@@ -435,7 +442,7 @@
         left: -5px;
         height: 100%;
         width: calc(100% + 10px);
-        background-image: var(--cank-00);
+        background-image: var(--back-mig);
         background-repeat: no-repeat;
         background-size: 100% 100%;
         overflow: visible;
@@ -444,13 +451,13 @@
         animation-timeline: view();
         animation-range: var(--animation-range);
       }
-      [data-cank="01"]::before {
-        background-image: var(--cank-01);
+      [data-cank="01"] {
+        --back-mig: var(--cank-01);
       }
       [data-cank="02"]::before {
-        background-image: var(--cank-02);
+        --back-mig: var(--cank-02);
       }
-      [data-svgviva][data-cank]::before {
+      [data-cank][data-svgviva]::before {
         filter: url("#svgviva");
       }
       @keyframes cank {
@@ -501,6 +508,84 @@
       [data-filter-viva]::before {
         color: var(--white-color);
         filter: url("#svgviva");
+      }
+      [data-filter-clear] {
+        animation: filter-clear linear both;
+        animation-timeline: view();
+        animation-range: var(--animation-range);
+      }
+      @keyframes filter-clear {
+        to {
+          color: var(--main-color);
+          text-shadow: none;
+        }
+      }
+    </style>
+
+    <style id="rantStyles">
+      c-omm,
+      r-ant {
+        position: relative;
+        display: inline-block;
+        padding: 0px 10px;
+        font-size: 0.5em;
+        font-style: italic;
+        text-align: center;
+        color: var(--grey-color);
+      }
+      r-ant {
+        font-size: 0.4em;
+      }
+      c-omm::before,
+      r-ant::before {
+        content: "";
+        position: absolute;
+        width: 5px;
+        height: 100%;
+        right: 100%;
+        top: 0;
+        /* border-width: 1.5px 0px 1.5px 3px; */
+        /* border-style: solid; */
+        /* border-color: var(--grey-color); */
+      }
+      c-omm::after,
+      r-ant::after {
+        content: "";
+        position: absolute;
+        width: 5px;
+        height: 100%;
+        left: 100%;
+        top: 0;
+        /* border-width: 1.5px 3px 1.5px 0px; */
+        /* border-style: solid; */
+        /* border-color: var(--grey-color); */
+      }
+      c-omm > b {
+        position: absolute;
+        display: inline-block;
+        width: 100%;
+        left: 0%;
+        top: 100%;
+        padding: 20px;
+        font-size: 0.5em;
+        text-align: justify;
+        color: var(--grey-color);
+        background-color: var(--back-color);
+        border-left: 1px solid var(--grey-color);
+        opacity: 0;
+        z-index: 10;
+        max-height: 10em;
+        overflow-y: auto;
+        transition: opacity ease-in 600ms;
+        pointer-events: none;
+      }
+      c-omm:hover b {
+        opacity: 0.85;
+        transition: opacity ease-out 400ms;
+        pointer-events: auto;
+      }
+      c-omm em {
+        font-style: normal;
       }
     </style>
   </head>
@@ -580,35 +665,242 @@
           </filter>
         </defs>
       </svg>
-      <div data-step id="expanding_forula">
-        <b>-b &#177;</b>
-        <b data-pms></b>
-        <b data-root>
-          <b>b<sup>2</sup></b>
-          <b data-grow style="--ani-start: 0">-</b>
-          <b data-grow style="--ani-start: 0.2">4</b>
-          <b data-grow style="--ani-start: 0.4">a</b>
-          <b data-grow style="--ani-start: 0.6">c</b>
-        </b>
+
+      <div data-step id="intro_message" style="margin-bottom: 15vh">
+        <b> </b>
+        <c-omm> you are going to have to solve this for x </c-omm>
       </div>
 
-      <div data-step data-move="0 1 3 4 2 5">
-        <b>x<sup>2</sup></b>
-        <b data-cank data-svgviva>+ 3x</b>
-        <b
-          ><b data-jump
-            ><b data-spin>
-              <b data-cross>
-                <b>+</b>
-                <b>-</b>
-              </b>
-              <b>7</b>
-            </b></b
-          ></b
-        >
-        <b>=</b>
-        <b>15</b>
-        <b data-cank="02" data-svgviva>+ 3x</b>
+      <script id="unfurlScript">
+        window.addEventListener("load", (e) => {
+          document.querySelectorAll("[data-unfurl]").forEach((el) => {
+            const items = Array.from(el.children);
+            items.forEach((b, i) => {
+              b.setAttribute("data-grow", "");
+              b.style.setProperty("--ani-start", i / items.length);
+            });
+            el.style.display = "inline-block";
+          });
+        });
+      </script>
+      <style id="unfurlStyles">
+        [data-unfurl] {
+          display: none;
+          margin-left: -0.25em;
+          --animation-start: 65%;
+          --animation-end: 90%;
+          animation: unfurl-terms linear both;
+          animation-timeline: view();
+          animation-range: var(--animation-range);
+        }
+        @keyframes unfurl-terms {
+          to {
+            margin-left: 0em;
+          }
+        }
+      </style>
+      <div data-step id="unfurl_expression">
+        <b>
+          <b>3x<sup>2</sup></b>
+          <b data-unfurl>
+            <b>+ 2x<sup>2</sup></b>
+            <b>+ 7</b>
+            <b>(x</b>
+            <b>+ 1)</b>
+          </b>
+          <b>= 9</b>
+        </b>
+        <c-omm> ooh, that's a LOT to do! </c-omm>
+      </div>
+
+      <div data-step id="notice_like">
+        <b>
+          <b data-viva style="--ani-start: 0">3x<sup>2</sup></b>
+          <b>+</b>
+          <b data-viva style="--ani-start: 0">2x<sup>2</sup></b>
+          + 7(x + 1) = 9
+        </b>
+        <c-omm>
+          notice the first two terms terms are like-terms
+          <b>
+            "like-terms" are terms where the variable portion is the same; in
+            this case, the first to terms have an x<sup>2</sup>; our goal will
+            be to combine them
+          </b>
+        </c-omm>
+      </div>
+
+      <div data-step id="group_like">
+        <b>
+          <b data-grow>
+            <b data-viva>(</b>
+          </b>
+          <b style="--ani-end: 0.5">3x<sup>2</sup></b>
+          <b>+</b>
+          <b style="--ani-end: 0.5">2x<sup>2</sup></b>
+          <b data-grow>
+            <b data-viva>)</b>
+          </b>
+          + 7(x + 1) = 9
+        </b>
+        <c-omm> we should group them together in ()'s </c-omm>
+      </div>
+
+      <style id="combineTermsStyles">
+        [data-combine-like] [data-shrink] {
+          --ani-start: 0.51;
+        }
+      </style>
+      <div data-step id="combine_like_terms">
+        <b data-combine-like>
+          <b data-shrink>(</b>
+          <b data-absorb>
+            <b>3x<sup>2</sup> + 2x<sup>2</sup></b>
+            <b data-filter-viva>5x<sup>2</sup></b>
+          </b>
+          <b data-shrink>)</b>
+          + 7(x + 1) = 9
+        </b>
+        <c-omm> then combine them into a single term, by adding </c-omm>
+      </div>
+
+      <div data-step id="notice_dist">
+        <b data-notice-dist>
+          <b>5x<sup>2</sup></b> +
+          <b data-viva style="--ani-start: 0; --ani-end: 0.5">7</b>
+          <b data-viva style="--ani-start: 0.7">(</b>
+          x + 1
+          <b data-viva style="--ani-start: 0.7">)</b>
+          = 9
+        </b>
+        <c-omm> notice a term infront of ()'s </c-omm>
+      </div>
+
+      <style>
+        #build_portal [data-filter-clear] {
+          --ani-end: 0.4;
+        }
+      </style>
+      <div data-step id="build_portal">
+        <b>
+          <b>5x<sup>2</sup></b> +
+          <b>7</b>
+          <b data-grow>
+            <b data-viva>&middot;</b>
+          </b>
+          <b>(</b>
+          x + 1
+          <b>)</b>
+          = 9
+        </b>
+        <c-omm> we need to construct a TIMES-MACHINE </c-omm>
+      </div>
+
+      <div data-step id="distribute_term">
+        <b>
+          <b data-dist>
+            <b>5x<sup>2</sup> +</b>
+            <b id="coefficient" data-vaporize>
+              <b data-shrink>7 &middot;</b>
+            </b>
+            <b>(</b>
+            <b>
+              <b data-grow="teleport" data-filter-viva>7 &middot;</b>
+              <b data-vaporize="teleport">x</b>
+              <b>x</b>
+              +
+              <b data-grow="teleport" data-filter-viva>7 &middot;</b>
+              <b data-vaporize="teleport">1</b>
+              <b>1</b>
+            </b>
+            <b>)</b>
+          </b>
+          <b>=</b>
+          <b>9</b>
+        </b>
+        <c-omm> !!! clone him through the portal !!!</c-omm>
+      </div>
+
+      <div data-step id="multiply_dist">
+        <b>
+          <b>5x<sup>2</sup> + (</b>
+          <b data-absorb>
+            <b>7 &middot; x</b>
+            <b data-filter-viva>7x</b>
+          </b>
+          +
+          <b data-absorb>
+            <b>7 &middot; 1</b>
+            <b data-filter-viva>7</b>
+          </b>
+          <b>) = 9</b>
+        </b>
+        <c-omm> actually preform the multiplications </c-omm>
+      </div>
+
+      <div data-step id="drop_parens">
+        <b>
+          <b>5x<sup>2</sup> + </b>
+          <b data-shrink style="--ani-start: 0.55">
+            <b data-vaporize>(</b>
+          </b>
+          <b>7x + 7</b>
+          <b data-shrink style="--ani-start: 0.55">
+            <b data-vaporize>)</b>
+          </b>
+          <b>= 9</b>
+        </b>
+        <c-omm> we can drop these ()'s now </c-omm>
+      </div>
+
+      <div data-step id="flip_flop">
+        <b data-move="0 2 1">
+          <b>5x<sup>2</sup> + 7x</b>
+          <b>
+            <b data-viva>
+              <b data-jump
+                ><b data-spin>
+                  <b data-cross>
+                    <b>+</b>
+                    <b>-</b>
+                  </b>
+                  <b>7</b>
+                </b></b
+              >
+            </b>
+          </b>
+          <b>= 9</b>
+        </b>
+        <c-omm> flip and flop just to demonstrate it </c-omm>
+      </div>
+
+      <div data-step id="absorb_9-7">
+        <b>
+          <b>5x<sup>2</sup> + 7x = </b>
+          <b data-absorb>
+            <b>9 - 7</b>
+            <b data-filter-viva>2</b>
+          </b>
+        </b>
+        <c-omm> actually preform that subtraction </c-omm>
+      </div>
+
+      <!--
+      <div data-step id="expanding_formula">
+        <b data-floor>
+          <b>-b &#177;</b>
+          <b data-root>
+            <b>b<sup>2</sup></b>
+            <b data-grow style="--ani-start: 0">-</b>
+            <b data-grow style="--ani-start: 0.2">4</b>
+            <b data-grow style="--ani-start: 0.4">a</b>
+            <b data-grow style="--ani-start: 0.6">c</b>
+          </b>
+        </b>
+        <c-omm>
+          point those toes, girly
+          <b> you know what I mean when I say point your toes </b>
+        </c-omm>
       </div>
 
       <style id="combineTermsStyles">
@@ -617,37 +909,21 @@
         }
       </style>
       <div data-step id="combine_like_terms">
-        <b>x<sup>3</sup></b>
-        +
-        <b data-filter-viva data-shrink>(</b>
-        <b data-absorb>
-          <b>2x<sup>2</sup> + 5x<sup>2</sup></b>
-          <b data-filter-viva>7x<sup>2</sup></b>
+        <b>
+          <b>x<sup>3</sup></b>
+          +
+          <b data-filter-viva data-shrink>(</b>
+          <b data-absorb>
+            <b>2x<sup>2</sup> + 5x<sup>2</sup></b>
+            <b data-filter-viva>7x<sup>2</sup></b>
+          </b>
+          <b data-filter-viva data-shrink>)</b>
+          <b>+ 3 = 9</b>
         </b>
-        <b data-filter-viva data-shrink>)</b>
-        <b>+ 3 = 9</b>
+        <c-omm>combine like terms</c-omm>
       </div>
 
-      <div data-step id="distribute_term">
-        <b data-dist>
-          <b id="coefficient" data-vaporize>
-            <b data-shrink>7 &middot;</b>
-          </b>
-          <b>(</b>
-          <b>
-            <b data-grow="teleport" data-filter-viva>7 &middot;</b>
-            <b data-vaporize="teleport">3x</b>
-            <b>3x</b>
-            +
-            <b data-grow="teleport" data-filter-viva>7 &middot;</b>
-            <b data-vaporize="teleport">1</b>
-            <b>1</b>
-          </b>
-          <b>)</b>
-        </b>
-        <b>=</b>
-        <b>0</b>
-      </div>
+      -->
     </mathro-batix>
 
     <script id="DEBUGG">
@@ -670,7 +946,7 @@
       });
     </script>
 
-    <script id="moveScript">
+    <script id="movieScript">
       function setupEquation(el) {
         const items = Array.from(el.children);
 
@@ -698,7 +974,7 @@
 
       window.addEventListener("load", () => {
         document
-          .querySelectorAll("[data-step][data-move]")
+          .querySelectorAll("[data-step] [data-move]")
           .forEach(setupEquation);
         log("ready");
       });
