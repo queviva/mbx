@@ -1,15 +1,15 @@
 ((doc, self) => {
+  // #region UTILS
   const log = console.log;
 
-  // 0. !!!HAKC!!!  pull in external css
-  // instead of const styleRule = `...`;
-  // with injected ${this.app.fix} values
+  // !!! HAKC !!!  pull in external css
+  /*
   const link = document.createElement("link");
   link.rel = "stylesheet";
   link.href = "mathrobatics.css";
   document.head.appendChild(link);
+  */
 
-  // 1. HELPER: The Sieve (Strictly pulls keys that exist in 'target')
   const sieve = (target, incoming) => {
     return Object.fromEntries(
       Object.keys(target).map((key) => [
@@ -19,7 +19,6 @@
     );
   };
 
-  // 2. HELPER: Clean JSON Parse
   const parseData = (raw) => {
     try {
       return JSON.parse(raw.replace(/\s+/g, " "));
@@ -27,61 +26,76 @@
       return {};
     }
   };
+  // #endregion
 
-  // 3. CAPTURE SCRIPT OPTS
+  // #region OPTS
   const defOpts = {
-    tag: "mathro-batics",
-    fix: "mb",
-    hop: "1.5em",
-    dur: "1.5s",
+    tag: "mathro-batix",
+    fix: "mbx",
   };
-  const devOpts = parseData(self.dataset[0]);
 
-  // This is the "App Level" config
-  const appOpts = sieve(defOpts, devOpts);
+  const devOpts = sieve(defOpts, parseData(Object.entries(self.dataset)[0][1]));
+  // #endregion
 
-  const boot = () => {
-    if (!customElements.get(appOpts.tag)) {
-      customElements.define(
-        appOpts.tag,
-        class extends HTMLElement {
-          constructor() {
-            super();
-            // Start with App Level Options
-            this.opts = { ...appOpts };
-          }
+  // #region SPOTTER
+  class Spotter {
+    constructor(routine) {
+      // maybe this takes a routine ?
+      this.routine = routine;
+      this.routine.stage = this.routine.stage.trim().replace(/\s+/g, " ");
+      this.routine.stage.querySelectorAll("b").forEach(b => {
+        log(b.id)
+      })
+    }
+  }
+  // #endregion
 
-          connectedCallback() {
-            // 4. INSTANCE OVERWRITE
-            // Look for data-[prefix] on this specific tag
-            const instanceRaw = this.dataset[appOpts.fix];
-            if (instanceRaw) {
-              const instanceOverrides = parseData(instanceRaw);
-              // Sieve again so the user can't inject junk into the instance
-              this.opts = sieve(this.opts, instanceOverrides);
-            }
-
-            // Apply instance-specific CSS variables if needed
-            this.style.setProperty(`--${appOpts.fix}-dur`, this.opts.dur);
-
-            console.log(`Initialized <${appOpts.tag}>`, this.opts);
-          }
-        },
-      );
+  // #region MBX TAG
+  class MBX extends HTMLElement {
+    constructor() {
+      super();
+      // !!! DO NOT USE SHADOW DOM !!!
+      this._opts = { ...devOpts };
+      this._spotter;
     }
 
-    // 5. INJECT GLOBAL CSS (Using App-Level Prefix)
+    loadRoutine(routine) {
+      this._spotter = new Spotter(routine);
+      log(this._spotter.routine);
+    }
+
+    connectedCallback() {
+      const instanceRaw = this.dataset[devOpts.fix];
+      if (instanceRaw) {
+        this._opts = sieve(this._opts, parseData(instanceRaw));
+      }
+      const readyEvent = new CustomEvent(`${devOpts.fix}-ready`, {
+        detail: { time: Date.now() },
+        bubbles: true,
+        composed: true,
+      });
+
+      this.dispatchEvent(readyEvent);
+    }
+  }
+
+  // #endregion
+
+  // #region INIT
+
+  const boot = () => {
+    if (!customElements.get(devOpts.tag)) {
+      customElements.define(devOpts.tag, MBX);
+    }
+
+    // !!! DEBUGG !!! INJECT GLOBAL CSS
+    /*
     const style = document.createElement("style");
     style.textContent = `
-      ${appOpts.tag} { display: block; contain: layout; }
-      ::view-transition-group(.${appOpts.fix}-moving) {
-        animation-duration: var(--${appOpts.fix}-dur, ${appOpts.dur});
-      }
-      @keyframes ${appOpts.fix}-hop {
-        50% { transform: translateY(calc(-1 * ${appOpts.hop})); }
-      }
+      ${devOpts.tag} { }
     `;
     document.head.appendChild(style);
+    */
   };
 
   if (document.readyState === "loading") {
@@ -89,4 +103,5 @@
   } else {
     boot();
   }
+  // #endregion
 })(document, document.currentScript);
