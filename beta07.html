@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mathro&middot;batiX Scroll Vault 0.7beta</title>
+
+    <script
+      src="encapsulated.js"
+      data-x='{
+        "tag" : "mbx-tag"
+      }'
+    ></script>
+
+    <!-- #region STYLES -->
+
+    <style id="demoStyles">
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 100vh;
+        background-color: #111;
+      }
+      mathro-batix {
+        padding-top: 10vh;
+        width: 70%;
+        font-size: 54px;
+      }
+
+      @media (orientation: portrait) {
+        mathro-batix {
+          font-size: 80px;
+          width: 100%;
+        }
+      }
+    </style>
+
+    <style id="mathrobatixStyles">
+      /* CONFIG */
+      mathro-batix {
+        --animation-start: 50%;
+        --animation-end: 80%;
+        --font-size: 3rem;
+        --back-color: #111;
+        --nose-h: 35;
+        --nose-s: 80%;
+        --nose-l: 40%;
+        --nose-a: 1;
+      }
+
+      /* LAYOUT */
+      mathro-batix * {
+        box-sizing: border-box;
+      }
+      mathro-batix {
+        display: inline-flex;
+        flex-direction: column;
+        overflow: visible;
+        color: var(--main-color);
+        background-color: var(--back-color);
+      }
+
+      /* COLORS */
+      mathro-batix {
+        --main-color: hsla(
+          var(--nose-h),
+          var(--nose-s),
+          var(--nose-l),
+          var(--nose-a)
+        );
+
+        --white-color: hsl(
+          var(--nose-h),
+          var(--nose-s),
+          calc(2.7 * var(--nose-l))
+        );
+
+        --grey-color: hsl(
+          var(--nose-h),
+          calc(0.1 * var(--nose-s)),
+          calc(0.8 * var(--nose-l))
+        );
+      }
+
+      /* FILTERS|SHAPES */
+      mathro-batix {
+        --viva-f1: 0 0 3px #fff;
+        --viva-f2: 0 0 8px hsl(calc(var(--nose-h) + 12), var(--nose-s), 58%);
+        --viva-f3: 0 0 24px hsl(calc(var(--nose-h) - 40), var(--nose-s), 55%);
+
+        --viva-shadow: var(--viva-f1), var(--viva-f2), var(--viva-f3);
+
+        --viva-filter: drop-shadow(var(--viva-f1)) drop-shadow(var(--viva-f2))
+          drop-shadow(var(--viva-f3));
+
+        --ghost-shadow: 0 0 0px var(--back-color), 0 0 3px #fff, 0 0 12px #fff;
+
+        --vapor-shadow:
+          0 0 5px var(--back-color), 0 0 40px var(--main-color), 0 0 40px #fff;
+
+        --cank-00: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 94Q30 40 95 0L100 10Q33 43 10 100Z'/%3E%3C/svg%3E");
+      }
+    </style>
+
+    <style id="stepStyles">
+      [data-step] {
+        display: inline-block;
+        position: relative;
+        margin-bottom: 30vh;
+      }
+      [data-step] > :nth-child(1) {
+        /* don't use interpolate-size if possible */
+        /* interpolate-size: allow-keywords; */
+        display: flex;
+        gap: 0.25em;
+        align-items: baseline;
+        justify-content: center;
+        font-family: "Times New Roman", Times, serif;
+      }
+      [data-step] > :nth-child(2) {
+        margin-top: 1.5em;
+        width: 100%;
+      }
+    </style>
+
+    <style id="batixStyles">
+      b {
+        position: relative;
+        display: inline-block;
+        font-weight: normal;
+        text-wrap: nowrap;
+
+        --ani-start: 0;
+        --ani-end: 1;
+
+        --animation-range: cover
+          calc(
+            var(--animation-start) +
+              (var(--animation-end) - var(--animation-start)) * var(--ani-start)
+          )
+          cover
+          calc(
+            var(--animation-start) +
+              (var(--animation-end) - var(--animation-start)) * var(--ani-end)
+          );
+      }
+
+      b sup {
+        font-size: 0.55em;
+        vertical-align: 70%;
+      }
+    </style>
+
+    <style id="moveStyles">
+      .move {
+        animation: move linear both;
+        animation-timeline: view();
+        animation-range: var(--animation-range);
+      }
+
+      @keyframes move {
+        from {
+          transform: translate(var(--dx), var(--dy));
+        }
+        to {
+          transform: translate(0, 0);
+        }
+      }
+    </style>
+
+    <style id="jumpStyles">
+      [data-jump] {
+        animation: jump ease-out both;
+        animation-timeline: view();
+        animation-range: var(--animation-range);
+      }
+      @keyframes jump {
+        0% {
+          transform: translateY(0em);
+        }
+        15% {
+          transform: translateY(-1em);
+        }
+        85% {
+          transform: translateY(-1em);
+        }
+        100% {
+          transform: translateY(0em);
+        }
+      }
+    </style>
+
+    <style id="crossStyles">
+      [data-cross] {
+        position: relative;
+        display: inline-grid;
+        grid-template-areas: "stack";
+        justify-items: center;
+        align-items: baseline;
+      }
+
+      [data-cross] > * {
+        transform-origin: left center;
+        grid-area: stack;
+        white-space: nowrap;
+      }
+
+      [data-cross] > :nth-child(1) {
+        animation: fade-out ease-out both;
+        animation-timeline: view();
+        animation-range: var(--animation-range);
+      }
+
+      [data-cross] > :nth-child(2) {
+        animation: fade-in ease-out both;
+        animation-timeline: view();
+        animation-range: var(--animation-range);
+      }
+
+      @keyframes fade-in {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes fade-out {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+    </style>
+
+    <style id="growStyles">
+      [data-grow] {
+        display: inline-block;
+        transform-origin: 0% 50%;
+        will-change: transform;
+        animation: grow linear both;
+        animation-timeline: view();
+        animation-range: var(--animation-range);
+      }
+
+      @keyframes grow {
+        from {
+          margin-right: -0.25em;
+          transform: scale(0);
+          width: 0px;
+          opacity: 0;
+        }
+        to {
+          margin-right: 0em;
+          transform: scale(1);
+          width: var(--full-width);
+          opacity: 1;
+        }
+      }
+    </style>
+
+    <style id="shrinkStyles">
+      [data-shrink] {
+        display: inline-block;
+        transform-origin: 0% 50%;
+        will-change: transform;
+        animation: shrink ease-in-out both;
+        animation-timeline: view();
+        animation-range: var(--animation-range);
+      }
+
+      @keyframes shrink {
+        from {
+          margin-right: 0em;
+          transform: scale(1);
+          width: var(--full-width);
+          opacity: 1;
+        }
+        to {
+          margin-right: -0.25em;
+          transform: scale(0);
+          width: 0px;
+          opacity: 0;
+        }
+      }
+    </style>
+
+    <style id="spinStyles">
+      [data-spin] {
+        animation: spin linear both;
+        animation-timeline: view();
+        animation-range: var(--animation-range);
+      }
+      @keyframes spin {
+        to {
+          rotate: var(--spin-angle, -360deg);
+        }
+      }
+    </style>
+
+    <style id="vivaStyles">
+      [data-viva] {
+        text-shadow: none;
+        --ani-start: 0.6;
+        animation: viva linear both;
+        animation-timeline: view();
+        animation-range: var(--animation-range);
+      }
+      @keyframes viva {
+        to {
+          color: var(--white-color);
+          text-shadow: var(--viva-shadow);
+        }
+      }
+    </style>
+
+    <style id="ghostStyles">
+      [data-ghost] {
+        text-shadow: none;
+        animation: ghost linear both;
+        animation-timeline: view();
+        animation-range: var(--animation-range);
+      }
+      @keyframes ghost {
+        to {
+          color: var(--back-color);
+          text-shadow: var(--ghost-shadow);
+        }
+      }
+    </style>
+
+    <style id="vaporizeStyles">
+      [data-vaporize] {
+        animation: vaporize linear both;
+        animation-timeline: view();
+        animation-range: var(--animation-range);
+      }
+      @keyframes vaporize {
+        0% {
+          text-shadow: none;
+        }
+        40% {
+          color: var(--back-color);
+          text-shadow: var(--ghost-shadow);
+          opacity: 1;
+        }
+        95% {
+          color: transparent;
+          text-shadow: var(--vapor-shadow);
+          opacity: 0.8;
+        }
+        100% {
+          color: transparent;
+          text-shadow: var(--vapor-shadow);
+          opacity: 0;
+        }
+      }
+    </style>
+
+    <style id="absorbStyles">
+      [data-absorb] {
+        position: relative;
+        display: inline-grid;
+        grid-template-areas: "stack";
+        justify-items: center;
+        align-items: baseline;
+      }
+
+      [data-absorb] > * {
+        transform-origin: left center;
+        grid-area: stack;
+        white-space: nowrap;
+      }
+
+      [data-absorb] > :nth-child(1) {
+        animation: shrink ease-out both;
+        animation-timeline: view();
+        animation-range: var(--animation-range);
+      }
+
+      [data-absorb] > :nth-child(2) {
+        animation: grow ease-in both;
+        animation-timeline: view();
+        animation-range: var(--animation-range);
+      }
+    </style>
+
+    <style id="parensStyles">
+      [data-parens]::before {
+        content: "(";
+      }
+      [data-parens]::after {
+        content: ")";
+      }
+    </style>
+
+    <style id="rootStyles">
+      [data-root] {
+        --root-high: 120%;
+        --root-for-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30px' height='100px' preserveAspectRatio='none'%3E%3Cpath d='M8 46L14 30L19 52L18 0L23 1L24 90L11 43Z' /%3E%3C/svg%3E");
+        --root-aft-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none'%3E%3Cpath d='M0 0H 100V3L 2 7Z' /%3E%3C/svg%3E");
+        /* word-spacing: -0.2em; */
+        margin-left: 0.6em;
+        margin-right: 0.5ch;
+      }
+
+      [data-root]::before,
+      [data-root]::after {
+        content: "";
+        position: absolute;
+        height: var(--root-high);
+        top: calc((100% - var(--root-high)) / 2);
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        overflow: visible;
+        filter: url("#maincolor");
+      }
+
+      [data-root]::before {
+        width: 1.2ch;
+        left: -1.5ch;
+        background-image: var(--root-for-dark);
+      }
+
+      [data-root]::after {
+        width: calc(100% + 1.3ch);
+        left: -0.75ch;
+        background-image: var(--root-aft-dark);
+      }
+    </style>
+
+    <style id="cankStyles">
+      [data-cank] {
+        --cank-00: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 94Q30 40 95 0L100 10Q33 43 10 100Z'/%3E%3C/svg%3E");
+        --cank-01: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 90Q55 55 90 0L100 8Q65 50 10 100Z'/%3E%3C/svg%3E");
+        --cank-02: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 100Q30 75 55 30L55 50Q30 80 0 100ZM 100 0Q70 25 50 70L50 50Q70 20 100 0Z'/%3E%3C/svg%3E");
+        --back-mig: var(--cank-00);
+      }
+      [data-cank]::before {
+        content: "";
+        position: absolute;
+        left: -5px;
+        height: 100%;
+        width: calc(100% + 10px);
+        background-image: var(--back-mig);
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        overflow: visible;
+        filter: url("#maincolor");
+        animation: cank linear both;
+        animation-timeline: view();
+        animation-range: var(--animation-range);
+      }
+      [data-cank="01"] {
+        --back-mig: var(--cank-01);
+      }
+      [data-cank="02"]::before {
+        --back-mig: var(--cank-02);
+      }
+      [data-cank][data-svgviva]::before {
+        filter: url("#svgviva");
+      }
+      @keyframes cank {
+        0% {
+          left: 50%;
+          top: 50%;
+          width: 0;
+          height: 0;
+        }
+        100% {
+          left: -8px;
+          top: 10%;
+          width: calc(100% + 16px);
+          height: 80%;
+        }
+      }
+    </style>
+
+    <style id="distStyles">
+      [data-dist] {
+        display: flex;
+        gap: 0.15em;
+      }
+      [data-dist] > #coefficient {
+        word-spacing: -0.15em;
+        --ani-end: 0.5;
+      }
+      [data-dist] > #coefficient > [data-shrink] {
+        --ani-start: 0.5;
+      }
+      [data-dist] [data-vaporize="teleport"] {
+        position: absolute;
+        font-weight: bold;
+        --ani-start: 0.25;
+        --ani-end: 0.85;
+      }
+      [data-dist] [data-grow="teleport"] {
+        --ani-start: 0.65;
+      }
+    </style>
+
+    <style id="viva">
+      [data-filter-viva] {
+        color: var(--white-color);
+        text-shadow: var(--viva-shadow);
+      }
+      [data-filter-viva]::after,
+      [data-filter-viva]::before {
+        color: var(--white-color);
+        filter: url("#svgviva");
+      }
+      [data-filter-clear] {
+        animation: filter-clear linear both;
+        animation-timeline: view();
+        animation-range: var(--animation-range);
+      }
+      @keyframes filter-clear {
+        to {
+          color: var(--main-color);
+          text-shadow: none;
+        }
+      }
+    </style>
+
+    <style id="rantStyles">
+      c-omm,
+      r-ant {
+        position: relative;
+        display: inline-block;
+        padding: 0px 10px;
+        font-size: 0.5em;
+        font-style: italic;
+        text-align: center;
+        color: var(--grey-color);
+      }
+      r-ant {
+        font-size: 0.4em;
+      }
+      c-omm::before,
+      r-ant::before {
+        content: "";
+        position: absolute;
+        width: 5px;
+        height: 100%;
+        right: 100%;
+        top: 0;
+        /* border-width: 1.5px 0px 1.5px 3px; */
+        /* border-style: solid; */
+        /* border-color: var(--grey-color); */
+      }
+      c-omm::after,
+      r-ant::after {
+        content: "";
+        position: absolute;
+        width: 5px;
+        height: 100%;
+        left: 100%;
+        top: 0;
+        /* border-width: 1.5px 3px 1.5px 0px; */
+        /* border-style: solid; */
+        /* border-color: var(--grey-color); */
+      }
+      c-omm > b {
+        position: absolute;
+        display: inline-block;
+        width: 100%;
+        left: 0%;
+        top: 100%;
+        padding: 20px;
+        font-size: 0.5em;
+        text-align: justify;
+        color: var(--grey-color);
+        background-color: var(--back-color);
+        border-left: 1px solid var(--grey-color);
+        opacity: 0;
+        z-index: 10;
+        max-height: 10em;
+        overflow-y: auto;
+        transition: opacity ease-in 600ms;
+        pointer-events: none;
+      }
+      c-omm:hover b {
+        opacity: 0.85;
+        transition: opacity ease-out 400ms;
+        pointer-events: auto;
+      }
+      c-omm em {
+        font-style: normal;
+      }
+    </style>
+
+    <!-- #endregion -->
+  </head>
+
+  <body>
+    <mbx-tag id="one">
+      <script>
+        const teen = {
+          title: "Quadratic Mania",
+          intro: "you must solve this equation for x",
+          stage: `
+          <b id="Tx2">x<sup>2</sup></b>
+          <b id="T3x2">+ 3x<sup>2</sup></b>
+          <b id="T-7">- 7x</b>
+          <b id="T2">+ 2</b>
+          <b id="EQ">=</b>
+          <b id="T0">0</b>
+        `,
+          steps: [
+            {
+              note: "notice the like terms",
+              load: null,
+              acts: (S) => {
+                S.viva("Tx2", "T3x2");
+              },
+            },
+          ],
+        };
+        const one = document.getElementById("one");
+        one.addEventListener("mbx-ready", (e) => {
+          one.loadRoutine(teen);
+        });
+      </script>
+    </mbx-tag>
+
+    <mbx-tag>two</mbx-tag>
+    <mbx-tag>tre</mbx-tag>
+
+    <mathro-batix>
+      <svg id="MathroBatixSVG" width="0" height="0" style="position: absolute">
+        <defs>
+          <filter id="maincolor">
+            <feFlood flood-color="var(--main-color)" result="F0" />
+            <feComposite in="F0" in2="SourceGraphic" operator="in" />
+          </filter>
+
+          <filter id="svgviva" x="-200%" y="-200%" height="900%" width="900%">
+            <feGaussianBlur stdDeviation="0.3" result="B0" />
+            <feFlood
+              flood-color="hsl(var(--nose-h), var(--nose-s), 90%)"
+              result="F0"
+            />
+            <feComposite in="F0" in2="B0" operator="in" result="Z0" />
+
+            <feGaussianBlur stdDeviation="2" result="B1" />
+            <feFlood
+              flood-color="hsl(calc(var(--nose-h) + 12), var(--nose-s), 50%)"
+              result="F1"
+            />
+            <feComposite in="F1" in2="B1" operator="in" result="Z1" />
+
+            <feGaussianBlur stdDeviation="3" result="B2" />
+            <feFlood
+              flood-color="hsl(calc(var(--nose-h) - 20), calc(var(--nose-s) * 0.69), 45%)"
+              result="F2"
+            />
+            <feComposite in="F2" in2="B2" operator="in" result="Z2" />
+
+            <feGaussianBlur stdDeviation="4" result="B3" />
+            <feFlood
+              flood-color="hsl( calc(var(--nose-h) - 40), calc(var(--nose-s) * 1.1), 50%)"
+              result="F3"
+            />
+            <feComposite in="F3" in2="B3" operator="in" result="Z3" />
+
+            <feGaussianBlur stdDeviation="8" result="B4" />
+            <feFlood
+              flood-color="hsl( var(--nose-h), calc(var(--nose-s) * 1.1), 50%)"
+              result="F4"
+            />
+            <feComposite in="F4" in2="B4" operator="in" result="Z4" />
+
+            <feMerge>
+              <feMergeNode in="Z4" />
+              <feMergeNode in="Z3" />
+              <feMergeNode in="Z2" />
+              <feMergeNode in="Z1" />
+              <feMergeNode in="Z0" />
+            </feMerge>
+          </filter>
+        </defs>
+      </svg>
+
+      <style id="rat0Styles">
+        #rat0 {
+          color: #909;
+        }
+      </style>
+      <div data-step id="intro_message" style="margin-bottom: 15vh">
+        <b>
+          <b id="rat0" data-cank="01" x-data-filter-viva> RAT </b>
+        </b>
+        <c-omm> you are going to have to solve this for x </c-omm>
+      </div>
+    </mathro-batix>
+
+    <script id="DEBUGG">
+      const log = console.log;
+    </script>
+
+    <script id="widthScript">
+      window.addEventListener("load", () => {
+        document
+          .querySelectorAll(
+            "[data-dist] > b, [data-grow], [data-shrink], [data-absorb] > b",
+          )
+          .forEach((el) => {
+            el.style.animationTimeline = "none";
+            el.style.animation = "none";
+            el.style.setProperty("--full-width", el.offsetWidth + "px");
+            el.style.animationTimeline = "view()";
+            el.style.animation = "";
+          });
+      });
+    </script>
+
+    <script id="movieScript">
+      function setupEquation(el) {
+        const items = Array.from(el.children);
+
+        const firstRects = items.map((el) => el.getBoundingClientRect());
+
+        const order = el.dataset.move.split(" ").map(Number);
+
+        const reordered = order.map((i) => items[i]);
+        reordered.forEach((child, i) => {
+          child.style.order = i;
+        });
+
+        const lastRects = items.map((el) => el.getBoundingClientRect());
+
+        items.forEach((el, i) => {
+          const dx = firstRects[i].left - lastRects[i].left;
+          const dy = firstRects[i].top - lastRects[i].top;
+
+          el.style.setProperty("--dx", dx + "px");
+          el.style.setProperty("--dy", dy + "px");
+
+          el.classList.add("move");
+        });
+      }
+
+      window.addEventListener("load", () => {
+        document
+          .querySelectorAll("[data-step] [data-move]")
+          .forEach(setupEquation);
+      });
+    </script>
+  </body>
+</html>
