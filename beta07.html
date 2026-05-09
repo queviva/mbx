@@ -4,12 +4,7 @@
     <meta charset="UTF-8" />
     <title>Mathro&middot;batiX Scroll Vault 0.7beta</title>
 
-    <script
-      src="encapsulated.js"
-      data-x='{
-        "tag" : "mbx-tag"
-      }'
-    ></script>
+    <script src="encapsulated.js" data-x='{"tag":"mathro-batix"}'></script>
 
     <!-- #region STYLES -->
 
@@ -19,7 +14,7 @@
         align-items: center;
         justify-content: center;
         padding-bottom: 100vh;
-        background-color: #111;
+        background-color: #888;
       }
       mathro-batix {
         padding-top: 10vh;
@@ -99,6 +94,14 @@
           0 0 5px var(--back-color), 0 0 40px var(--main-color), 0 0 40px #fff;
 
         --cank-00: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 94Q30 40 95 0L100 10Q33 43 10 100Z'/%3E%3C/svg%3E");
+      }
+    </style>
+
+    <style id="svgStyles">
+      svg {
+        display: none;
+        width: 0;
+        height: 0;
       }
     </style>
 
@@ -304,7 +307,6 @@
     <style id="vivaStyles">
       [data-viva] {
         text-shadow: none;
-        --ani-start: 0.6;
         animation: viva linear both;
         animation-timeline: view();
         animation-range: var(--animation-range);
@@ -596,41 +598,8 @@
   </head>
 
   <body>
-    <mbx-tag id="one">
-      <script>
-        const teen = {
-          title: "Quadratic Mania",
-          intro: "you must solve this equation for x",
-          stage: `
-          <b id="Tx2">x<sup>2</sup></b>
-          <b id="T3x2">+ 3x<sup>2</sup></b>
-          <b id="T-7">- 7x</b>
-          <b id="T2">+ 2</b>
-          <b id="EQ">=</b>
-          <b id="T0">0</b>
-        `,
-          steps: [
-            {
-              note: "notice the like terms",
-              load: null,
-              acts: (S) => {
-                S.viva("Tx2", "T3x2");
-              },
-            },
-          ],
-        };
-        const one = document.getElementById("one");
-        one.addEventListener("mbx-ready", (e) => {
-          one.loadRoutine(teen);
-        });
-      </script>
-    </mbx-tag>
-
-    <mbx-tag>two</mbx-tag>
-    <mbx-tag>tre</mbx-tag>
-
-    <mathro-batix>
-      <svg id="MathroBatixSVG" width="0" height="0" style="position: absolute">
+    <mathro-batix id="one">
+      <svg>
         <defs>
           <filter id="maincolor">
             <feFlood flood-color="var(--main-color)" result="F0" />
@@ -683,41 +652,51 @@
           </filter>
         </defs>
       </svg>
-
-      <style id="rat0Styles">
-        #rat0 {
-          color: #909;
-        }
-      </style>
-      <div data-step id="intro_message" style="margin-bottom: 15vh">
-        <b>
-          <b id="rat0" data-cank="01" x-data-filter-viva> RAT </b>
-        </b>
-        <c-omm> you are going to have to solve this for x </c-omm>
-      </div>
     </mathro-batix>
+    <script id="ROUTINE" type="module">
+      const teen = {
+        title: "Quadratic Mania",
+        intro: "you must solve this equation for x",
+        stage: `
+          <b id="Tx2">x^2</b>
+          +
+          <b id="T3x2">3x^pizza</b>
+          <b id="T-7">- 7x</b>
+          + 2 = 0
+          `,
+        /*
+          <b id="T2">+ 2</b>
+          <b id="EQ">=</b>
+          <b id="T0">0</b>
+        `,*/
+        steps: [
+          {
+            note: "notice the like terms",
+            acts: (S) => {
+              S.viva("Tx2", "T3x2");
+            },
+          },
+          {
+            note: " place parenthesis around them",
+            acts: (S) => {
+              S.vaporize("T-7").during(0, 0.6).shrink("T-7").during(0.3);
+              S.ghost("T3x2");
+              S.viva("Tx2");
+            },
+          },
+        ],
+      };
+      const one = document.getElementById("one");
+      one.addEventListener("mbx-ready", (e) => {
+        one.loadRoutine(teen);
+      });
+    </script>
 
     <script id="DEBUGG">
       const log = console.log;
     </script>
 
-    <script id="widthScript">
-      window.addEventListener("load", () => {
-        document
-          .querySelectorAll(
-            "[data-dist] > b, [data-grow], [data-shrink], [data-absorb] > b",
-          )
-          .forEach((el) => {
-            el.style.animationTimeline = "none";
-            el.style.animation = "none";
-            el.style.setProperty("--full-width", el.offsetWidth + "px");
-            el.style.animationTimeline = "view()";
-            el.style.animation = "";
-          });
-      });
-    </script>
-
-    <script id="movieScript">
+    <script id="movieScript" type="module">
       function setupEquation(el) {
         const items = Array.from(el.children);
 

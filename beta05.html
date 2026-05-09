@@ -69,7 +69,7 @@
         --white-color: hsl(
           var(--nose-h),
           var(--nose-s),
-          calc(2.7 * var(--nose-l))
+          calc(2.2 * var(--nose-l))
         );
 
         --grey-color: hsl(
@@ -81,7 +81,7 @@
 
       /* FILTERS|SHAPES */
       mathro-batix {
-        --viva-f1: 0 0 3px #fff;
+        --viva-f1: 0 0 3px hsl(var(--nose-h), var(--nose-s), 80%);
         --viva-f2: 0 0 8px hsl(calc(var(--nose-h) + 12), var(--nose-s), 58%);
         --viva-f3: 0 0 24px hsl(calc(var(--nose-h) - 40), var(--nose-s), 55%);
 
@@ -756,7 +756,9 @@
           <b data-shrink>(</b>
           <b data-absorb>
             <b>3x<sup>2</sup> + 2x<sup>2</sup></b>
-            <b data-filter-viva>5x<sup>2</sup></b>
+            <b>
+              <b data-viva> 5x<sup>2</sup></b>
+            </b>
           </b>
           <b data-shrink>)</b>
           + 7(x + 1) = 9
@@ -926,7 +928,7 @@
     </script>
 
     <script id="widthScript">
-      window.addEventListener("load", () => {
+      const getWidths = () => {
         document
           .querySelectorAll(
             "[data-dist] > b, [data-grow], [data-shrink], [data-absorb] > b",
@@ -938,10 +940,17 @@
             el.style.animationTimeline = "view()";
             el.style.animation = "";
           });
-      });
+      };
+      window.addEventListener("load", getWidths);
+      window.addEventListener("resize", getWidths);
     </script>
 
     <script id="movieScript">
+      // !!! HORROR !!!
+      // this needs to be re-orderd on resize or orientation change
+      // try creating an 'undoing' order, reassigning those
+      // rerending the tags, and hope that the -timeline:view();
+      // will play to the correct position
       function setupEquation(el) {
         const items = Array.from(el.children);
 
@@ -967,12 +976,14 @@
         });
       }
 
-      window.addEventListener("load", () => {
+      const getMoves = () => {
         document
           .querySelectorAll("[data-step] [data-move]")
           .forEach(setupEquation);
-        log("ready");
-      });
+      };
+
+      window.addEventListener("load", getMoves);
+      window.addEventListener("resize", getMoves);
     </script>
   </body>
 </html>
