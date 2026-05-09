@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mathro&middot;batiX Scroll Vault 0.7beta</title>
+    <script src="encapsulated.js" data-x='{"tag":"mathro-batix"}'></script>
+    <link rel="stylesheet" href="mathrobatix.css" />
+  </head>
+  <body>
+    <mathro-batix id="one">
+      <svg>
+        <defs>
+          <filter id="maincolor">
+            <feFlood flood-color="var(--main-color)" result="F0" />
+            <feComposite in="F0" in2="SourceGraphic" operator="in" />
+          </filter>
+
+          <filter id="svgviva" x="-200%" y="-200%" height="900%" width="900%">
+            <feGaussianBlur stdDeviation="0.3" result="B0" />
+            <feFlood
+              flood-color="hsl(var(--nose-h), var(--nose-s), 90%)"
+              result="F0"
+            />
+            <feComposite in="F0" in2="B0" operator="in" result="Z0" />
+
+            <feGaussianBlur stdDeviation="2" result="B1" />
+            <feFlood
+              flood-color="hsl(calc(var(--nose-h) + 12), var(--nose-s), 50%)"
+              result="F1"
+            />
+            <feComposite in="F1" in2="B1" operator="in" result="Z1" />
+
+            <feGaussianBlur stdDeviation="3" result="B2" />
+            <feFlood
+              flood-color="hsl(calc(var(--nose-h) - 20), calc(var(--nose-s) * 0.69), 45%)"
+              result="F2"
+            />
+            <feComposite in="F2" in2="B2" operator="in" result="Z2" />
+
+            <feGaussianBlur stdDeviation="4" result="B3" />
+            <feFlood
+              flood-color="hsl( calc(var(--nose-h) - 40), calc(var(--nose-s) * 1.1), 50%)"
+              result="F3"
+            />
+            <feComposite in="F3" in2="B3" operator="in" result="Z3" />
+
+            <feGaussianBlur stdDeviation="8" result="B4" />
+            <feFlood
+              flood-color="hsl( var(--nose-h), calc(var(--nose-s) * 1.1), 50%)"
+              result="F4"
+            />
+            <feComposite in="F4" in2="B4" operator="in" result="Z4" />
+
+            <feMerge>
+              <feMergeNode in="Z4" />
+              <feMergeNode in="Z3" />
+              <feMergeNode in="Z2" />
+              <feMergeNode in="Z1" />
+              <feMergeNode in="Z0" />
+            </feMerge>
+          </filter>
+        </defs>
+      </svg>
+    </mathro-batix>
+    <script id="ROUTINE" type="module">
+      const teen = {
+        title: "Quadratic Mania",
+        intro: "you must solve this equation for x",
+        stage: `
+          <b id="Tx2">x^2</b>
+          +
+          <b id="T3x2">3x^pizza</b>
+          <b id="T-7">- 7x</b>
+          + 2 = 0
+          `,
+        /*
+          <b id="T2">+ 2</b>
+          <b id="EQ">=</b>
+          <b id="T0">0</b>
+        `,*/
+        steps: [
+          {
+            note: "notice the like terms",
+            acts: (S) => {
+              S.viva("Tx2", "T3x2");
+            },
+          },
+          {
+            note: " place parenthesis around them",
+            acts: (S) => {
+              S.vaporize("T-7").during(0, 0.6).shrink("T-7").during(0.3);
+              S.ghost("T3x2");
+              S.viva("Tx2");
+            },
+          },
+        ],
+      };
+      const one = document.getElementById("one");
+      one.addEventListener("mbx-ready", (e) => {
+        one.loadRoutine(teen);
+      });
+    </script>
+
+    <script id="DEBUGG">
+      const log = console.log;
+    </script>
+
+    <script id="movieScript" type="module">
+      function setupEquation(el) {
+        const items = Array.from(el.children);
+
+        const firstRects = items.map((el) => el.getBoundingClientRect());
+
+        const order = el.dataset.move.split(" ").map(Number);
+
+        const reordered = order.map((i) => items[i]);
+        reordered.forEach((child, i) => {
+          child.style.order = i;
+        });
+
+        const lastRects = items.map((el) => el.getBoundingClientRect());
+
+        items.forEach((el, i) => {
+          const dx = firstRects[i].left - lastRects[i].left;
+          const dy = firstRects[i].top - lastRects[i].top;
+
+          el.style.setProperty("--dx", dx + "px");
+          el.style.setProperty("--dy", dy + "px");
+
+          el.classList.add("move");
+        });
+      }
+
+      window.addEventListener("load", () => {
+        document
+          .querySelectorAll("[data-step] [data-move]")
+          .forEach(setupEquation);
+      });
+    </script>
+  </body>
+</html>
