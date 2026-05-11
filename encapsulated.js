@@ -2,14 +2,6 @@
   // #region UTILS
   const log = console.log;
 
-  // !!! HAKC !!!  pull in external css
-  /*
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = "mathrobatix.css";
-  document.head.appendChild(link);
-  */
-
   const sieve = (target, incoming) => {
     const src = incoming && typeof incoming === "object" ? incoming : {};
     return Object.fromEntries(
@@ -50,6 +42,7 @@
       this.coreHTML = innerHTML;
       this.element = null;
       this.visible = true;
+      this.order = 0;
       this.build();
     }
 
@@ -164,8 +157,6 @@
       XXX.dispatchEvent(stepReady);
     }
 
-    // #region API CALLS
-
     _setTargets(...ids) {
       this._lastTargets = ids.filter((id) => this.terms.has(id));
       return this;
@@ -177,10 +168,21 @@
       return this._setTargets(...targets);
     }
 
+    // #region API CALLS
+
+    during(start, end = null) {
+      const s = start != null ? Math.max(0, Math.min(1, start)) : null;
+      const e = end != null ? Math.max(0, Math.min(1, end)) : null;
+
+      this._lastTargets.forEach((id) => {
+        this.terms.get(id)?.setTiming(s, e);
+      });
+      return this;
+    }
     viva(...ids) {
       return this._wrap("viva", ...ids);
     }
-    ghost(...ids){
+    ghost(...ids) {
       return this._wrap("ghost", ...ids);
     }
     shrink(...ids) {
@@ -192,24 +194,40 @@
     vaporize(...ids) {
       return this._wrap("vaporize", ...ids);
     }
-    absorb(...ids) {
-      return this._wrap("absorb", ...ids);
-    }
 
-    during(start, end = null) {
-      const s = start != null ? Math.max(0, Math.min(1, start)) : null;
-      const e = end != null ? Math.max(0, Math.min(1, end)) : null;
+    absorb(ids = [], newID = "", newHTML = "") {
+      const renderGroup = (input) => {
+        return [input]
+          .flat()
+          .filter(Boolean)
+          .map((id) => {
+            const term = this.terms.get(id);
+            if (!term) return "";
+            const html = term.render();
+            term.visible = false;
+            return html;
+          })
+          .join("");
+      };
 
-      this._lastTargets.forEach((id) => {
-        this.terms.get(id)?.setTiming(s, e);
-      });
+      const htmlA = renderGroup(ids);
+
+      this.insert(newID, newHTML);
+      log(this._lastTargets);
+
+      const finalTag = `
+        <b data-absorb>
+          <b>${htmlA}</b>
+          <b data-filter-viva>${this.terms.get(newID).render()}</b>
+        </b>
+      `;
       return this;
     }
 
     insert(id, html) {
       const term = new Term(id, html);
       this.terms.set(id, term);
-      this.sequence.push(term); // append at the end by default
+      this.sequence.push(term);
       return this._setTargets(id);
     }
 
@@ -266,35 +284,41 @@
 
   // #endregion
 
+  // #region WIDTH SCRIPT
+  const widthScript = (step) => {
+    step
+      .querySelectorAll(
+        "[data-dist] > b, [data-grow], [data-shrink], [data-absorb] > b",
+      )
+      .forEach((el) => {
+        el.style.animationTimeline = "none";
+        el.style.animation = "none";
+        el.style.setProperty("--full-width", el.offsetWidth + "px");
+        el.style.animationTimeline = "view()";
+        el.style.animation = "";
+      });
+  };
+  // #endregion
+
   // #region INIT
-  const boot = () => {
+  const boot = async () => {
     if (!customElements.get(devOpts.tag)) {
       customElements.define(devOpts.tag, MBX);
     }
 
-    // !!! DEBUGG !!! INJECT GLOBAL CSS
+    // INJECT CSS
+    // !!! DEBUGG !!! does not work
     /*
-    const style = document.createElement("style");
-    style.textContent = `
-      ${devOpts.tag} { }
+    const rez = await fetch("mathrobatix.css");
+    const CSSText = await rez.text();
+    const styleTag = document.createElement("style");
+    styleTag.textContent = `
+        ${CSSText}
     `;
-    document.head.appendChild(style);
+    document.head.appendChild(styleTag);
     */
 
     // #region WIDTH SCRIPT
-    const widthScript = (step) => {
-      step
-        .querySelectorAll(
-          "[data-dist] > b, [data-grow], [data-shrink], [data-absorb] > b",
-        )
-        .forEach((el) => {
-          el.style.animationTimeline = "none";
-          el.style.animation = "none";
-          el.style.setProperty("--full-width", el.offsetWidth + "px");
-          el.style.animationTimeline = "view()";
-          el.style.animation = "";
-        });
-    };
     document.addEventListener("mbx-step-ready", (e) => {
       const targ = e.target;
       widthScript(targ);

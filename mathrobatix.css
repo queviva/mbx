@@ -1,4 +1,4 @@
-/* #region demoStyles */
+/* #region demo */
 body {
   display: flex;
   align-items: center;
@@ -21,7 +21,7 @@ mathro-batix {
 }
 /* #endregion */
 
-/* #region mathrobatixStyles */
+/* #region mathrobatix */
 /* CONFIG */
 mathro-batix {
   --animation-start: 50%;
@@ -84,7 +84,7 @@ mathro-batix {
 }
 /* #endregion */
 
-/* #region svgStyles */
+/* #region svg */
 svg {
   display: none;
   width: 0;
@@ -92,7 +92,7 @@ svg {
 }
 /* #endregion */
 
-/* #region stepStyles */
+/* #region step */
 [data-step] {
   display: inline-block;
   position: relative;
@@ -113,7 +113,7 @@ svg {
 }
 /* #endregion */
 
-/* #region batixStyles */
+/* #region batix */
 b {
   position: relative;
   display: inline-block;
@@ -141,7 +141,7 @@ b sup {
 }
 /* #endregion */
 
-/* #region moveStyles */
+/* #region move */
 .move {
   animation: move linear both;
   animation-timeline: view();
@@ -158,7 +158,7 @@ b sup {
 }
 /* #endregion */
 
-/* #region jumpStyles */
+/* #region jump */
 [data-jump] {
   animation: jump ease-out both;
   animation-timeline: view();
@@ -180,7 +180,24 @@ b sup {
 }
 /* #endregion */
 
-/* #region crossStyles */
+/* #region unfurl */
+[data-unfurl] {
+  display: none;
+  margin-left: -0.25em;
+  --animation-start: 65%;
+  --animation-end: 90%;
+  animation: unfurl-terms linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes unfurl-terms {
+  to {
+    margin-left: 0em;
+  }
+}
+/* #endregion */
+
+/* #region cross */
 [data-cross] {
   position: relative;
   display: inline-grid;
@@ -226,7 +243,7 @@ b sup {
 }
 /* #endregion */
 
-/* #region growStyles */
+/* #region grow */
 [data-grow] {
   display: inline-block;
   transform-origin: 0% 50%;
@@ -252,7 +269,7 @@ b sup {
 }
 /* #endregion */
 
-/* #region shrinkStyles */
+/* #region shrink */
 [data-shrink] {
   display: inline-block;
   transform-origin: 0% 50%;
@@ -278,7 +295,7 @@ b sup {
 }
 /* #endregion */
 
-/* #region spinStyles */
+/* #region spin */
 [data-spin] {
   animation: spin linear both;
   animation-timeline: view();
@@ -291,7 +308,7 @@ b sup {
 }
 /* #endregion */
 
-/* #region vivaStyles */
+/* #region viva */
 [data-viva] {
   text-shadow: none;
   animation: viva linear both;
@@ -306,7 +323,7 @@ b sup {
 }
 /* #endregion */
 
-/* #region ghostStyles */
+/* #region ghost */
 [data-ghost] {
   text-shadow: none;
   animation: ghost linear both;
@@ -321,7 +338,7 @@ b sup {
 }
 /* #endregion */
 
-/* #region vaporizeStyles */
+/* #region vaporize */
 [data-vaporize] {
   animation: vaporize linear both;
   animation-timeline: view();
@@ -349,7 +366,7 @@ b sup {
 }
 /* #endregion */
 
-/* #region absorbStyles */
+/* #region absorb */
 [data-absorb] {
   position: relative;
   display: inline-grid;
@@ -377,7 +394,7 @@ b sup {
 }
 /* #endregion */
 
-/* #region parensStyles */
+/* #region parens */
 [data-parens]::before {
   content: "(";
 }
@@ -386,7 +403,7 @@ b sup {
 }
 /* #endregion */
 
-/* #region rootStyles */
+/* #region root */
 [data-root] {
   --root-high: 120%;
   --root-for-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30px' height='100px' preserveAspectRatio='none'%3E%3Cpath d='M8 46L14 30L19 52L18 0L23 1L24 90L11 43Z' /%3E%3C/svg%3E");
@@ -421,7 +438,7 @@ b sup {
 }
 /* #endregion */
 
-/* #region cankStyles */
+/* #region cank */
 [data-cank] {
   --cank-00: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 94Q30 40 95 0L100 10Q33 43 10 100Z'/%3E%3C/svg%3E");
   --cank-01: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 90Q55 55 90 0L100 8Q65 50 10 100Z'/%3E%3C/svg%3E");
@@ -468,7 +485,7 @@ b sup {
 }
 /* #endregion */
 
-/* #region distStyles */
+/* #region dist */
 [data-dist] {
   display: flex;
   gap: 0.15em;
@@ -514,7 +531,7 @@ b sup {
 }
 /* #endregion */
 
-/* #region rantStyles */
+/* #region rant */
 [data-comm],
 [data-rant] {
   position: relative;

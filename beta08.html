@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Mathro&middot;batiX Scroll Vault 0.7beta</title>
+    <title>Mathro&middot;batiX Scroll Vault 0.8beta</title>
     <script src="encapsulated.js" data-x='{"tag":"mathro-batix"}'></script>
     <link rel="stylesheet" href="mathrobatix.css" />
   </head>
@@ -69,15 +69,12 @@
         stage: `
           <b id="Tx2">x^2</b>
           +
-          <b id="T3x2">3x^pizza</b>
+          <b id="T3x2">3x^2</b>
           <b id="T-7">- 7x</b>
-          + 2 = 0
-          `,
-        /*
           <b id="T2">+ 2</b>
           <b id="EQ">=</b>
           <b id="T0">0</b>
-        `,*/
+        `,
         steps: [
           {
             note: "notice the like terms",
@@ -86,11 +83,10 @@
             },
           },
           {
-            note: " place parenthesis around them",
+            note: "combine them",
             acts: (S) => {
-              S.vaporize("T-7").during(0, 0.6).shrink("T-7").during(0.3);
-              S.ghost("T3x2");
-              S.viva("Tx2");
+              S.insert("P1", "(").before("Tx2");
+              S.viva("P1");
             },
           },
         ],
