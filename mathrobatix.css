@@ -124,6 +124,9 @@ svg {
   margin-top: 1.5em;
   width: 100%;
 }
+[data-step].measure {
+  opacity: 0;
+}
 /* #endregion */
 
 /* #region batix */
@@ -162,7 +165,7 @@ b {
 /* #endregion */
 
 /* #region move */
-.move {
+[data-move] {
   animation: move linear both;
   animation-timeline: view();
   animation-range: var(--animation-range);
@@ -282,7 +285,7 @@ b {
   }
   to {
     margin-right: 0em;
-    transform: scale(1);
+    transform: scale(var(--grow-val, 1));
     width: var(--full-width);
     opacity: 1;
   }

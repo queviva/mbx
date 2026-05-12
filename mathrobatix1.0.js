@@ -1,5 +1,4 @@
 ((doc, self) => {
-
   // #region UTILS
   const log = console.log;
 
@@ -39,6 +38,19 @@
   // #region SPOTTER
   class Spotter {
     // #region CLASS METHS
+    #rectObserver = new ResizeObserver((entries) => {
+      const props = ["width", "height", "x", "y"];
+      for (const entry of entries) {
+        const el = entry.target;
+        const rect = el.getBoundingClientRect();
+        const style = el.style;
+        for (const prop of props) {
+          style.setProperty(`--full-${prop}`, Math.round(rect[prop]) + "px");
+        }
+        log("updating in observer");
+      }
+    });
+
     constructor(container) {
       this._container = container;
       this._supRegex = /([^\s])\^(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g;
@@ -111,6 +123,18 @@
       return el;
     }
 
+    _measureElements(...els) {
+      const props = ["width", "height", "x", "y"];
+      for (const el of new Set(els)) {
+        const rect = el.getBoundingClientRect();
+        const style = el.style;
+        for (const prop of props) {
+          style.setProperty(`--full-${prop}`, Math.round(rect[prop]) + "px");
+        }
+        //this.#rectObserver.observe(el);
+      }
+    }
+
     _namespaceIDs(stage, prefix) {
       stage.querySelectorAll("[id]").forEach((el) => {
         el.id = `${prefix}-${el.id}`;
@@ -127,6 +151,7 @@
     }
 
     async loadRoutine(routine = {}) {
+      this.#rectObserver.disconnect();
       this._container.replaceChildren();
       this._stepCount = 0;
       this._targets = new Set();
@@ -145,9 +170,7 @@
     }
 
     async processStep(step) {
-      // !!! DEBUGG !!!
       //await new Promise((r) => setTimeout(r, 1000));
-
       this._stepCount++;
       const stepID = `${devOpts.fix}-s${this._stepCount}`;
 
@@ -159,13 +182,35 @@
       const comm = this._makeTag("b", step.note || "", "comm");
       const stepDiv = this._makeTag("div", "", "step");
 
+      stepDiv.append(stage, comm);
+      stepDiv.classList.add("measure");
+      this._container.append(stepDiv);
+
       this._stageObject = stage;
 
-      if (typeof step.acts === "function") step.acts(this);
+      stage.querySelectorAll("[id]").forEach((el) => {
+        this._measureElements(el);
+      });
 
+      let actsResult;
+      if (typeof step.acts === "function") {
+        try {
+          actsResult = step.acts(this);
+          if (actsResult && typeof actsResult.then === "function") {
+            await actsResult;
+          }
+        } catch (err) {
+          console.warn("Spotter: step.acts error", err);
+        }
+      }
+
+      // Now that any measurement/setup is complete, namespace IDs and finalize.
       this._namespaceIDs(stage, stepID);
-      stepDiv.append(stage, comm);
-      this._container.append(stepDiv);
+
+      // Remove measurement class to make the step visible / interactive.
+      stepDiv.classList.remove("measure");
+
+      // Dispatch the step-ready event for consumers.
       this._dispatchReady(stepDiv);
     }
     // #endregion
@@ -238,6 +283,9 @@
         absEl.children[0].append(el);
       });
       absEl.children[1].append(newEl);
+
+      this._measureElements(absEl.children[0], absEl.children[1]);
+
       return this.select(newEl.id);
     }
     // #endregion
@@ -276,49 +324,6 @@
 
   // #endregion
 
-  // #region WIDTH SCRIPT
-  const widthScript = (step) => {
-    step
-      .querySelectorAll(
-        "[data-dist] > b, [data-grow], [data-shrink], [data-absorb] > b",
-      )
-      .forEach((el) => {
-        el.style.animationTimeline = "none";
-        el.style.animation = "none";
-        el.style.setProperty("--full-width", el.offsetWidth + "px");
-        el.style.animationTimeline = "view()";
-        el.style.animation = "";
-      });
-  };
-  // #endregion
-
-  // #region MOVIE SCRIPT
-  const movieScript = (el) => {
-    const items = Array.from(el.children);
-
-    const firstRects = items.map((el) => el.getBoundingClientRect());
-
-    const order = el.dataset.move.split(" ").map(Number);
-
-    const reordered = order.map((i) => items[i]);
-    reordered.forEach((child, i) => {
-      child.style.order = i;
-    });
-
-    const lastRects = items.map((el) => el.getBoundingClientRect());
-
-    items.forEach((el, i) => {
-      const dx = firstRects[i].left - lastRects[i].left;
-      const dy = firstRects[i].top - lastRects[i].top;
-
-      el.style.setProperty("--dx", dx + "px");
-      el.style.setProperty("--dy", dy + "px");
-
-      el.classList.add("move");
-    });
-  };
-  // #endregion
-
   // #region INIT
   const boot = async () => {
     if (!customElements.get(devOpts.tag)) {
@@ -336,48 +341,6 @@
     `;
     document.head.appendChild(styleTag);
     */
-
-    // listen for width|movie
-    /*
-    document.addEventListener(`${defOpts.fix}-step-ready`, (e) => {
-      const targ = e.target;
-      requestAnimationFrame(() => {
-        widthScript(targ);
-        window.addEventListener("resize", (e) => {
-          widthScript(targ);
-          targ.querySelectorAll("[data-step] [data-move]").forEach(movieScript);
-        });
-        targ.querySelectorAll("[data-step] [data-move]").forEach(movieScript);
-      });
-    });
-    */
-    document.addEventListener(`${defOpts.fix}-step-ready`, (e) => {
-      const step = e.target;
-
-      // Create an observer that fires only once when the layout is actually calculated
-      const observer = new ResizeObserver((entries) => {
-        for (let entry of entries) {
-          const el = entry.target;
-
-          // We found the real width!
-          el.style.animationTimeline = "none";
-          el.style.animation = "none";
-          el.style.setProperty("--full-width", el.offsetWidth + "px");
-          el.style.animationTimeline = "view()";
-          el.style.animation = "";
-
-          // Stop observing once we have the measurement
-          observer.unobserve(el);
-        }
-      });
-
-      // Target the specific elements that need measuring
-      step
-        .querySelectorAll(
-          "[data-dist] > b, [data-grow], [data-shrink], [data-absorb] > b",
-        )
-        .forEach((el) => observer.observe(el));
-    });
   };
 
   if (document.readyState === "loading") {

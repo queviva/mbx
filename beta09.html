@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Mathro&middot;batiX Scroll Vault 0.9beta</title>
-    <script src="mathrobatix0.9.js" data-x='{"tag":"mathro-batix"}'></script>
+    <script src="mathrobatix1.0.js" data-x='{"tag":"mathro-batix"}'></script>
     <link rel="stylesheet" href="mathrobatix.css" />
   </head>
   <body>
@@ -76,25 +76,42 @@
         `,
         steps: [
           {
-            note: "notice the like terms",
+            note: `notice the like terms
+              <b>
+                like terms refers to the variable and its
+                exponent being the same - in this case,
+                there is a the same variable x with
+                an exponent of g_2 on two terms;
+                you can combine them by adding the
+                coefficient
+              </b>
+            `,
             acts: (S) => {
               S.select("g1", "g2").viva();
-              S.select("T10").vaporize().shrink().spin("69deg").during(0, 0.3);
+              S.select("T10").vaporize().shrink().spin("180deg").during(0, 0.3);
               S.select("T2").grow();
             },
           },
           {
-            note: " what about this? ",
+            note: "absorb them",
+            load: `
+              <b>x^2</b>
+              <b id="T3x">+ 3x</b>
+              <b id="T2x">+ 2x</b>
+              + 5 = 0
+            `,
             acts: S =>{
-              S.select("T3x2").viva().during(0.5);
-              S.select("T7xi").grow();
+              S.select("T3x", "T2x").absorb("T5x", "+ 5x")
+              .viva();
             }
           },
           {
-            note: "combine them",
+            note: "what about this?",
             load: `<b id="rat">3x</b> + 99 = 909`,
             acts: (S) => {
-              console.log("#3 action");
+              S.select("rat").vaporize()
+              .shrink().during(0.7);
+
             },
           },
         ],
@@ -104,7 +121,7 @@
         one.loadRoutine(routine);
       });
       one.addEventListener("mbx-step-ready", (e) => {
-        // console.log(e.target.id, "ready");
+        //console.log(e.target.id, "ready");
       });
     </script>
   </body>
