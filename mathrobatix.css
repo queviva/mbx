@@ -92,6 +92,19 @@ svg {
 }
 /* #endregion */
 
+/* #region intro */
+[data-intro] {
+  display: inline-block;
+  position: relative;
+  margin-top: 20vh;
+  margin-bottom: 20vh;
+  color: var(--grey-color);
+  font-style: italic;
+  font-size: 0.5em;
+  text-align: center;
+}
+/* #endregion */
+
 /* #region step */
 [data-step] {
   display: inline-block;
@@ -134,10 +147,17 @@ b {
         var(--ani-end)
     );
 }
+/* #endregion */
 
-b sup {
+/* #region sup|sub */
+[data-sup] {
   font-size: 0.55em;
   vertical-align: 70%;
+}
+[data-sub] {
+  vertical-align: -50%;
+  font-size: 0.55em;
+  font-style: italic;
 }
 /* #endregion */
 
