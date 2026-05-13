@@ -531,7 +531,7 @@ b {
 }
 /* #endregion */
 
-/* #region viva */
+/* #region viva filter */
 [data-filter-viva] {
   color: var(--white-color);
   text-shadow: var(--viva-shadow);
@@ -541,6 +541,16 @@ b {
   color: var(--white-color);
   filter: url("#svgviva");
 }
+/* #endregion */
+
+/* #region ghost filter */
+[data-filter-ghost] {
+  color: var(--back-color);
+  text-shadow: var(--ghost-shadow);
+}
+/* #endregion */
+
+/* #region clear filter */
 [data-filter-clear] {
   animation: filter-clear linear both;
   animation-timeline: view();

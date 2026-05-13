@@ -38,20 +38,8 @@
   // #region SPOTTER
   class Spotter {
     // #region CLASS METHS
-    #rectObserver = new ResizeObserver((entries) => {
-      const props = ["width", "height", "x", "y"];
-      for (const entry of entries) {
-        const el = entry.target;
-        const rect = el.getBoundingClientRect();
-        const style = el.style;
-        for (const prop of props) {
-          style.setProperty(`--full-${prop}`, Math.round(rect[prop]) + "px");
-        }
-        log("updating in observer");
-      }
-    });
-
     constructor(container) {
+      this._routine = {};
       this._container = container;
       this._supRegex = /([^\s])\^(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g;
       this._subRegex = /([^\s])\_(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g;
@@ -60,6 +48,12 @@
       this._stageString;
       this._stageObject;
       this._targets = new Set();
+
+      // !!! HAKC !!!
+      // I dare you to think of another functional way
+      window.addEventListener("resize", (e) => {
+        this.loadRoutine(this._routine);
+      });
     }
 
     _sanitizeHTML(html = "") {
@@ -131,7 +125,6 @@
         for (const prop of props) {
           style.setProperty(`--full-${prop}`, Math.round(rect[prop]) + "px");
         }
-        //this.#rectObserver.observe(el);
       }
     }
 
@@ -151,7 +144,7 @@
     }
 
     async loadRoutine(routine = {}) {
-      this.#rectObserver.disconnect();
+      this._routine = routine;
       this._container.replaceChildren();
       this._stepCount = 0;
       this._targets = new Set();
@@ -168,6 +161,7 @@
         await this.processStep(step);
       }
     }
+    // #endregion
 
     async processStep(step) {
       //await new Promise((r) => setTimeout(r, 1000));
@@ -181,7 +175,6 @@
       const stage = this._makeTag("b", this._stageString, "stage");
       const comm = this._makeTag("b", step.note || "", "comm");
       const stepDiv = this._makeTag("div", "", "step");
-
       stepDiv.append(stage, comm);
       stepDiv.classList.add("measure");
       this._container.append(stepDiv);
@@ -204,16 +197,38 @@
         }
       }
 
-      // Now that any measurement/setup is complete, namespace IDs and finalize.
       this._namespaceIDs(stage, stepID);
-
-      // Remove measurement class to make the step visible / interactive.
       stepDiv.classList.remove("measure");
 
-      // Dispatch the step-ready event for consumers.
+      // remove absorbs from stage
+      const nextStage = this._makeTag("div", stage.innerHTML, "step");
+      nextStage.querySelectorAll("[data-absorb]").forEach((el) => {
+        el.parentNode.insertBefore(el.children[1], el);
+        el.remove();
+      });
+      nextStage.querySelectorAll("[data-viva]").forEach((el) => {
+        while (el.firstChild) el.parentNode.insertBefore(el.firstChild, el);
+        el.remove();
+      });
+      this._stageString = nextStage.outerHTML;
+      this._stageObject = this._makeTag("b", this._stageString);
+      log(this._stageObject);
+
+      // run the encore
+      let encoreResult;
+      if (typeof step.encore === "function") {
+        try {
+          encoreResult = step.encore(this);
+          if (encoreResult && typeof encoreResult.then === "function") {
+            await encoreResult;
+          }
+        } catch (err) {
+          console.warn("Spotter: step.encore error", err);
+        }
+      }
+
       this._dispatchReady(stepDiv);
     }
-    // #endregion
 
     // #region API
     select(...ids) {
@@ -224,6 +239,14 @@
         })
         .filter((el) => el !== null);
       return this;
+    }
+
+    clearData(type) {
+      log(this._targets);
+      for (const el of this._targets) {
+        log(el, " being cleared");
+        el.removeAttribute(`data-${type}`);
+      }
     }
 
     // #region WRAP TYPES
@@ -255,6 +278,15 @@
     }
     spin(deg) {
       return this._wrap("spin", deg ? { "--spin-angle": deg } : null);
+    }
+    // #endregion
+
+    // #region FILTERS
+    filter(type) {
+      for (const el of this._targets) {
+        el.setAttribute(`data-filter-${type}`, "");
+      }
+      return this;
     }
     // #endregion
 

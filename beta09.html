@@ -80,10 +80,10 @@
               <b>
                 like terms refers to the variable and its
                 exponent being the same - in this case,
-                there is a the same variable x with
-                an exponent of g_2 on two terms;
+                there is the same variable x with
+                an exponent of g_2 on two different terms;
                 you can combine them by adding the
-                coefficient
+                coefficients, three and seven
               </b>
             `,
             acts: (S) => {
@@ -100,18 +100,19 @@
               <b id="T2x">+ 2x</b>
               + 5 = 0
             `,
-            acts: S =>{
-              S.select("T3x", "T2x").absorb("T5x", "+ 5x")
-              .viva();
-            }
+            acts: (S) => {
+              S.select("T3x", "T2x").absorb("T5x", "+ 5x").viva();
+            },
+            encore: (S) => {
+              S.select("T5x").spin();
+            },
           },
           {
             note: "what about this?",
-            load: `<b id="rat">3x</b> + 99 = 909`,
+            // load: `<b id="rat">3x</b> + 99 = 909`,
             acts: (S) => {
-              S.select("rat").vaporize()
-              .shrink().during(0.7);
-
+              S.select("T3x").vaporize().shrink().during(0.7);
+              S.select("T2x").filter("ghost").filter("clear");
             },
           },
         ],
