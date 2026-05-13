@@ -49,7 +49,10 @@
         "shrink",
         "vaporize",
         "spin",
+        "vault",
+        "tuck",
         "filter-clear",
+        "move",
       ];
       this._allowed = new Set(["id"]);
       this._stepCount = 0;
@@ -198,7 +201,7 @@
 
       this._stageObject = stage;
 
-      stage.querySelectorAll("[id]").forEach((el) => {
+      this._stageObject.querySelectorAll("[id]").forEach((el) => {
         this._measureElements(el);
       });
 
@@ -236,7 +239,7 @@
       this._dispatchReady(stepDiv);
     }
 
-    // #region TERM METHS 
+    // #region TERM METHS
     select(...ids) {
       const unique = [...new Set(ids)];
       this._targets = unique
@@ -251,6 +254,7 @@
       const el = this._makeTag("b", html, "stage");
       el.id = id;
       this._stageObject.append(el);
+      this._measureElements(el);
       return this.select(el.id);
     }
 
@@ -276,7 +280,7 @@
       });
     }
 
-    dismount () {
+    dismount() {
       this._targets.forEach((el) => {
         el.remove();
       });
@@ -285,14 +289,14 @@
 
     // #region WRAP TYPES
     _wrap(type, cssVars) {
-      this._targets.forEach((el) => {
+      for (const el of this._targets) {
         el.innerHTML = `<b data-${type}>${el.innerHTML}</b>`;
         if (cssVars) {
           for (const [key, value] of Object.entries(cssVars)) {
-            el.firstChild.style.setProperty(key, value);
+            el.children[0].style.setProperty(key, value);
           }
         }
-      });
+      }
       return this;
     }
     viva() {
@@ -312,6 +316,23 @@
     }
     spin(deg) {
       return this._wrap("spin", deg ? { "--spin-angle": deg } : null);
+    }
+    vault(high) {
+      return this._wrap("vault", high ? { "--vault-height": high } : null);
+    }
+    tuck() {
+      return this._wrap("tuck");
+    }
+    unfurl() {
+      const targets = this._targets;
+      const total = targets.length;
+      for (const [i, el] of targets.entries()) {
+        this.select(el.id)._wrap("grow", {
+          "--ani-start": i / total,
+        });
+      }
+      this._targets = targets;
+      return this;
     }
     // #endregion
 
@@ -334,7 +355,7 @@
       const e = end != null ? Math.max(0, Math.min(1, end)) : null;
 
       this._targets.forEach((el) => {
-        const fc = el.firstChild;
+        const fc = el.children[0];
         if (start != null) fc.style.setProperty("--ani-start", start);
         if (end != null) fc.style.setProperty("--ani-end", end);
       });
@@ -360,6 +381,62 @@
     }
     // #endregion
 
+    // #region MOVE LOGIC
+    moveBefore(anchorId) {
+      return this._move(anchorId, "before");
+    }
+
+    moveAfter(anchorId) {
+      return this._move(anchorId, "after");
+    }
+
+    _move(anchorId, direction) {
+      const stage = this._stageObject;
+      const anchor = stage.querySelector(`[id="${anchorId}"]`);
+      if (!anchor) return this;
+
+      const allElements = Array.from(stage.querySelectorAll("[id]"));
+
+      // 2. Snapshot: Capture 'Before' positions for everyone
+      const snapshots = new Map();
+      allElements.forEach((el) => {
+        snapshots.set(el.id, el.getBoundingClientRect());
+      });
+
+      // 3. The Surgery: Prepare the order and move 'em
+      const targetArray =
+        direction === "after"
+          ? Array.from(this._targets).reverse()
+          : Array.from(this._targets);
+
+      targetArray.forEach((el) => {
+        const ref = direction === "before" ? anchor : anchor.nextSibling;
+        anchor.parentNode.insertBefore(el, ref);
+      });
+
+      // 4. The Comparison: Check EVERYONE for layout shifts
+      allElements.forEach((el) => {
+        const oldRect = snapshots.get(el.id);
+        const newRect = el.getBoundingClientRect();
+
+        const dx = oldRect.left - newRect.left;
+        const dy = oldRect.top - newRect.top;
+
+        // 5. Apply the 'move' API only if the element actually shifted
+        // Use a small threshold (0.5) to ignore sub-pixel browser jitter
+        if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+          // We manually wrap here instead of using this._wrap
+          // to avoid clobbering the current this._targets set
+          el.innerHTML = `<b data-move>${el.innerHTML}</b>`;
+          const wrapper = el.children[0];
+          wrapper.style.setProperty("--dx", `${Math.round(dx)}px`);
+          wrapper.style.setProperty("--dy", `${Math.round(dy)}px`);
+        }
+      });
+
+      return this;
+    }
+    // #endregion
   }
   // #endregion
 

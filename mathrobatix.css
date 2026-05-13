@@ -181,21 +181,44 @@ b {
 }
 /* #endregion */
 
-/* #region jump */
-[data-jump] {
-  animation: jump ease-out both;
+/* #region vault */
+[data-vault] {
+  --vault-height: -1em;
+  animation: vault ease-out both;
   animation-timeline: view();
   animation-range: var(--animation-range);
 }
-@keyframes jump {
+@keyframes vault {
   0% {
     transform: translateY(0em);
   }
   15% {
-    transform: translateY(-1em);
+    transform: translateY(var(--vault-height, -1em));
   }
   85% {
-    transform: translateY(-1em);
+    transform: translateY(var(--vault-height, -1em));
+  }
+  100% {
+    transform: translateY(0em);
+  }
+}
+/* #endregion */
+
+/* #region tuck */
+[data-tuck] {
+  animation: tuck ease-out both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes tuck {
+  0% {
+    transform: translateY(0em);
+  }
+  15% {
+    transform: translateY(1em);
+  }
+  85% {
+    transform: translateY(1em);
   }
   100% {
     transform: translateY(0em);
@@ -269,6 +292,8 @@ b {
 /* #region grow */
 [data-grow] {
   display: inline-block;
+  margin: 0;
+  padding: 0;
   transform-origin: 0% 50%;
   will-change: transform;
   animation: grow linear both;
@@ -278,12 +303,14 @@ b {
 
 @keyframes grow {
   from {
+    margin-left: -0.25em;
     margin-right: -0.25em;
     transform: scale(0);
     width: 0px;
     opacity: 0;
   }
   to {
+    margin-left: 0em;
     margin-right: 0em;
     transform: scale(var(--grow-val, 1));
     width: var(--mbx-width);

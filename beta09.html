@@ -75,6 +75,32 @@
         `,
         steps: [
           {
+            note: " how are you ? ",
+            acts: S => {
+              S.select("T7x2").spin("180deg").tuck();
+              S.select("T3x2").vault("-1.3em");
+              S.select("T3x2", "T7x2").moveAfter("EQ");
+              // S.select("T7x2", "T2", "EQ", "T10").unfurl();
+            }
+          },
+          {
+            note: "will it remain moved?",
+            acts: S=>{}
+          }
+        ],
+      };
+      const XXX_routine = {
+        title: "Quadratic Mania",
+        intro: "you must solve this equation for x",
+        stage: `
+          <b id="T3x2">3x^2</b>
+          <b id="T7x2">- 7x^2</b>
+          <b id="T2">+ 2</b>
+          <b id="EQ">=</b>
+          <b id="T10">10</b>
+        `,
+        steps: [
+          {
             note: `notice the like terms
               <b>
                 like terms refers to the variable and its
@@ -88,7 +114,8 @@
             acts: (S) => {
               S.mount("P1", "(").insertBefore("T3x2");
               S.mount("P2", ")").insertAfter("T7x2");
-              S.select("T3x2","T7x2").viva();
+              S.select("P1", "P2").grow().during(0, 0.5).spin();
+              S.select("T3x2", "T7x2").viva();
               S.select("T10").vaporize().shrink().spin("180deg").during(0, 0.3);
               S.select("T2").grow();
             },
@@ -98,9 +125,7 @@
             acts: (S) => {
               S.select("T3x2", "T7x2").absorb("T10x2", "10x^2").viva();
             },
-            encore: (S) => {
-              
-            },
+            encore: (S) => {},
           },
           {
             note: "what about this?",
@@ -115,8 +140,8 @@
             acts: (S) => {
               S.select("T10x2").dismount();
               S.select("T2").filter("");
-            }
-          }
+            },
+          },
         ],
       };
       const one = document.getElementById("one");
