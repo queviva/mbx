@@ -286,7 +286,7 @@ b {
   to {
     margin-right: 0em;
     transform: scale(var(--grow-val, 1));
-    width: var(--full-width);
+    width: var(--mbx-width);
     opacity: 1;
   }
 }
@@ -306,7 +306,7 @@ b {
   from {
     margin-right: 0em;
     transform: scale(1);
-    width: var(--full-width);
+    width: var(--mbx-width);
     opacity: 1;
   }
   to {
@@ -532,19 +532,19 @@ b {
 /* #endregion */
 
 /* #region viva filter */
-[data-filter-viva] {
+[data-filter="viva"] {
   color: var(--white-color);
   text-shadow: var(--viva-shadow);
 }
-[data-filter-viva]::after,
-[data-filter-viva]::before {
+[data-filter="viva"]::after,
+[data-filter="viva"]::before {
   color: var(--white-color);
   filter: url("#svgviva");
 }
 /* #endregion */
 
 /* #region ghost filter */
-[data-filter-ghost] {
+[data-filter="ghost"] {
   color: var(--back-color);
   text-shadow: var(--ghost-shadow);
 }

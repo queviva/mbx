@@ -43,6 +43,14 @@
       this._container = container;
       this._supRegex = /([^\s])\^(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g;
       this._subRegex = /([^\s])\_(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g;
+      this._apis = [
+        "viva",
+        "grow",
+        "shrink",
+        "vaporize",
+        "spin",
+        "filter-clear",
+      ];
       this._allowed = new Set(["id"]);
       this._stepCount = 0;
       this._stageString;
@@ -123,7 +131,10 @@
         const rect = el.getBoundingClientRect();
         const style = el.style;
         for (const prop of props) {
-          style.setProperty(`--full-${prop}`, Math.round(rect[prop]) + "px");
+          style.setProperty(
+            `--${devOpts.fix}-${prop}`,
+            Math.round(rect[prop]) + "px",
+          );
         }
       }
     }
@@ -131,6 +142,12 @@
     _namespaceIDs(stage, prefix) {
       stage.querySelectorAll("[id]").forEach((el) => {
         el.id = `${prefix}-${el.id}`;
+      });
+    }
+
+    _removeIDs(stage) {
+      stage.querySelectorAll("[id]").forEach((el) => {
+        el.removeAttribute("id");
       });
     }
 
@@ -197,40 +214,29 @@
         }
       }
 
-      this._namespaceIDs(stage, stepID);
-      stepDiv.classList.remove("measure");
+      const nextStep = this._makeTag("div", stepDiv.innerHTML, "step");
 
       // remove absorbs from stage
-      const nextStage = this._makeTag("div", stage.innerHTML, "step");
-      nextStage.querySelectorAll("[data-absorb]").forEach((el) => {
+      nextStep.querySelectorAll("[data-absorb]").forEach((el) => {
         el.parentNode.insertBefore(el.children[1], el);
         el.remove();
       });
-      nextStage.querySelectorAll("[data-viva]").forEach((el) => {
-        while (el.firstChild) el.parentNode.insertBefore(el.firstChild, el);
-        el.remove();
-      });
-      this._stageString = nextStage.outerHTML;
-      this._stageObject = this._makeTag("b", this._stageString);
-      log(this._stageObject);
 
-      // run the encore
-      let encoreResult;
-      if (typeof step.encore === "function") {
-        try {
-          encoreResult = step.encore(this);
-          if (encoreResult && typeof encoreResult.then === "function") {
-            await encoreResult;
-          }
-        } catch (err) {
-          console.warn("Spotter: step.encore error", err);
-        }
+      // remove the API <b>'s
+      for (const api of this._apis) {
+        nextStep.querySelectorAll(`[data-${api}]`).forEach((el) => {
+          while (el.firstChild) el.parentNode.insertBefore(el.firstChild, el);
+          el.remove();
+        });
       }
+      this._stageString = nextStep.children[0].innerHTML;
 
+      this._removeIDs(stepDiv.children[0]);
+      stepDiv.classList.remove("measure");
       this._dispatchReady(stepDiv);
     }
 
-    // #region API
+    // #region TERM METHS 
     select(...ids) {
       const unique = [...new Set(ids)];
       this._targets = unique
@@ -241,13 +247,41 @@
       return this;
     }
 
-    clearData(type) {
-      log(this._targets);
-      for (const el of this._targets) {
-        log(el, " being cleared");
-        el.removeAttribute(`data-${type}`);
-      }
+    mount(id, html, data) {
+      const el = this._makeTag("b", html, "stage");
+      el.id = id;
+      this._stageObject.append(el);
+      return this.select(el.id);
     }
+
+    insertBefore(id) {
+      const beef = this._stageObject.querySelector(`[id=${id}]`);
+      if (!beef) return this;
+      this._targets.forEach((el) => {
+        this._stageObject.insertBefore(el, beef);
+      });
+    }
+
+    insertAfter(id) {
+      const beef = this._stageObject.querySelector(`[id=${id}]`);
+      if (!beef) return this;
+      this._targets.forEach((el) => {
+        this._stageObject.insertBefore(el, beef.nextSibling);
+      });
+    }
+
+    hide() {
+      this._targets.forEach((el) => {
+        el.style.display = "none";
+      });
+    }
+
+    dismount () {
+      this._targets.forEach((el) => {
+        el.remove();
+      });
+    }
+    // #endregion
 
     // #region WRAP TYPES
     _wrap(type, cssVars) {
@@ -282,9 +316,13 @@
     // #endregion
 
     // #region FILTERS
+    filterClear() {
+      return this._wrap("filter-clear");
+    }
+
     filter(type) {
       for (const el of this._targets) {
-        el.setAttribute(`data-filter-${type}`, "");
+        el.setAttribute("data-filter", type);
       }
       return this;
     }
@@ -322,7 +360,6 @@
     }
     // #endregion
 
-    // #endregion
   }
   // #endregion
 
