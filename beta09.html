@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Mathro&middot;batiX Scroll Vault 0.9beta</title>
-    <script src="mathrobatix1.0.js" data-x='{"tag":"mathro-batix"}'></script>
+    <script src="mathrobatix1.1.js" data-x='{"tag":"mathro-batix"}'></script>
     <link rel="stylesheet" href="mathrobatix.css" />
   </head>
   <body>
@@ -63,7 +63,7 @@
       </svg>
     </mathro-batix>
     <script id="ROUTINE" type="module">
-      const routine = {
+      const YYY_routine = {
         title: "Quadratic Mania",
         intro: "you must solve this equation for x",
         stage: `
@@ -76,20 +76,23 @@
         steps: [
           {
             note: " how are you ? ",
-            acts: S => {
-              S.select("T7x2").spin("180deg").tuck();
-              S.select("T3x2").vault("-1.3em");
-              S.select("T3x2", "T7x2").moveAfter("EQ");
-              // S.select("T7x2", "T2", "EQ", "T10").unfurl();
-            }
+            acts: (S) => {
+              // S.spot("T7x2").spin("180deg").tuck();
+              // S.spot("T3x2").vault("-1.3em");
+              S.spot("T2").moveBefore("T3x2");
+              S.spot("T7x2").shrink();
+              // S.spot("T7x2", "T2", "EQ", "T10").unfurl();
+            },
           },
           {
             note: "will it remain moved?",
-            acts: S=>{}
-          }
+            acts: (S) => {
+              S.spot("T3x2").viva();
+            },
+          },
         ],
       };
-      const XXX_routine = {
+      const routine = {
         title: "Quadratic Mania",
         intro: "you must solve this equation for x",
         stage: `
@@ -114,34 +117,47 @@
             acts: (S) => {
               S.mount("P1", "(").insertBefore("T3x2");
               S.mount("P2", ")").insertAfter("T7x2");
-              S.select("P1", "P2").grow().during(0, 0.5).spin();
-              S.select("T3x2", "T7x2").viva();
-              S.select("T10").vaporize().shrink().spin("180deg").during(0, 0.3);
-              S.select("T2").grow();
+              S.spot("P1", "P2").grow().during(0, 0.5)
+              S.spot("T3x2", "T7x2").viva();
+              S.spot("T10").vaporize().shrink().spin("180deg").during(0, 0.3);
+              S.spot("T2").grow();
             },
           },
           {
             note: "absorb them",
             acts: (S) => {
-              S.select("T3x2", "T7x2").absorb("T10x2", "10x^2").viva();
+              S.spot("T3x2", "T7x2").absorb("T10x2", "10x^2").viva();
             },
             encore: (S) => {},
           },
           {
             note: "what about this?",
             acts: (S) => {
-              S.select("P1", "P2").dismount();
-              S.select("T10x2").vaporize().shrink().during(0.7);
-              S.select("T2").filter("ghost").filterClear();
+              S.spot("P1", "P2").dismount();
+              S.spot("T10x2").vaporize().shrink().during(0.7);
+              S.spot("T2").filter("ghost").filterClear();
             },
           },
           {
             note: "does +2 have the ghost from before?",
             acts: (S) => {
-              S.select("T10x2").dismount();
-              S.select("T2").filter("");
+              S.spot("T10x2").dismount();
+              S.spot("T2").filter("");
             },
           },
+          {
+            note: "a new floor",
+            load: `
+              <b id="T3x2">3x^2</b>
+              <b id="T4x">+ 4x</b>
+              <b id="T1">+ 1</b>
+              <b id="EQ">=</b>
+              <b id="T0">0</b>
+            `,
+            acts: S => {
+              S.spot("T3x2", "T4x", "T1", "EQ", "T0").unfurl();
+            }
+          }
         ],
       };
       const one = document.getElementById("one");

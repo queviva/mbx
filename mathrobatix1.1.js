@@ -37,66 +37,74 @@
 
   // #region SPOTTER
   class Spotter {
-    // #region CLASS METHS
-    constructor(container) {
-      this._routine = {};
-      this._container = container;
-      this._supRegex = /([^\s])\^(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g;
-      this._subRegex = /([^\s])\_(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g;
-      this._apis = [
-        "viva",
-        "grow",
-        "shrink",
-        "vaporize",
-        "spin",
-        "vault",
-        "tuck",
-        "filter-clear",
-        "move",
-      ];
-      this._allowed = new Set(["id"]);
-      this._stepCount = 0;
-      this._stageString;
-      this._stageObject;
-      this._targets = new Set();
+    // #region PRIVATE FIELDS
+    #routine = {};
+    #container;
+    #opts = {};
+    #supRegex = /([^\s])\^(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g;
+    #subRegex = /([^\s])\_(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g;
+    #apis = [
+      "viva",
+      "grow",
+      "shrink",
+      "vaporize",
+      "spin",
+      "vault",
+      "tuck",
+      "filter-clear",
+      "move",
+    ];
+    #allowed = new Set(["id"]);
+    #stepCount = 0;
+    #stageString;
+    #stageObject;
+    #targets = new Set();
+    // !!! HAKC !!!
+    #resizeRunning = false;
+    #resizeTimer = null;
+    // #endregion
 
+    constructor(container, opts = {}) {
+      this.#container = container;
+      this.#opts = opts;
       // !!! HAKC !!!
       // #region
       // I dare you to think of another functional way
       /*
       window.addEventListener("resize", (e) => {
-        this.loadRoutine(this._routine);
+        this.loadRoutine(this.#routine);
       });
       */
-      this._resizeRunning = false;
-      this._resizeTimer = null;
+      this.#resizeRunning = false;
+      this.#resizeTimer = null;
       window.addEventListener("resize", () => {
-        clearTimeout(this._resizeTimer);
-        this._resizeTimer = setTimeout(async () => {
-          if (this._resizeRunning) return;
-          this._resizeRunning = true;
+        clearTimeout(this.#resizeTimer);
+        this.#resizeTimer = setTimeout(async () => {
+          if (this.#resizeRunning) return;
+          this.#resizeRunning = true;
           try {
-            await this.loadRoutine(this._routine);
+            await this.loadRoutine(this.#routine);
           } finally {
-            this._resizeRunning = false;
+            this.#resizeRunning = false;
           }
         }, 200);
       });
       // #endregion
     }
 
-    _sanitizeHTML(html = "") {
+    // #region PRIVATE METHS
+    #sanitizeHTML(html = "") {
       if (!html) return document.createDocumentFragment();
 
       const marked = String(html)
         .trim()
         .replace(/\s+/g, " ")
         .replace(
-          this._supRegex,
+          this.#supRegex,
           (m, base, sup) => `${base}<b data-sup>${sup}</b>`,
         )
         .replace(
-          this._subRegex,
+          this.#subRegex,
           (m, base, sub) => `${base}<b data-sub>${sub}</b>`,
         );
 
@@ -113,9 +121,15 @@
       while (node) {
         const nextNode = walker.nextNode();
         if (node.nodeType === Node.TEXT_NODE) {
-          if (node.textContent.length === 0) {
+          const text = node.textContent;
+          if (!text) {
             node.parentNode.removeChild(node);
           }
+          //else {
+          // const wrapper = this.#makeTag("b", text);
+          // node.parentNode.replaceChild(wrapper, node);
+          // node = wrapper;
+          // }
         } else if (node.nodeType === Node.ELEMENT_NODE) {
           const tag = node.tagName.toLowerCase();
           if (tag !== "b") {
@@ -126,7 +140,7 @@
           } else {
             for (const attr of Array.from(node.attributes)) {
               const name = attr.name.toLowerCase();
-              if (!this._allowed.has(name) && !name.startsWith("data-")) {
+              if (!this.#allowed.has(name) && !name.startsWith("data-")) {
                 node.removeAttribute(attr.name);
               }
             }
@@ -139,14 +153,14 @@
       return tpl.content;
     }
 
-    _makeTag(tag, html, attr) {
+    #makeTag(tag, html, attr) {
       const el = document.createElement(tag);
-      el.append(this._sanitizeHTML(html));
+      el.append(this.#sanitizeHTML(html));
       if (attr) el.setAttribute(`data-${attr}`, "");
       return el;
     }
 
-    _measureElements(...els) {
+    #measureElements(...els) {
       const props = ["width", "height", "x", "y"];
       for (const el of new Set(els)) {
         const rect = el.getBoundingClientRect();
@@ -160,19 +174,19 @@
       }
     }
 
-    _namespaceIDs(stage, prefix) {
+    #namespaceIDs(stage, prefix) {
       stage.querySelectorAll("[id]").forEach((el) => {
         el.id = `${prefix}-${el.id}`;
       });
     }
 
-    _removeIDs(stage) {
+    #removeIDs(stage) {
       stage.querySelectorAll("[id]").forEach((el) => {
         el.removeAttribute("id");
       });
     }
 
-    _dispatchReady(step) {
+    #dispatchReady(step) {
       const stepReady = new CustomEvent(`${devOpts.fix}-step-ready`, {
         detail: { time: Date.now() },
         bubbles: true,
@@ -183,45 +197,45 @@
     // #endregion
 
     async loadRoutine(routine = {}) {
-      this._routine = routine;
-      this._container.replaceChildren();
-      this._stepCount = 0;
-      this._targets = new Set();
+      this.#routine = routine;
+      this.#container.replaceChildren();
+      this.#stepCount = 0;
+      this.#targets = new Set();
 
       if (routine.intro) {
-        this._container.append(
-          this._sanitizeHTML(`<b data-intro>${routine.intro}</b>`),
+        this.#container.append(
+          this.#sanitizeHTML(`<b data-intro>${routine.intro}</b>`),
         );
       }
 
-      this._stageString = routine.stage || "";
+      this.#stageString = routine.stage || "";
 
       for (let step of routine.steps || []) {
-        await this.processStep(step);
+        await this.#processStep(step);
       }
     }
 
-    async processStep(step) {
-      await new Promise((r) => setTimeout(r, 1000));
-      this._stepCount++;
-      const stepID = `${devOpts.fix}-s${this._stepCount}`;
+    async #processStep(step) {
+      // await new Promise((r) => setTimeout(r, 1000));
+      this.#stepCount++;
+      const stepID = `${devOpts.fix}-s${this.#stepCount}`;
 
-      if (step.load) this._stageString = step.load;
+      if (step.load) this.#stageString = step.load;
 
-      const stage = this._makeTag("b", this._stageString, "stage");
-      const comm = this._makeTag("b", step.note || "", "comm");
-      const stepDiv = this._makeTag("div", "", "step");
+      const stage = this.#makeTag("b", this.#stageString, "stage");
+      const comm = this.#makeTag("b", step.note || "", "comm");
+      const stepDiv = this.#makeTag("div", "", "step");
       stepDiv.append(stage, comm);
       stepDiv.classList.add("measure");
-      this._container.append(stepDiv);
+      this.#container.append(stepDiv);
 
-      this._stageObject = stage;
+      this.#stageObject = stage;
 
       // layout HAKC
       await new Promise((r) => requestAnimationFrame(r));
 
-      this._stageObject.querySelectorAll("[id]").forEach((el) => {
-        this._measureElements(el);
+      this.#stageObject.querySelectorAll("[id]").forEach((el) => {
+        this.#measureElements(el);
       });
 
       let actsResult;
@@ -236,7 +250,7 @@
         }
       }
 
-      const nextStep = this._makeTag("div", stepDiv.innerHTML, "step");
+      const nextStep = this.#makeTag("div", stepDiv.innerHTML, "step");
 
       // remove absorbs from stage
       nextStep.querySelectorAll("[data-absorb]").forEach((el) => {
@@ -245,70 +259,70 @@
       });
 
       // remove the API <b>'s
-      for (const api of this._apis) {
+      for (const api of this.#apis) {
         nextStep.querySelectorAll(`[data-${api}]`).forEach((el) => {
           while (el.firstChild) el.parentNode.insertBefore(el.firstChild, el);
           el.remove();
         });
       }
-      this._stageString = nextStep.children[0].innerHTML;
+      this.#stageString = nextStep.children[0].innerHTML;
 
-      this._removeIDs(stepDiv.children[0]);
+      this.#removeIDs(stepDiv.children[0]);
       stepDiv.classList.remove("measure");
-      this._dispatchReady(stepDiv);
+      this.#dispatchReady(stepDiv);
     }
 
-    // #region TERM METHS
-    select(...ids) {
+    // #region MATHROBATIX
+    spot(...ids) {
       const unique = [...new Set(ids)];
-      this._targets = unique
+      this.#targets = unique
         .map((id) => {
-          return this._stageObject.querySelector(`[id="${id}"]`);
+          return this.#stageObject.querySelector(`[id="${CSS.escape(id)}"]`);
         })
         .filter((el) => el !== null);
       return this;
     }
 
     mount(id, html, data) {
-      const el = this._makeTag("b", html, "stage");
+      const el = this.#makeTag("b", html, "stage");
       el.id = id;
-      this._stageObject.append(el);
-      this._measureElements(el);
-      return this.select(el.id);
+      this.#stageObject.append(el);
+      this.#measureElements(el);
+      return this.spot(el.id);
     }
 
     insertBefore(id) {
-      const beef = this._stageObject.querySelector(`[id=${id}]`);
+      const beef = this.#stageObject.querySelector(`[id="${CSS.escape(id)}"]`);
       if (!beef) return this;
-      this._targets.forEach((el) => {
-        this._stageObject.insertBefore(el, beef);
+      this.#targets.forEach((el) => {
+        el.parentNode.insertBefore(el, beef);
       });
     }
 
     insertAfter(id) {
-      const beef = this._stageObject.querySelector(`[id=${id}]`);
+      const beef = this.#stageObject.querySelector(`[id="${CSS.escape(id)}"]`);
       if (!beef) return this;
-      this._targets.forEach((el) => {
-        this._stageObject.insertBefore(el, beef.nextSibling);
+      this.#targets.forEach((el) => {
+        el.parentNode.insertBefore(el, beef.nextSibling);
       });
     }
 
     hide() {
-      this._targets.forEach((el) => {
+      this.#targets.forEach((el) => {
         el.style.display = "none";
       });
     }
 
     dismount() {
-      this._targets.forEach((el) => {
+      this.#targets.forEach((el) => {
         el.remove();
       });
     }
     // #endregion
 
     // #region WRAP TYPES
-    _wrap(type, cssVars) {
-      for (const el of this._targets) {
+    #wrap(type, cssVars) {
+      for (const el of this.#targets) {
         el.innerHTML = `<b data-${type}>${el.innerHTML}</b>`;
         if (cssVars) {
           for (const [key, value] of Object.entries(cssVars)) {
@@ -319,49 +333,49 @@
       return this;
     }
     viva() {
-      return this._wrap("viva");
+      return this.#wrap("viva");
     }
     ghost() {
-      return this._wrap("ghost");
+      return this.#wrap("ghost");
     }
     vaporize() {
-      return this._wrap("vaporize");
+      return this.#wrap("vaporize");
     }
     grow(scale) {
-      return this._wrap("grow", scale ? { "--grow-val": scale } : null);
+      return this.#wrap("grow", scale ? { "--grow-val": scale } : null);
     }
     shrink() {
-      return this._wrap("shrink");
+      return this.#wrap("shrink");
     }
     spin(deg) {
-      return this._wrap("spin", deg ? { "--spin-angle": deg } : null);
+      return this.#wrap("spin", deg ? { "--spin-angle": deg } : null);
     }
     vault(high) {
-      return this._wrap("vault", high ? { "--vault-height": high } : null);
+      return this.#wrap("vault", high ? { "--vault-height": high } : null);
     }
     tuck() {
-      return this._wrap("tuck");
+      return this.#wrap("tuck");
     }
     unfurl() {
-      const targets = this._targets;
+      const targets = this.#targets;
       const total = targets.length;
       for (const [i, el] of targets.entries()) {
-        this.select(el.id)._wrap("grow", {
+        this.spot(el.id).#wrap("grow", {
           "--ani-start": i / total,
         });
       }
-      this._targets = targets;
+      this.#targets = targets;
       return this;
     }
     // #endregion
 
     // #region FILTERS
     filterClear() {
-      return this._wrap("filter-clear");
+      return this.#wrap("filter-clear");
     }
 
     filter(type) {
-      for (const el of this._targets) {
+      for (const el of this.#targets) {
         el.setAttribute("data-filter", type);
       }
       return this;
@@ -373,7 +387,7 @@
       const s = start != null ? Math.max(0, Math.min(1, start)) : null;
       const e = end != null ? Math.max(0, Math.min(1, end)) : null;
 
-      this._targets.forEach((el) => {
+      this.#targets.forEach((el) => {
         const fc = el.children[0];
         if (start != null) fc.style.setProperty("--ani-start", start);
         if (end != null) fc.style.setProperty("--ani-end", end);
@@ -385,36 +399,38 @@
 
     // #region ABSORB
     absorb(id, html) {
-      const absEl = this._makeTag("b", "<b></b><b></b>", "absorb");
-      const newEl = this._makeTag("b", html);
+      const absEl = this.#makeTag("b", "<b></b><b></b>", "absorb");
+      const newEl = this.#makeTag("b", html);
       newEl.id = id;
-      this._stageObject.insertBefore(absEl, this._targets[0]);
-      this._targets.forEach((el) => {
+      this.#stageObject.insertBefore(absEl, this.#targets[0]);
+      this.#targets.forEach((el) => {
         absEl.children[0].append(el);
       });
       absEl.children[1].append(newEl);
 
-      this._measureElements(absEl.children[0], absEl.children[1]);
+      this.#measureElements(absEl.children[0], absEl.children[1]);
 
-      return this.select(newEl.id);
+      return this.spot(newEl.id);
     }
     // #endregion
 
     // #region MOVE LOGIC
     moveBefore(anchorId) {
-      return this._move(anchorId, "before");
+      return this.#move(anchorId, "before");
     }
 
     moveAfter(anchorId) {
-      return this._move(anchorId, "after");
+      return this.#move(anchorId, "after");
     }
 
-    _move(anchorId, direction) {
-      const anchor = this._stageObject.querySelector(`[id="${anchorId}"]`);
+    #move(anchorId, direction) {
+      const anchor = this.#stageObject.querySelector(
+        `[id="${CSS.escape(anchorId)}"]`,
+      );
       if (!anchor) return this;
 
       const allElements = Array.from(
-        this._stageObject.querySelectorAll("[id]"),
+        this.#stageObject.querySelectorAll("[id]"),
       );
 
       const snapshots = new Map();
@@ -424,8 +440,8 @@
 
       const targetArray =
         direction === "after"
-          ? Array.from(this._targets).reverse()
-          : Array.from(this._targets);
+          ? Array.from(this.#targets).reverse()
+          : Array.from(this.#targets);
 
       for (const el of targetArray) {
         const ref = direction === "before" ? anchor : anchor.nextSibling;
@@ -456,28 +472,31 @@
 
   // #region MBX TAG
   class MBX extends HTMLElement {
+    #opts;
+    #spotter;
+
     constructor() {
       super();
       // !!! DO NOT USE SHADOW DOM !!!
-      this._opts = { ...devOpts };
-      this._spotter = new Spotter(this);
+      this.#opts = { ...devOpts };
     }
 
     loadRoutine(routine) {
-      this._spotter.loadRoutine(routine);
+      this.#spotter.loadRoutine(routine);
     }
 
     connectedCallback() {
       const tagOpts = this.dataset[devOpts.fix];
-      this._opts = sieve(this._opts, parseData(tagOpts));
+      this.#opts = sieve(this.#opts, parseData(tagOpts));
       // setup options for this tag
       // style color, size, &c.
-      const readyEvent = new CustomEvent(`${devOpts.fix}-ready`, {
+      //this.style.setProperty("--main-color", "#909");
+      const readyEvent = new CustomEvent(`${this.#opts.fix}-ready`, {
         detail: { time: Date.now() },
         bubbles: true,
         composed: true,
       });
-
+      this.#spotter = new Spotter(this, this.#opts);
       this.dispatchEvent(readyEvent);
     }
   }
