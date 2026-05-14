@@ -1,4 +1,5 @@
 ((doc, self) => {
+
   // #region UTILS
   const log = console.log;
 
@@ -269,6 +270,7 @@
 
       this.#removeIDs(stepDiv.children[0]);
       stepDiv.classList.remove("measure");
+      stepDiv.removeAttribute("class");
       this.#dispatchReady(stepDiv);
     }
 
@@ -366,6 +368,9 @@
       }
       this.#targets = targets;
       return this;
+    }
+    cank(){
+      return this.#wrap("cank");
     }
     // #endregion
 
@@ -490,7 +495,7 @@
       this.#opts = sieve(this.#opts, parseData(tagOpts));
       // setup options for this tag
       // style color, size, &c.
-      //this.style.setProperty("--main-color", "#909");
+      this.style.setProperty("--nose-h", "220");
       const readyEvent = new CustomEvent(`${this.#opts.fix}-ready`, {
         detail: { time: Date.now() },
         bubbles: true,

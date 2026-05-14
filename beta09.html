@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="mathrobatix.css" />
   </head>
   <body>
-    <mathro-batix id="one">
+    <mathro-batix id="one" style="
+      ">
       <svg>
         <defs>
           <filter id="maincolor">
@@ -117,7 +118,7 @@
             acts: (S) => {
               S.mount("P1", "(").insertBefore("T3x2");
               S.mount("P2", ")").insertAfter("T7x2");
-              S.spot("P1", "P2").grow().during(0, 0.5)
+              S.spot("P1", "P2").grow().during(0, 0.5);
               S.spot("T3x2", "T7x2").viva();
               S.spot("T10").vaporize().shrink().spin("180deg").during(0, 0.3);
               S.spot("T2").grow();
@@ -127,8 +128,8 @@
             note: "absorb them",
             acts: (S) => {
               S.spot("T3x2", "T7x2").absorb("T10x2", "10x^2").viva();
+              S.spot("T10").cank();
             },
-            encore: (S) => {},
           },
           {
             note: "what about this?",
@@ -154,10 +155,11 @@
               <b id="EQ">=</b>
               <b id="T0">0</b>
             `,
-            acts: S => {
-              S.spot("T3x2", "T4x", "T1", "EQ", "T0").unfurl();
-            }
-          }
+            acts: (S) => {
+              // S.spot("T3x2", "T4x", "T1", "EQ", "T0").unfurl();
+              S.spot("T3x2").cank();
+            },
+          },
         ],
       };
       const one = document.getElementById("one");

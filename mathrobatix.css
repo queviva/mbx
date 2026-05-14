@@ -55,7 +55,7 @@ mathro-batix {
     var(--nose-a)
   );
 
-  --white-color: hsl(var(--nose-h), var(--nose-s), calc(2.7 * var(--nose-l)));
+  --white-color: hsl(var(--nose-h), var(--nose-s), calc(2.0 * var(--nose-l)));
 
   --grey-color: hsl(
     var(--nose-h),
@@ -66,9 +66,9 @@ mathro-batix {
 
 /* FILTERS|SHAPES */
 mathro-batix {
-  --viva-f1: 0 0 3px #fff;
-  --viva-f2: 0 0 8px hsl(calc(var(--nose-h) + 12), var(--nose-s), 58%);
-  --viva-f3: 0 0 24px hsl(calc(var(--nose-h) - 40), var(--nose-s), 55%);
+  --viva-f1: 0 0 3px hsl(calc(var(--nose-h) + 0), var(--nose-s), 80%);
+  --viva-f2: 0 0 8px hsl(calc(var(--nose-h) + 0), var(--nose-s), 58%);
+  --viva-f3: 0 0 24px hsl(calc(var(--nose-h) - 0), var(--nose-s), 55%);
 
   --viva-shadow: var(--viva-f1), var(--viva-f2), var(--viva-f3);
 
