@@ -1,0 +1,263 @@
+mathro-batix > .mbx-holder {
+  /* #region CONFIG */
+  --animation-start: 50%;
+  --animation-end: 80%;
+  --font-size: 3rem;
+  --back-color: #111;
+  --mbx-h: 220;
+  --mbx-s: 100%;
+  --mbx-l: 50%;
+  --mbx-a: 1;
+  /* #endregion */
+
+  /* #region COLORS */
+  --main-color: hsla(var(--mbx-h), var(--mbx-s), var(--mbx-l), var(--mbx-a));
+
+  --white-color: hsl(var(--mbx-h), var(--mbx-s), calc(2 * var(--mbx-l)));
+
+  --grey-color: hsl(
+    var(--mbx-h),
+    calc(0.1 * var(--mbx-s)),
+    calc(0.8 * var(--mbx-l))
+  );
+  /* #endregion */
+
+  /* #region FILTERS */
+  --viva-f1: 0 0 3px hsl(calc(var(--mbx-h) + 0), var(--mbx-s), 80%);
+  --viva-f2: 0 0 8px hsl(calc(var(--mbx-h) + 0), var(--mbx-s), 58%);
+  --viva-f3: 0 0 24px hsl(calc(var(--mbx-h) - 0), var(--mbx-s), 55%);
+
+  --viva-shadow: var(--viva-f1), var(--viva-f2), var(--viva-f3);
+
+  --viva-filter: drop-shadow(var(--viva-f1)) drop-shadow(var(--viva-f2))
+    drop-shadow(var(--viva-f3));
+
+  --ghost-shadow: 0 0 0px var(--back-color), 0 0 3px #fff, 0 0 12px #fff;
+
+  --vapor-shadow:
+    0 0 5px var(--back-color), 0 0 40px var(--main-color), 0 0 40px #fff;
+  /* #endregion */
+
+  /* #region SHAPES */
+  --cank-00: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 94Q30 40 95 0L100 10Q33 43 10 100Z'/%3E%3C/svg%3E");
+  --cank-01: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 90Q55 55 90 0L100 8Q65 50 10 100Z'/%3E%3C/svg%3E");
+  --cank-02: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 100Q30 75 55 30L55 50Q30 80 0 100ZM 100 0Q70 25 50 70L50 50Q70 20 100 0Z'/%3E%3C/svg%3E");
+  /* #endregion */
+
+  /* #region LAYOUT */
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  overflow: visible;
+  color: var(--main-color);
+  background-color: var(--back-color);
+  /* #endregion */
+}
+
+/* #region svg */
+svg {
+  width: 0;
+  height: 0;
+}
+/* #endregion */
+
+/* #region batix */
+b {
+  box-sizing: border-box;
+  position: relative;
+  display: inline-block;
+  font-weight: normal;
+  text-wrap: nowrap;
+
+  --ani-start: 0;
+  --ani-end: 1;
+
+  --animation-range: cover
+    calc(
+      var(--animation-start) + (var(--animation-end) - var(--animation-start)) *
+        var(--ani-start)
+    )
+    cover
+    calc(
+      var(--animation-start) + (var(--animation-end) - var(--animation-start)) *
+        var(--ani-end)
+    );
+}
+/* #endregion */
+
+/* #region intro */
+[data-intro] {
+  display: inline-block;
+  position: relative;
+  margin-top: 20vh;
+  margin-bottom: 20vh;
+  color: var(--grey-color);
+  font-style: italic;
+  font-size: 0.5em;
+  text-align: center;
+}
+/* #endregion */
+
+/* #region step */
+[data-step] {
+  display: inline-block;
+  position: relative;
+  margin-bottom: 30vh;
+}
+[data-step] > :nth-child(1) {
+  /* don't use interpolate-size if possible */
+  /* interpolate-size: allow-keywords; */
+  display: flex;
+  gap: 0.25em;
+  align-items: baseline;
+  justify-content: center;
+  font-family: "Times New Roman", Times, serif;
+}
+[data-step] > :nth-child(2) {
+  margin-top: 1.5em;
+  width: 100%;
+}
+[data-step].measure {
+  opacity: 0;
+}
+/* #endregion */
+
+/* #region comm */
+[data-comm],
+[data-rant] {
+  position: relative;
+  display: inline-block;
+  padding: 0px 10px;
+  font-size: 0.5em;
+  font-style: italic;
+  text-align: center;
+  color: var(--grey-color);
+}
+[data-rant] {
+  font-size: 0.4em;
+}
+[data-comm]::before,
+[data-rant]::before {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 100%;
+  right: 100%;
+  top: 0;
+  /* border-width: 1.5px 0px 1.5px 3px; */
+  /* border-style: solid; */
+  /* border-color: var(--grey-color); */
+}
+[data-comm]::after,
+[data-rant]::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 100%;
+  left: 100%;
+  top: 0;
+  /* border-width: 1.5px 3px 1.5px 0px; */
+  /* border-style: solid; */
+  /* border-color: var(--grey-color); */
+}
+[data-comm] > b {
+  position: absolute;
+  display: inline-block;
+  width: 100%;
+  left: 0%;
+  top: 100%;
+  padding: 20px;
+  font-size: 0.5em;
+  text-align: justify;
+  color: var(--grey-color);
+  background-color: var(--back-color);
+  border-left: 1px solid var(--grey-color);
+  opacity: 0;
+  z-index: 10;
+  max-height: 10em;
+  overflow-y: auto;
+  transition: opacity ease-in 600ms;
+  pointer-events: none;
+}
+[data-comm]:hover b {
+  opacity: 0.85;
+  transition: opacity ease-out 400ms;
+  pointer-events: auto;
+}
+[data-comm] em {
+  font-style: normal;
+}
+/* #endregion */
+
+/* #region sup|sub */
+[data-sup] {
+  font-size: 0.55em;
+  vertical-align: 70%;
+}
+[data-sub] {
+  vertical-align: -50%;
+  font-size: 0.55em;
+  font-style: italic;
+}
+/* #endregion */
+
+/* #region viva */
+[data-viva] {
+  text-shadow: var(--viva-shadow);
+  animation-name: viva linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes viva {
+  to {
+    color: var(--white-color);
+    text-shadow: var(--viva-shadow);
+  }
+}
+/* #endregion */
+
+/* #region cank */
+[data-cank] {
+  --back-mig: var(--cank-00);
+  color: pink;
+}
+[data-cank="01"] {
+  --back-mig: var(--cank-01);
+}
+[data-cank="02"] {
+  --back-mig: var(--cank-02);
+}
+[data-cank]::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  height: 100%;
+  width: calc(100% + 10px);
+  background-image: var(--back-mig);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  overflow: visible;
+  filter: url("#mbx-svg-viva");
+  animation: cank 2s ease-in-out infinite; /* Switch from 'linear both' and remove timeline */
+  /* animation: cank linear both; */
+  /* animation-timeline: view(); */
+  /* animation-range: var(--animation-range); */
+}
+@keyframes cank {
+  0% {
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+  }
+  100% {
+    left: -8px;
+    top: 10%;
+    width: calc(100% + 16px);
+    height: 80%;
+  }
+}
+/* #endregion */
