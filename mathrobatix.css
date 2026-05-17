@@ -57,7 +57,9 @@ mathro-batix [data-holder] {
 mathro-batix [data-holder] {
   --cank-00: path("M0 94Q30 40 95 0L100 10Q33 43 10 100Z");
   --cank-01: path("M0 90Q55 55 90 0L100 8Q65 50 10 100Z");
-  --cank-02: path("M0 100Q30 75 55 30L55 50Q30 80 0 100ZM 100 0Q70 25 50 70L50 50Q70 20 100 0Z");
+  --cank-02: path(
+    "M0 100Q30 75 55 30L55 50Q30 80 0 100ZM 100 0Q70 25 50 70L50 50Q70 20 100 0Z"
+  );
 }
 
 /* #endregion */
@@ -644,17 +646,19 @@ svg {
   left: 0%;
   top: 100%;
   padding: 20px;
-  font-size: 0.5em;
   text-align: justify;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: 0.5em;
   color: var(--grey-color);
   background-color: var(--back-color);
-  border-left: 1px solid var(--grey-color);
-  opacity: 0;
-  z-index: 11;
+  /* border-left: 1px solid var(--grey-color); */
   max-height: 10em;
   overflow-y: auto;
+  opacity: 0;
   transition: opacity ease-in 600ms;
   pointer-events: none;
+  z-index: 11;
 }
 [data-comm]:hover b {
   opacity: 0.85;

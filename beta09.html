@@ -53,17 +53,19 @@
             note: "will it remain moved?",
             acts: (S) => {
               S.spot("T3x2").cank("2");
+              S.spot("EQ", "T10").dismount();
             },
           },
           {
             note: "root for the home team",
-            load: `
+            xxxload: `
             <b id="root" data-root><b>7x^2 </b><b id="T1"> + </b><b id="T2">2x</b><b id="T3"> + </b><b id="T4">3</b></b>
             <b id="99">= 49</b>
             `,
             acts: (S) => {
-              S.spot("root").viva();
-              S.spot("T1", "T2", "T3", "T4").unfurl();
+              S.spot("T2").moveBefore("T7x2").viva();
+              // S.spot("root").viva();
+              // S.spot("T1", "T2", "T3", "T4").unfurl();
             },
           },
         ],
@@ -102,6 +104,7 @@
           {
             note: "absorb them",
             acts: (S) => {
+              S.spot("P1", "P2").ghost().during(0.4).shrink().during(0.5);
               S.spot("T3x2", "T7x2").absorb("T10x2", "10x^2").viva();
               S.spot("T10").cank();
             },
