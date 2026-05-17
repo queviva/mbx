@@ -1,5 +1,4 @@
 ((doc, self) => {
-
   // #region UTILS
   const log = console.log;
 
@@ -28,17 +27,24 @@
   const defOpts = {
     tag: "mathro-batix",
     fix: "mbx",
+    color: 220,
   };
-
   const devOpts = sieve(
     defOpts,
     parseData(Object.entries(self?.dataset || {})[0]?.[1]),
   );
   // #endregion
 
+  class ReadyEvent extends CustomEvent {
+    constructor() {
+      super();
+    }
+  }
+
   // #region SPOTTER
   class Spotter {
     // #region PRIVATE FIELDS
+    #spotterCount = 0;
     #routine = {};
     #container;
     #opts = {};
@@ -50,6 +56,7 @@
       "shrink",
       "vaporize",
       "spin",
+      "cank",
       "vault",
       "tuck",
       "filter-clear",
@@ -60,14 +67,21 @@
     #stageString;
     #stageObject;
     #targets = new Set();
+    #svgString = `
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <path fill="currentColor" />
+      </svg>
+    `;
     // !!! HAKC !!!
     #resizeRunning = false;
     #resizeTimer = null;
     // #endregion
 
     constructor(container, opts = {}) {
+      this.#spotterCount++;
       this.#container = container;
       this.#opts = opts;
+
       // !!! HAKC !!!
       // #region
       // I dare you to think of another functional way
@@ -187,9 +201,9 @@
       });
     }
 
-    #dispatchReady(step) {
+    #dispatchReady(step, num) {
       const stepReady = new CustomEvent(`${devOpts.fix}-step-ready`, {
-        detail: { time: Date.now() },
+        detail: { step: num, time: Date.now() },
         bubbles: true,
         composed: true,
       });
@@ -198,11 +212,13 @@
     // #endregion
 
     async loadRoutine(routine = {}) {
+      // zero out
       this.#routine = routine;
       this.#container.replaceChildren();
       this.#stepCount = 0;
       this.#targets = new Set();
 
+      // show any intro
       if (routine.intro) {
         this.#container.append(
           this.#sanitizeHTML(`<b data-intro>${routine.intro}</b>`),
@@ -223,11 +239,11 @@
 
       if (step.load) this.#stageString = step.load;
 
+      const stepDiv = this.#makeTag("b", "", "step");
       const stage = this.#makeTag("b", this.#stageString, "stage");
       const comm = this.#makeTag("b", step.note || "", "comm");
-      const stepDiv = this.#makeTag("div", "", "step");
+      stepDiv.setAttribute("data-measure", "");
       stepDiv.append(stage, comm);
-      stepDiv.classList.add("measure");
       this.#container.append(stepDiv);
 
       this.#stageObject = stage;
@@ -251,7 +267,7 @@
         }
       }
 
-      const nextStep = this.#makeTag("div", stepDiv.innerHTML, "step");
+      const nextStep = this.#makeTag("b", stepDiv.innerHTML, "step");
 
       // remove absorbs from stage
       nextStep.querySelectorAll("[data-absorb]").forEach((el) => {
@@ -269,9 +285,8 @@
       this.#stageString = nextStep.children[0].innerHTML;
 
       this.#removeIDs(stepDiv.children[0]);
-      stepDiv.classList.remove("measure");
-      stepDiv.removeAttribute("class");
-      this.#dispatchReady(stepDiv);
+      stepDiv.removeAttribute("data-measure");
+      this.#dispatchReady(stepDiv, stepID);
     }
 
     // #region MATHROBATIX
@@ -286,7 +301,7 @@
     }
 
     mount(id, html, data) {
-      const el = this.#makeTag("b", html, "stage");
+      const el = this.#makeTag("b", html, data || null);
       el.id = id;
       this.#stageObject.append(el);
       this.#measureElements(el);
@@ -355,22 +370,33 @@
     vault(high) {
       return this.#wrap("vault", high ? { "--vault-height": high } : null);
     }
-    tuck() {
-      return this.#wrap("tuck");
+    tuck(deep) {
+      return this.#wrap("tuck", deep ? { "--tuck-depth": deep } : null);
     }
     unfurl() {
+      // const unTag = this.#makeTag("b","","unfurl");
       const targets = this.#targets;
       const total = targets.length;
+      // targets[0].parentNode.insertBefore(unTag, targets[0]);
       for (const [i, el] of targets.entries()) {
         this.spot(el.id).#wrap("grow", {
           "--ani-start": i / total,
         });
+        // unTag.append(el);
       }
       this.#targets = targets;
       return this;
     }
-    cank(){
-      return this.#wrap("cank");
+    cank(num) {
+      for (const el of this.#targets) {
+        el.innerHTML = `
+          <b data-cank="${num | "0"}">
+            <b>${el.innerHTML}</b>
+            ${this.#svgString}
+          </b>
+        `;
+      }
+      return this;
     }
     // #endregion
 
@@ -477,31 +503,41 @@
 
   // #region MBX TAG
   class MBX extends HTMLElement {
-    #opts;
+    #tagOpts;
     #spotter;
 
     constructor() {
       super();
       // !!! DO NOT USE SHADOW DOM !!!
-      this.#opts = { ...devOpts };
+      this.#tagOpts = { ...devOpts };
     }
 
     loadRoutine(routine) {
       this.#spotter.loadRoutine(routine);
     }
 
-    connectedCallback() {
-      const tagOpts = this.dataset[devOpts.fix];
-      this.#opts = sieve(this.#opts, parseData(tagOpts));
-      // setup options for this tag
-      // style color, size, &c.
-      this.style.setProperty("--nose-h", "220");
-      const readyEvent = new CustomEvent(`${this.#opts.fix}-ready`, {
+    async connectedCallback() {
+      // await new Promise((r) => setTimeout(r, 1000));
+
+      this.#tagOpts = sieve(
+        this.#tagOpts,
+        parseData(this.dataset[devOpts.fix]),
+      );
+
+      this.innerHTML = "";
+
+      const holder = document.createElement("b");
+      holder.setAttribute("data-holder", "");
+      holder.style.setProperty("--mbx-h", this.#tagOpts.color);
+      this.append(holder);
+
+      this.#spotter = new Spotter(holder, this.#tagOpts);
+
+      const readyEvent = new CustomEvent(`${this.#tagOpts.fix}-ready`, {
         detail: { time: Date.now() },
         bubbles: true,
         composed: true,
       });
-      this.#spotter = new Spotter(this, this.#opts);
       this.dispatchEvent(readyEvent);
     }
   }
@@ -510,27 +546,26 @@
 
   // #region INIT
   const boot = async () => {
-    if (!customElements.get(devOpts.tag)) {
-      customElements.define(devOpts.tag, MBX);
-    }
-
-    // INJECT CSS
-    // !!! DEBUGG !!! does not work
-    /*
+    // await new Promise((r) => setTimeout(r, 1000));
+    // inject styles
     const rez = await fetch("mathrobatix.css");
     const CSSText = await rez.text();
     const styleTag = document.createElement("style");
-    styleTag.textContent = `
-        ${CSSText}
-    `;
-    document.head.appendChild(styleTag);
-    */
+    styleTag.textContent = CSSText.replace(
+      new RegExp(defOpts.tag, "g"),
+      devOpts.tag,
+    ).replace(new RegExp(defOpts.fix, "g"), devOpts.fix);
+    await document.head.appendChild(styleTag);
+
+    // create custom tag
+    if (!customElements.get(devOpts.tag)) {
+      customElements.define(devOpts.tag, MBX);
+    }
   };
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot);
-  } else {
-    boot();
-  }
+  // boot when ready
+  document.readyState === "loading"
+    ? document.addEventListener("DOMContentLoaded", boot)
+    : boot();
   // #endregion
 })(document, document.currentScript);

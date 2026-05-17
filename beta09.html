@@ -4,73 +4,37 @@
     <meta charset="UTF-8" />
     <title>Mathro&middot;batiX Scroll Vault 0.9beta</title>
     <script src="mathrobatix1.1.js" data-x='{"tag":"mathro-batix"}'></script>
-    <link rel="stylesheet" href="mathrobatix.css" />
+    <style id="demoStyles">
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 100vh;
+        background-color: #888;
+      }
+      mathro-batix {
+        display: relative;
+        width: 70%;
+      }
+    </style>
   </head>
   <body>
-    <mathro-batix id="one" style="
-      ">
-      <svg>
-        <defs>
-          <filter id="maincolor">
-            <feFlood flood-color="var(--main-color)" result="F0" />
-            <feComposite in="F0" in2="SourceGraphic" operator="in" />
-          </filter>
-
-          <filter id="svgviva" x="-200%" y="-200%" height="900%" width="900%">
-            <feGaussianBlur stdDeviation="0.3" result="B0" />
-            <feFlood
-              flood-color="hsl(var(--nose-h), var(--nose-s), 90%)"
-              result="F0"
-            />
-            <feComposite in="F0" in2="B0" operator="in" result="Z0" />
-
-            <feGaussianBlur stdDeviation="2" result="B1" />
-            <feFlood
-              flood-color="hsl(calc(var(--nose-h) + 12), var(--nose-s), 50%)"
-              result="F1"
-            />
-            <feComposite in="F1" in2="B1" operator="in" result="Z1" />
-
-            <feGaussianBlur stdDeviation="3" result="B2" />
-            <feFlood
-              flood-color="hsl(calc(var(--nose-h) - 20), calc(var(--nose-s) * 0.69), 45%)"
-              result="F2"
-            />
-            <feComposite in="F2" in2="B2" operator="in" result="Z2" />
-
-            <feGaussianBlur stdDeviation="4" result="B3" />
-            <feFlood
-              flood-color="hsl( calc(var(--nose-h) - 40), calc(var(--nose-s) * 1.1), 50%)"
-              result="F3"
-            />
-            <feComposite in="F3" in2="B3" operator="in" result="Z3" />
-
-            <feGaussianBlur stdDeviation="8" result="B4" />
-            <feFlood
-              flood-color="hsl( var(--nose-h), calc(var(--nose-s) * 1.1), 50%)"
-              result="F4"
-            />
-            <feComposite in="F4" in2="B4" operator="in" result="Z4" />
-
-            <feMerge>
-              <feMergeNode in="Z4" />
-              <feMergeNode in="Z3" />
-              <feMergeNode in="Z2" />
-              <feMergeNode in="Z1" />
-              <feMergeNode in="Z0" />
-            </feMerge>
-          </filter>
-        </defs>
-      </svg>
-    </mathro-batix>
-    <script id="ROUTINE" type="module">
-      const YYY_routine = {
+    <mathro-batix id="one" data-mbx='{"color":"220"}'></mathro-batix>
+    <div style="margin:30px; font-size:30px;">
+      and some stuff
+    </div>
+    <mathro-batix id="two" data-mbx='{"color":"40"}'></mathro-batix>
+    <script id="ROUTINE">
+      const routineOne = {
         title: "Quadratic Mania",
         intro: "you must solve this equation for x",
         stage: `
           <b id="T3x2">3x^2</b>
-          <b id="T7x2">- 7x^2</b>
           <b id="T2">+ 2</b>
+          <b id="T7x2">+ 7x^2</b>
           <b id="EQ">=</b>
           <b id="T10">10</b>
         `,
@@ -78,27 +42,38 @@
           {
             note: " how are you ? ",
             acts: (S) => {
-              // S.spot("T7x2").spin("180deg").tuck();
-              // S.spot("T3x2").vault("-1.3em");
-              S.spot("T2").moveBefore("T3x2");
-              S.spot("T7x2").shrink();
+              S.spot("EQ", "T10").shrink();
+              S.spot("T7x2").cank("1").spin().viva();
+              S.spot("T7x2").moveBefore("T2").vault();
+              S.spot("T2").tuck("0.5em");
               // S.spot("T7x2", "T2", "EQ", "T10").unfurl();
             },
           },
           {
             note: "will it remain moved?",
             acts: (S) => {
-              S.spot("T3x2").viva();
+              S.spot("T3x2").cank("2");
+            },
+          },
+          {
+            note: "root for the home team",
+            load: `
+            <b id="root" data-root><b>7x^2 </b><b id="T1"> + </b><b id="T2">2x</b><b id="T3"> + </b><b id="T4">3</b></b>
+            <b id="99">= 49</b>
+            `,
+            acts: (S) => {
+              S.spot("root").viva();
+              S.spot("T1", "T2", "T3", "T4").unfurl();
             },
           },
         ],
       };
-      const routine = {
+      const routineTwo = {
         title: "Quadratic Mania",
         intro: "you must solve this equation for x",
         stage: `
           <b id="T3x2">3x^2</b>
-          <b id="T7x2">- 7x^2</b>
+          <b id="T7x2">+ 7x^2</b>
           <b id="T2">+ 2</b>
           <b id="EQ">=</b>
           <b id="T10">10</b>
@@ -156,18 +131,25 @@
               <b id="T0">0</b>
             `,
             acts: (S) => {
-              // S.spot("T3x2", "T4x", "T1", "EQ", "T0").unfurl();
-              S.spot("T3x2").cank();
+              S.spot("T3x2", "T4x", "T1", "EQ", "T0").unfurl();
+              S.spot("T0").spin().during(0.9);
+              // S.spot("T3x2").cank();
             },
           },
         ],
       };
+    </script>
+    <script>
       const one = document.getElementById("one");
+      const two = document.getElementById("two");
       one.addEventListener("mbx-ready", (e) => {
-        one.loadRoutine(routine);
+        one.loadRoutine(routineOne);
+      });
+      two.addEventListener("mbx-ready", (e) => {
+        two.loadRoutine(routineTwo);
       });
       one.addEventListener("mbx-step-ready", (e) => {
-        //console.log(e.target.id, "ready");
+        // console.log(e.detail, "ready");
       });
     </script>
   </body>
