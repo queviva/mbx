@@ -235,25 +235,24 @@
     async #processStep(step) {
       // await new Promise((r) => setTimeout(r, 1000));
       this.#stepCount++;
-      const stepID = `${devOpts.fix}-s${this.#stepCount}`;
+      const stepID = `${this.#container.parentNode.id}-${devOpts.fix}-s${this.#stepCount}`;
 
       if (step.load) this.#stageString = step.load;
 
       const stepDiv = this.#makeTag("b", "", "step");
       const stage = this.#makeTag("b", this.#stageString, "stage");
       const comm = this.#makeTag("b", step.note || "", "comm");
+      this.#stageObject = stage;
       stepDiv.setAttribute("data-measure", "");
       stepDiv.append(stage, comm);
       this.#container.append(stepDiv);
 
-      this.#stageObject = stage;
-
       // layout HAKC
       await new Promise((r) => requestAnimationFrame(r));
 
-      this.#stageObject.querySelectorAll("[id]").forEach((el) => {
+      for (const el of this.#stageObject.querySelectorAll("[id]")) {
         this.#measureElements(el);
-      });
+      }
 
       let actsResult;
       if (typeof step.acts === "function") {
@@ -262,25 +261,26 @@
           if (actsResult && typeof actsResult.then === "function") {
             await actsResult;
           }
-        } catch (err) {
-          console.warn("Spotter: step.acts error", err);
+        } catch (T) {
+          console.warn("Spotter: step.acts error", T);
         }
       }
 
       const nextStep = this.#makeTag("b", stepDiv.innerHTML, "step");
 
       // remove absorbs from stage
-      nextStep.querySelectorAll("[data-absorb]").forEach((el) => {
-        el.parentNode.insertBefore(el.children[1], el);
+      for (const el of nextStep.querySelectorAll("[data-absorb]")) {
+        while (el.children[1].firstChild) el.parentNode.insertBefore(el.children[1].firstChild, el);
+        // el.parentNode.insertBefore(el.children[1], el);
         el.remove();
-      });
+      }
 
       // remove the API <b>'s
       for (const api of this.#apis) {
-        nextStep.querySelectorAll(`[data-${api}]`).forEach((el) => {
+        for (const el of nextStep.querySelectorAll(`[data-${api}]`)) {
           while (el.firstChild) el.parentNode.insertBefore(el.firstChild, el);
           el.remove();
-        });
+        }
       }
       this.#stageString = nextStep.children[0].innerHTML;
 
@@ -290,51 +290,56 @@
     }
 
     // #region MATHROBATIX
+    pick(id) {
+      return (
+        this.#stageObject?.querySelector(`[id="${CSS.escape(id)}"]`) || null
+      );
+    }
+
     spot(...ids) {
       const unique = [...new Set(ids)];
       this.#targets = unique
-        .map((id) => {
-          return this.#stageObject.querySelector(`[id="${CSS.escape(id)}"]`);
-        })
+        .map((id) => this.pick(id))
         .filter((el) => el !== null);
       return this;
     }
 
     mount(id, html, data) {
       const el = this.#makeTag("b", html, data || null);
-      el.id = id;
-      this.#stageObject.append(el);
+      el.id = CSS.escape(id);
+      this.#stageObject?.append(el);
       this.#measureElements(el);
       return this.spot(el.id);
     }
 
+    dismount() {
+      for (const el of this.#targets) {
+        el.remove();
+      }
+    }
+
     insertBefore(id) {
-      const beef = this.#stageObject.querySelector(`[id="${CSS.escape(id)}"]`);
+      const beef = this.pick(id);
       if (!beef) return this;
-      this.#targets.forEach((el) => {
+      for (const el of this.#targets) {
         el.parentNode.insertBefore(el, beef);
-      });
+      }
     }
 
     insertAfter(id) {
-      const beef = this.#stageObject.querySelector(`[id="${CSS.escape(id)}"]`);
+      const beef = this.pick(id);
       if (!beef) return this;
-      this.#targets.forEach((el) => {
+      for (const el of this.#targets) {
         el.parentNode.insertBefore(el, beef.nextSibling);
-      });
+      }
     }
 
     hide() {
-      this.#targets.forEach((el) => {
+      for (const el of this.#targets) {
         el.style.display = "none";
-      });
+      }
     }
 
-    dismount() {
-      this.#targets.forEach((el) => {
-        el.remove();
-      });
-    }
     // #endregion
 
     // #region WRAP TYPES
@@ -387,16 +392,30 @@
       this.#targets = targets;
       return this;
     }
-    cank(num) {
+    // #endregion
+
+    // #region SVG TYPES
+    #svgWrap(type, data, cssVars) {
       for (const el of this.#targets) {
         el.innerHTML = `
-          <b data-cank="${num | "0"}">
+          <b data-${type}="${data || null}">
             <b>${el.innerHTML}</b>
             ${this.#svgString}
           </b>
         `;
+        if (cssVars) {
+          for (const [key, value] of Object.entries(cssVars)) {
+            el.children[0].style.setProperty(key, value);
+          }
+        }
       }
       return this;
+    }
+    cank(num) {
+      return this.#svgWrap("cank", num || null);
+    }
+    cirk(num) {
+      return this.#svgWrap("cirk", num || null);
     }
     // #endregion
 
@@ -429,19 +448,19 @@
     // #endregion
 
     // #region ABSORB
-    absorb(id, html) {
+    absorb(...ids) {
       const absEl = this.#makeTag("b", "<b></b><b></b>", "absorb");
-      const newEl = this.#makeTag("b", html);
-      newEl.id = id;
       this.#stageObject.insertBefore(absEl, this.#targets[0]);
       this.#targets.forEach((el) => {
         absEl.children[0].append(el);
       });
-      absEl.children[1].append(newEl);
+      for (const id of new Set(ids)) {
+        absEl.children[1].append(this.pick(id));
+      }
 
       this.#measureElements(absEl.children[0], absEl.children[1]);
 
-      return this.spot(newEl.id);
+      return this.spot(...ids);
     }
     // #endregion
 

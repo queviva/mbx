@@ -14,19 +14,32 @@
         justify-content: center;
         padding-bottom: 100vh;
         background-color: #888;
+        --demo-h: 40;
       }
       mathro-batix {
-        display: relative;
+        position: relative;
+        display: inline;
+        min-width: 70%;
+      }
+      [data-logo] {
         width: 70%;
+        padding-top: 5vh;
+        font-family: "Luckiest Guy";
+        font-size: 50px;
+        font-style: normal;
+        line-height: 50px;
+        text-align: center;
+        color: hsl(40, 100%, 85%);
+        -webkit-text-stroke: 2px hsl(var(--demo-h), 80%, 60%);
+        background-color: #111;
       }
     </style>
   </head>
   <body>
-    <mathro-batix id="one" data-mbx='{"color":"220"}'></mathro-batix>
-    <div style="margin:30px; font-size:30px;">
-      and some stuff
-    </div>
-    <mathro-batix id="two" data-mbx='{"color":"40"}'></mathro-batix>
+    <div data-logo>MATHROBATIX</div>
+    <mathro-batix id="one" data-mbx='{"color":"40"}'></mathro-batix>
+    <div style="margin: 30px; font-size: 30px">and some stuff</div>
+    <mathro-batix id="two" data-mbx='{"color":"300"}'></mathro-batix>
     <script id="ROUTINE">
       const routineOne = {
         title: "Quadratic Mania",
@@ -34,7 +47,7 @@
         stage: `
           <b id="T3x2">3x^2</b>
           <b id="T2">+ 2</b>
-          <b id="T7x2">+ 7x^2</b>
+          <b id="T7x2">+ <b id="T777">7x^2</b></b>
           <b id="EQ">=</b>
           <b id="T10">10</b>
         `,
@@ -43,7 +56,7 @@
             note: " how are you ? ",
             acts: (S) => {
               S.spot("EQ", "T10").shrink();
-              S.spot("T7x2").cank("1").spin().viva();
+              S.spot("T7x2").spin().viva();
               S.spot("T7x2").moveBefore("T2").vault();
               S.spot("T2").tuck("0.5em");
               // S.spot("T7x2", "T2", "EQ", "T10").unfurl();
@@ -52,7 +65,8 @@
           {
             note: "will it remain moved?",
             acts: (S) => {
-              S.spot("T3x2").cank("2");
+              S.spot("T3x2").cirk();
+              S.spot("T777").cank("1");
               S.spot("EQ", "T10").dismount();
             },
           },
@@ -74,8 +88,8 @@
         title: "Quadratic Mania",
         intro: "you must solve this equation for x",
         stage: `
-          <b id="T3x2">3x^2</b>
-          <b id="T7x2">+ 7x^2</b>
+          <b id="T3x2">3x^g_2</b>
+          <b id="T7x2">+ 7x^g_2</b>
           <b id="T2">+ 2</b>
           <b id="EQ">=</b>
           <b id="T10">10</b>
@@ -105,7 +119,8 @@
             note: "absorb them",
             acts: (S) => {
               S.spot("P1", "P2").ghost().during(0.4).shrink().during(0.5);
-              S.spot("T3x2", "T7x2").absorb("T10x2", "10x^2").viva();
+              S.mount("T10x2", "10x^g_2");
+              S.spot("T3x2", "T7x2").absorb("T10x2").viva();
               S.spot("T10").cank();
             },
           },
@@ -136,7 +151,7 @@
             acts: (S) => {
               S.spot("T3x2", "T4x", "T1", "EQ", "T0").unfurl();
               S.spot("T0").spin().during(0.9);
-              // S.spot("T3x2").cank();
+              S.spot("T3x2").filter("viva").filterClear().during(0.7);
             },
           },
         ],

@@ -1,4 +1,4 @@
-/* #region mathrobatix */
+/* #region mathro-batix */
 /* CONFIG */
 mathro-batix [data-holder] {
   --animation-start: 50%;
@@ -13,52 +13,103 @@ mathro-batix [data-holder] {
 
 /* LAYOUT */
 mathro-batix [data-holder] {
-  padding-top: 10vh;
   display: inline-flex;
   flex-direction: column;
   width: 100%;
   overflow: visible;
   font-size: 54px;
-  color: var(--main-color);
+  /* color: var(--main-color); */
   background-color: var(--back-color);
+}
+
+/* FONTS */
+@font-face {
+  font-family: "Luckiest Guy";
+  src: url(luckiest.ttf);
 }
 
 /* COLORS */
 mathro-batix [data-holder] {
-  --main-color: hsla(var(--mbx-h), var(--mbx-s), var(--mbx-l), var(--mbx-a));
-
-  --white-color: hsl(var(--mbx-h), var(--mbx-s), calc(2 * var(--mbx-l)));
-
-  --grey-color: hsl(
-    var(--mbx-h),
-    calc(0.1 * var(--mbx-s)),
-    calc(0.8 * var(--mbx-l))
-  );
+  --main-color: hsl(var(--mbx-h), 80%, 50%);
+  --white-color: hsl(var(--mbx-h), 100%, 98%);
+  --grey-color: hsl(var(--mbx-h), 10%, 40%);
+  --inverse-color: hsl(calc(var(--mbx-h) + 180), 80%, 50%);
 }
 
 /* FILTER */
 mathro-batix [data-holder] {
-  --viva-f1: 0 0 3px hsl(calc(var(--mbx-h) + 0), var(--mbx-s), 80%);
-  --viva-f2: 0 0 8px hsl(calc(var(--mbx-h) + 0), var(--mbx-s), 58%);
-  --viva-f3: 0 0 24px hsl(calc(var(--mbx-h) - 0), var(--mbx-s), 55%);
-
+  --viva-f1: 0 0 3px hsl(var(--mbx-h), 90%, 80%);
+  --viva-f2: 0 0 8px hsl(var(--mbx-h), 100%, 58%);
+  --viva-f3: 0 0 24px hsl(var(--mbx-h), 100%, 55%);
   --viva-shadow: var(--viva-f1), var(--viva-f2), var(--viva-f3);
-
   --viva-filter: drop-shadow(var(--viva-f1)) drop-shadow(var(--viva-f2))
     drop-shadow(var(--viva-f3));
 
-  --ghost-shadow: 0 0 0px var(--back-color), 0 0 3px #fff, 0 0 12px #fff;
+  --ghost-f1: 0 0 1px var(--back-color);
+  --ghost-f2: 0 0 3px hsl(var(--mbx-h), 100%, 80%);
+  --ghost-f3: 0 0 12px hsl(var(--mbx-h), 100%, 98%);
+  --ghost-shadow: var(--ghost-f1), var(--ghost-f2), var(--ghost-f3);
+  --ghost-filter: drop-shadow(var(--ghost-f1)) drop-shadow(var(--ghost-f2))
+    drop-shadow(var(--ghost-f3));
 
-  --vapor-shadow:
-    0 0 5px var(--back-color), 0 0 40px var(--main-color), 0 0 40px #fff;
+  --vapor-f1: 0 0 5px var(--back-color);
+  --vapor-f2: 0 0 40px var(--main-color);
+  --vapor-f3: 0 0 41px #fff;
+  --vapor-shadow: var(--vapor-f1), var(--vapor-f2), var(--vapor-f3);
+  --vapor-filter: drop-shadow(var(--vapor-f1)) drop-shadow(var(--vapor-f2))
+    drop-shadow(var(--vapor-f3));
 }
 
 /* SHAPES */
 mathro-batix [data-holder] {
   --cank-00: path("M0 94Q30 40 95 0L100 10Q33 43 10 100Z");
+  --cank-00-A: path("M0 94Q0 94 0 94 L10 100Q10 100 10 100Z");
+  --cank-00-B: path("M0 94Q30 40 95 0L100 10Q33 43 10 100Z");
+
   --cank-01: path("M0 90Q55 55 90 0L100 8Q65 50 10 100Z");
+  --cank-01-A: path("M0 90Q0 90 0 90L10 100Q10 100 10 100Z");
+  --cank-01-B: path("M0 90Q55 55 90 0L100 8Q65 50 10 100Z");
+
   --cank-02: path(
     "M0 100Q30 75 55 30L55 50Q30 80 0 100ZM 100 0Q70 25 50 70L50 50Q70 20 100 0Z"
+  );
+  --cank-02-A: path(
+    "M 0 100 Q 0 100 0 100 L 0 100 Q 0 100 0 100 L 0 100 Q 0 100 0 100 L 0 100 Q 0 100 0 100 Z"
+  );
+  --cank-02-B: path(
+    "M 0 100 Q 30 75 55 30 L 55 30 Q 55 30 55 30 L 50 55.5 Q 50 55.5 50 55.5 L 50 55.5 Q 30 80 0 100 Z"
+  );
+  --cank-02-C: path(
+    "M 0 100 Q 30 75 55 30 L 55 42.5 Q 55 42.5 55 42.5 L 50 70 Q 50 70 50 70 L 50 55.5 Q 30 80 0 100 Z"
+  );
+  --cank-02-D: path(
+    "M 0 100 Q 30 75 55 30 L 55 42.5 Q 71 20 100 0 L 100 0 Q 70 25 50 70 L 50 55.5 Q 30 80 0 100 Z"
+  );
+
+  --curl-00: path(
+    "M0 100 A10 55 0 0 1 10 45 H40 A10 45 0 0 0 50 0A10 45 0 0 0 60 45H90 A10 55 0 0 1 100 100A10 45 0 0 0 90 60 H60 A10 35 0 0 1 50 30 A10 35 0 0 1 40 60 H10 A10 45 0 0 0 0 100Z"
+  );
+  --curl-01: path("M3 100 L0 0 Q50 20 100 0L97 100 L98 20 Q50 15 2 20Z");
+
+  /* "M90 35A40 35 0 0 0 50 0A50 50 0 0 0 0 50A50 50 0 0 0 50 100A50 50 0 0 0 100 50A20 47 0 0 0 80 3A16 47 0 0 1 96 50A41 40 0 0 1 55 90A50 40 0 0 1 5 50A42 42 0 0 1 50 8A40 27 0 0 1 90 35Z" */
+  --cirk-00: path(
+    "M 50.000,5.000 A 45 45 0 0 1 89.452,27.611 A 45 45 0 0 1 71.393,86.583 A 45 45 0 0 1 13.782,79.031 A 45 45 0 0 1 11.548,20.969 A 45 45 0 0 1 33.607,10.417 L 5 50 L 50 95 L 95 50 Z"
+  );
+  --cirk-mask-00: path(
+    "M50 0A50 50 0 0 0 0 50A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0Z"
+  );
+
+  --cirk-01: path(
+    "M25 20A25 30 0 0 0 0 50A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0C-8 2 10 45 15 45C5 20 20 8 50 8A45 42 0 0 1 95 50A45 40 0 0 1 50 90A48 45 0 0 1 2 48A28 28 0 0 1 30 20Z"
+  );
+  --cirk-02: path(
+    "M50 0A50 50 0 0 0 0 50A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0ZM 20 20A33 30 330 0 0 82 80A33 30 330 0 0 20 20Z"
+  );
+  --cirk-03: path(
+    "M5 20Q0 30 0 50A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0C-8 2 10 45 15 45C5 20 20 8 50 8A45 42 0 0 1 95 50A45 40 0 0 1 50 90A48 45 0 0 1 2 45Q2 35 5 20Z"
+  );
+  --cirk-xtra-swoosh: path(
+    "M15 15A10 10 0 0 0 85 85A10 10 0 0 0 15 20A10 10 0 0 0 40 40A10 10 0 0 1 25 20A10 10 0 0 1 80 80A10 10 0 0 1 20 12Z"
   );
 }
 
@@ -105,7 +156,7 @@ svg {
 [data-intro] {
   display: inline-block;
   position: relative;
-  margin-top: 20vh;
+  margin-top: 5vh;
   margin-bottom: 20vh;
   color: var(--grey-color);
   font-style: italic;
@@ -128,6 +179,7 @@ svg {
   align-items: baseline;
   justify-content: center;
   font-family: "Times New Roman", Times, serif;
+  color: var(--main-color);
 }
 [data-step] > :nth-child(2) {
   margin-top: 1.5em;
@@ -142,11 +194,13 @@ svg {
 [data-sup] {
   font-size: 0.55em;
   vertical-align: 70%;
+  line-height: 1;
 }
 [data-sub] {
-  vertical-align: -50%;
+  vertical-align: -0.6em;
   font-size: 0.55em;
   font-style: italic;
+  line-height: 0.5;
 }
 /* #endregion */
 
@@ -481,66 +535,71 @@ svg {
 
 /* #region cank */
 [data-cank] {
-  --cank-path: var(--cank-00);
+  --cank-ani-A: var(--cank-00-A);
+  --cank-ani-B: var(--cank-00-B);
 }
 [data-cank="1"] {
-  --cank-path: var(--cank-01);
+  --cank-ani-A: var(--cank-01-A);
+  --cank-ani-B: var(--cank-01-B);
 }
 [data-cank="2"] {
-  --cank-path: var(--cank-02);
+  --cank-ani-A: var(--cank-02-A);
+  --cank-ani-B: var(--cank-02-B);
 }
 [data-cank] path {
+  /* transform: rotate(40deg); */
+  /* transform-origin: 50% 50%; */
   fill: var(--white-color);
-  d: var(--cank-path);
+  d: var(--cank-ani-A);
   filter: var(--viva-filter);
-}
-[data-cank] svg {
   animation: cank linear both;
   animation-timeline: view();
   animation-range: var(--animation-range);
 }
-/*
-[data-c ank] {
-  --back-mig: var(--cank-00);
-}
-[data-cank]::before {
-  content: "";
-  position: absolute;
-  z-index: 11;
-  left: -5px;
-  height: 100%;
-  width: calc(100% + 10px);
-  background-image: var(--back-mig);
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  overflow: visible;
-  filter: url("#mbx-svg-viva");
-  animation: cank linear both;
-  animation-timeline: view();
-  animation-range: var(--animation-range);
-}
-[data-cank="01"] {
-  --back-mig: var(--cank-01);
-}
-[data-cank="02"] {
-  --back-mig: var(--cank-02);
-}
-[data-cank][data-svgviva]::before {
-  filter: url("#mbx-svg-viva");
-}
-  */
 @keyframes cank {
   0% {
-    left: 50%;
-    top: 50%;
-    width: 0;
-    height: 0;
+    d: var(--cank-ani-A);
   }
   100% {
-    left: -8px;
-    top: 10%;
-    width: calc(100% + 16px);
-    height: 80%;
+    d: var(--cank-ani-B);
+  }
+}
+/* #endregion */
+
+/* #region cirk */
+[data-cirk] {
+  --cirk-path: var(--cirk-00);
+  --cirk-mask: var(--cirk-mask-00);
+}
+[data-cirk="1"] {
+  --cirk-path: var(--cirk-01);
+}
+[data-cirk="2"] {
+  --cirk-path: var(--cirk-02);
+}
+[data-cirk] > path {
+  d: var(--cirk-path);
+  fill: var(--white-color);
+  fill-rule: evenodd;
+  filter: var(--viva-filter);
+  /* animation: cirk linear both; */
+  /* animation-timeline: view(); */
+  /* animation-range: var(--animation-range); */
+}
+[data-cirk] mask > path {
+  d: var(--cirk-mask);
+  stroke: #000;
+  stroke-width: 10px;
+  stroke-dasharray: 320px;
+  stroke-dashoffset: 320px;
+  animation: unmask linear forwards;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+
+@keyframes unmask {
+  to {
+    stroke-dashoffset: 0;
   }
 }
 /* #endregion */
@@ -601,7 +660,7 @@ svg {
 }
 /* #endregion */
 
-/* #region rant */
+/* #region comm */
 [data-comm],
 [data-rant] {
   position: relative;
