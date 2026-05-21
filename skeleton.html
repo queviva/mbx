@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mathro&middot;batix Skeleton</title>
+    <link rel="stylesheet" href="skeleton.css" />
+    <script
+      src="skeleton.js"
+      data-mbx='{"tag":"mathro-batix","fix":"rat"}'
+    ></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 100vh;
+        background-color: #888;
+        font-size: 2rem;
+      }
+      mathro-batix {
+        position: relative;
+        display: inline;
+        min-width: 70%;
+        min-height: 100px;
+        background-color: #505;
+        color: #fff;
+        user-select: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div>MBX SKELETON</div>
+    <mathro-batix id="one"></mathro-batix>
+    <div>and also</div>
+    <mathro-batix id="two" data-rat='{"fix":"cow","color":"40"}'></mathro-batix>
+    <script id="routines">
+      const routineOne = {
+        intro: "Routine ONE",
+        steps: [
+          {
+            note: "first of first",
+            acts: (S) => {},
+          },
+          {
+            note: "second of first",
+            acts: (S) => {},
+          },
+          {
+            note: "third of first",
+          },
+        ],
+      };
+      const routineTwo = {
+        intro: "Routine TWO",
+        steps: [
+          {
+            note: "1st of routine #2",
+            acts: (S) => {},
+          },
+          {
+            note: "2nd of routine #2",
+            acts: (S) => {},
+          },
+          {
+            note: "3rd of routine #2",
+            acts: (S) => {},
+          },
+        ],
+      };
+    </script>
+    <script id="lizzers">
+      const log = console.log;
+      const one = document.getElementById("one");
+      const two = document.getElementById("two");
+      one.addEventListener("rat-ready", (e) => {
+        one.addEventListener("click", (e) => {
+          one.loadRoutine(routineOne);
+        });
+        log(`<id=${e.target.id}> ready`);
+      });
+      two.addEventListener("cow-ready", (e) => {
+        log(`<id=${e.target.id}> ready, calling load`);
+        log(e.detail);
+        two.loadRoutine(routineTwo);
+      });
+      two.addEventListener("cow-step-1-ready", (e) => {
+        log(e);
+      });
+    </script>
+  </body>
+</html>
