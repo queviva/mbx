@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SVG Path Clipping Demo</title>
+    <style>
+      body {
+        background-color: #0d0f12;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      b {
+        position: relative;
+        display: inline-block;
+        font-size: 3rem;
+        padding: 30px 50px;
+      }
+
+      b svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        filter: url(#svg-version-viva);
+      }
+
+      .glowing-path {
+        fill: hsl(300, 100%, 98%);
+
+        /* 1. Define the default layout box behavior for SVGs */
+        clip-path: polygon(50% 50%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%)
+          fill-box;
+
+        /* 2. Run the animation loop */
+        animation: geometricSweep 3s linear infinite;
+      }
+
+      /* 
+  3. Every keyframe must contain exactly 6 coordinate points.
+  The points move along the outer edges to open up a box clockwise.
+*/
+      @keyframes geometricSweep {
+        0% {
+          clip-path: polygon(50% 50%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%)
+            fill-box;
+        }
+        25% {
+          /* Top-right corner opens */
+          clip-path: polygon(
+              50% 50%,
+              50% 0%,
+              100% 0%,
+              100% 0%,
+              100% 0%,
+              100% 0%
+            )
+            fill-box;
+        }
+        50% {
+          /* Bottom-right corner opens */
+          clip-path: polygon(
+              50% 50%,
+              50% 0%,
+              100% 0%,
+              100% 100%,
+              100% 100%,
+              100% 100%
+            )
+            fill-box;
+        }
+        75% {
+          /* Bottom-left corner opens */
+          clip-path: polygon(
+              50% 50%,
+              50% 0%,
+              100% 0%,
+              100% 100%,
+              0% 100%,
+              0% 100%
+            )
+            fill-box;
+        }
+        100% {
+          /* Top-left corner opens to complete the loop */
+          clip-path: polygon(
+              50% 50%,
+              50% 0%,
+              100% 0%,
+              100% 100%,
+              0% 100%,
+              0% 0%
+            )
+            fill-box;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <b>
+      Text Here
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <defs>
+          <filter
+            id="svg-version-viva"
+            x="-100%"
+            y="-100%"
+            width="300%"
+            height="300%"
+          >
+            <!-- First shadow: 3px blur -->
+            <feDropShadow
+              dx="0"
+              dy="0"
+              stdDeviation="1.5"
+              flood-color="hsl(300, 80%, 60%)"
+              result="shadow1"
+            />
+
+            <!-- Second shadow: 8px blur (applied on top of original source graphics) -->
+            <feDropShadow
+              dx="0"
+              dy="0"
+              stdDeviation="4"
+              flood-color="hsl(300, 80%, 38%)"
+              in="SourceGraphic"
+              result="shadow2"
+            />
+
+            <!-- Third shadow: 24px blur -->
+            <feDropShadow
+              dx="0"
+              dy="0"
+              stdDeviation="12"
+              flood-color="hsl(300, 80%, 25%)"
+              in="SourceGraphic"
+              result="shadow3"
+            />
+
+            <!-- Blend all three shadows together with the source graphic -->
+            <feMerge>
+              <feMergeNode in="shadow3" />
+              <feMergeNode in="shadow2" />
+              <feMergeNode in="shadow1" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <clipPath id="sector-clip" clipPathUnits="objectBoundingBox">
+            <polygon points="0 0, 0.5 0, 0.5 0.5, 1 0.5, 1 1, 0 1" />
+          </clipPath>
+        </defs>
+
+        <path
+          class="glowing-path"
+          d="M50 0A50 50 0 0 0 0 50A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0ZM 20 20A33 30 330 0 0 82 80A33 30 330 0 0 20 20Z"
+          fill-rule="evenodd"
+        />
+      </svg>
+    </b>
+  </body>
+</html>

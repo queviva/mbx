@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mathro&middot;batiX Scroll Vault 0.9beta</title>
+    <script src="mathrobatix2.0.js" data-x='{"tag":"mathro-batix"}'></script>
+    <style id="demoStyles">
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 100vh;
+        background-color: #888;
+        --demo-h: 40;
+      }
+      mathro-batix {
+        position: relative;
+        display: inline;
+        min-width: 70%;
+      }
+      [data-logo] {
+        width: 70%;
+        padding-top: 5vh;
+        font-family: "Luckiest Guy";
+        font-size: 50px;
+        font-style: normal;
+        line-height: 50px;
+        text-align: center;
+        color: hsl(40, 100%, 85%);
+        -webkit-text-stroke: 2px hsl(var(--demo-h), 80%, 60%);
+        background-color: #111;
+      }
+    </style>
+  </head>
+  <body>
+    <svg>
+      <filter
+        id="svg-filter-viva"
+        x="-100%"
+        y="-100%"
+        width="300%"
+        height="300%"
+      >
+        <feDropShadow
+          dx="0"
+          dy="0"
+          stdDeviation="1.5"
+          flood-color="hsl(var--mbx-h, 80%, 60%)"
+          result="shadow1"
+        />
+        <feDropShadow
+          dx="0"
+          dy="0"
+          stdDeviation="4"
+          flood-color="hsl(var(--mbx-h), 80%, 38%)"
+          in="SourceGraphic"
+          result="shadow2"
+        />
+        <feDropShadow
+          dx="0"
+          dy="0"
+          stdDeviation="12"
+          flood-color="hsl(var(--mbx-h), 80%, 25%)"
+          in="SourceGraphic"
+          result="shadow3"
+        />
+        <feMerge>
+          <feMergeNode in="shadow3" />
+          <feMergeNode in="shadow2" />
+          <feMergeNode in="shadow1" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </svg>
+    <div data-logo>MATHROBATIX</div>
+    <mathro-batix id="one" data-mbx='{"color":"40"}'></mathro-batix>
+    <div style="margin: 30px; font-size: 30px">and some stuff</div>
+    <mathro-batix id="two" data-mbx='{"color":"300"}'></mathro-batix>
+    <script id="ROUTINE">
+      const routineOne = {
+        title: "Quadratic Mania",
+        intro: "you must solve this equation for x",
+        stage: `
+          <b id="T3x2">3x^2</b>
+          <b id="T2">+ 2</b>
+          <b id="T7x2">+ <b id="T777">7x^2</b></b>
+          <b id="EQ">=</b>
+          <b id="T10">10</b>
+        `,
+        steps: [
+          {
+            note: " how are you ? ",
+            acts: (S) => {
+              S.spot("T2").ghost();
+              S.spot("T3x2").vaporize();
+              S.spot("EQ", "T10").shrink();
+              S.spot("T7x2").moveBefore("T2").vault().viva();
+              S.spot("T2").tuck("0.5em");
+            },
+          },
+          {
+            note: "will it remain moved?",
+            acts: (S) => {
+              S.spot("T3x2").cank();
+              // S.spot("T10").cirk();
+              // S.spot("T777").cank("1");
+              // S.spot("EQ", "T10").dismount();
+            },
+          },
+          {
+            note: "root for the home team",
+            xxxload: `
+            <b id="root" data-root><b>7x^2 </b><b id="T1"> + </b><b id="T2">2x</b><b id="T3"> + </b><b id="T4">3</b></b>
+            <b id="99">= 49</b>
+            `,
+            acts: (S) => {
+              // S.spot("T2").moveBefore("T7x2").viva();
+              // S.spot("root").viva();
+              // S.spot("T1", "T2", "T3", "T4").unfurl();
+            },
+          },
+        ],
+      };
+      const routineTwo = {
+        title: "Quadratic Mania",
+        intro: "you must solve this equation for x",
+        stage: `
+          <b id="T3x2">3x^g_2</b>
+          <b id="T7x2">+ 7x^g_2</b>
+          <b id="T2">+ 2</b>
+          <b id="EQ">=</b>
+          <b id="T10">10</b>
+        `,
+        steps: [
+          {
+            note: `notice the like terms
+              <b>
+                like terms refers to the variable and its
+                exponent being the same - in this case,
+                there is the same variable x with
+                an exponent of g_2 on two different terms;
+                you can combine them by adding the
+                coefficients, three and seven
+              </b>
+            `,
+            acts: (S) => {
+              S.mount("P1", "(").insertBefore("T3x2");
+              S.mount("P2", ")").insertAfter("T7x2");
+              S.spot("P1", "P2").grow().during(0, 0.5);
+              S.spot("T3x2", "T7x2").viva();
+              S.spot("T10").vaporize().shrink().spin("180deg").during(0, 0.3);
+              S.spot("T2").grow();
+            },
+          },
+          {
+            note: "absorb them",
+            acts: (S) => {
+              S.spot("P1", "P2").ghost().during(0.4).shrink().during(0.5);
+              S.mount("T10x2", "10x^g_2");
+              S.spot("T3x2", "T7x2").absorb("T10x2").viva();
+              S.spot("T10").viva().cank();
+            },
+          },
+          {
+            note: "what about this?",
+            acts: (S) => {
+              // S.spot("P1", "P2").dismount();
+              // S.spot("T10x2").vaporize().shrink().during(0.7);
+              // S.spot("T2").filter("ghost").filterClear();
+            },
+          },
+          {
+            note: "does +2 have the ghost from before?",
+            acts: (S) => {
+              // S.spot("T10x2").dismount();
+              // S.spot("T2").filter("");
+            },
+          },
+          {
+            note: "a new floor",
+            load: `
+              <b id="T3x2">3x^2</b>
+              <b id="T4x">+ 4x</b>
+              <b id="T1">+ 1</b>
+              <b id="EQ">=</b>
+              <b id="T0">0</b>
+            `,
+            acts: (S) => {
+              // S.spot("T3x2", "T4x", "T1", "EQ", "T0").unfurl();
+              // S.spot("T0").spin().during(0.9);
+              // S.spot("T3x2").filter("viva").filterClear().during(0.7);
+            },
+          },
+        ],
+      };
+    </script>
+    <script id="LIZZERS">
+      const log = console.log;
+      const one = document.getElementById("one");
+      const two = document.getElementById("two");
+      one.addEventListener("mbx-ready", (e) => {
+        one.loadRoutine(routineOne);
+      });
+      two.addEventListener("mbx-ready", (e) => {
+        two.loadRoutine(routineTwo);
+      });
+      one.addEventListener("mbx-step-ready", (e) => {
+        // console.log(e.detail, "ready");
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mathro&middot;batiX 1.1beta</title>
+    <script
+      src="mathrobatix1.1.js"
+      data-mbx='{"tag":"rat-batix", "fix":"rat"}'
+    ></script>
+    <style id="demoStyles">
+      body {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 100vh;
+        background-color: #888;
+        border: 3px solid pink;
+      }
+
+      rat-batix {
+        display: inline;
+        width: 80%;
+        font-size: 54px;
+        border: 1px solid yellow;
+      }
+
+      @media (orientation: portrait) {
+        rat-batix {
+          font-size: 80px;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <rat-batix id="two" data-rat='{"color":"40"}'></rat-batix>
+    <div>and some other stuff</div>
+    <rat-batix id="one"> what is all this? </rat-batix>
+    <script id="ROUTINE" type="module">
+      const routine = {
+        title: "testing",
+        intro: "you are asked to solve this for x",
+        stage: `
+          <b id="T3x2">3x^2</b>
+          <b id="T7x2">+ 7x^2</b>
+          <b id="EQ">=</b>
+          <b id="T100">100</b>
+        `,
+        steps: [
+          {
+            note: "suck it ",
+            acts: (S) => {
+              S.spot("T7x2").cank("02");
+            },
+          },
+        ],
+      };
+
+      const routineTwo = {
+        intro: "loe it ",
+        stage: `
+          <b id="T5x">5x_i</b>
+          <b id="T3x">+ 3x_i</b>
+          <b> = 2</b>
+        `,
+        steps: [
+          {
+            note: "not much better",
+            acts: (S) => {
+              S.spot("T5x").viva();
+            },
+          },
+        ],
+      };
+
+      const one = document.getElementById("one");
+      const two = document.getElementById("two");
+      one.addEventListener("rat-ready", (e) => {
+        one.loadRoutine(routine);
+        two.loadRoutine(routineTwo);
+      });
+      one.addEventListener("rat-step-ready", (e) => {
+        console.log(e.target.id, "ready");
+      });
+    </script>
+
+  </body>
+</html>

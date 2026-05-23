@@ -1,179 +1,237 @@
-((doc, self) => {
+((doc, script) => {
   // #region UTILS
   const log = console.log;
 
-  const sieve = (target, incoming) => {
-    const src = incoming && typeof incoming === "object" ? incoming : {};
-    return Object.fromEntries(
-      Object.keys(target).map((key) => [
-        key,
-        Object.prototype.hasOwnProperty.call(src, key) ? src[key] : target[key],
-      ]),
-    );
-  };
+  const sieve = (defaults, incoming) => ({
+    ...defaults,
+    ...(incoming && typeof incoming === "object" ? incoming : {}),
+  });
 
   const parseData = (raw) => {
-    if (!raw || typeof raw !== "string") return {};
+    if (typeof raw !== "string") return {};
     try {
-      const trimmed = raw.trim().replace(/\s+/g, " ");
-      return JSON.parse(trimmed);
-    } catch (e) {
+      return JSON.parse(raw.trim().replace(/\s+/g, " "));
+    } catch {
       return {};
     }
   };
 
-  const dispatchReady = (el, type) => {
+  const dispatch = (el, name) => {
     el.parentNode.dispatchEvent(
-      new CustomEvent(`${type || devOpts.fix}-ready`, {
+      new CustomEvent(name, {
         detail: { time: Date.now() },
         bubbles: true,
         composed: true,
       }),
     );
   };
-
   // #endregion
 
   // #region OPTS
-  const defOpts = {
+  const defaults = {
     tag: "mathro-batix",
     fix: "mbx",
     color: 300,
   };
 
-  const devOpts = sieve(
-    defOpts,
-    parseData(Object.entries(self?.dataset || {})[0]?.[1]),
-  );
+  const opts = sieve(defaults, parseData(script?.dataset[defaults.fix]));
   // #endregion
 
   // #region SPOTTER
   class Spotter {
+    // #region PRIVATE FIELDS
     #opts;
     #holder = null;
     #routine = {};
-    #routineCount = 0;
-    #currentStepNumber = 0;
+    #routineNum = 0;
+    #currentStep = 0;
+    #resizeHandler = null;
+    #abortCtrl = null;
+    #supRegex = /([^\s])\^(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g;
+    #subRegex = /([^\s])\_(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g;
+    #apis = [
+      "viva",
+      "grow",
+      "shrink",
+      "vaporize",
+      "spin",
+      "cank",
+      "vault",
+      "tuck",
+      "filter-clear",
+      "move",
+    ];
+    #allowed = new Set(["id"]);
+    // #endregion
 
-    constructor(holder, opts = {}) {
+    constructor(holder, opts) {
       this.#holder = holder;
-      this.#opts = { ...opts };
-      // !!! RESIZE BUG HAKC !!!
-      window.addEventListener("resize", (e) => {
-        this.loadRoutine(this.#routine);
-      });
+      this.#opts = opts;
+
+      this.#resizeHandler = () => this.loadRoutine(this.#routine);
+      window.addEventListener("resize", this.#resizeHandler);
     }
 
+    // #region PRIVATE METHS
     #svgString() {
-      const UUID = crypto.randomUUID();
+      const id = `${this.#opts.fix}-${crypto.randomUUID()}`;
       return `
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <mask id="${UUID}"><rect width="100" height="100" fill="#000"/><path/></mask>
-        <path mask="url(#${UUID})"/>
-      </svg>
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <mask id="${id}"><rect width="100" height="100" fill="#000"/><path/></mask>
+          <path mask="url(#${id})"/>
+        </svg>
       `;
     }
 
-    async loadRoutine(routine = {}) {
-      this.#holder.replaceChildren();
-      this.#routine = routine;
-      const currentRoutineNumber = ++this.#routineCount;
-      this.#currentStepNumber = 0;
+    #createStepHTML(step) {
+      const el = document.createElement("b");
+      el.setAttribute("data-comm", "");
+      el.innerHTML = step?.note || "";
+      el.insertAdjacentHTML("afterbegin", this.#svgString());
+      return el;
+    }
 
-      if (routine.intro)
-        this.#holder.insertAdjacentHTML("afterBegin", routine.intro);
+    async #runActs(step, el, routineNum, signal) {
+      if (signal?.aborted || routineNum !== this.#routineNum) return false;
+      if (typeof step.acts !== "function") return true;
 
-      for (let step of routine.steps || []) {
-        if (currentRoutineNumber !== this.#routineCount) break;
-        const ok = await this.#processStep(
-          step,
-          currentRoutineNumber,
-          this.#currentStepNumber,
-        );
-        if (!ok) break;
+      try {
+        const api = this.#makeAPI(el, routineNum, signal);
+        const result = step.acts(api, signal);
+        if (result?.then) await result;
+        return true;
+      } catch {
+        return false;
       }
     }
 
-    async #processStep(step, routineNumber, stepNumber) {
-      await new Promise((r) => setTimeout(r, 1000));
+    #finalize(el, routineNum, stepNum, signal) {
+      if (signal?.aborted || routineNum !== this.#routineNum) return false;
 
-      const stuff = document.createElement("b");
-      stuff.setAttribute("data-comm", "");
-      stuff.innerHTML = step.note || "";
-      stuff.insertAdjacentHTML("afterBegin", this.#svgString());
-
-      if (routineNumber === this.#routineCount) {
-        this.#holder.append(stuff);
-        dispatchReady(this.#holder, `${this.#opts.fix}-step-${stepNumber}`);
-        ++this.#currentStepNumber;
-      } else {
-        log(`killed ${stepNumber}`);
-        return false;
-      }
+      this.#holder.append(el);
+      dispatch(this.#holder, `${this.#opts.fix}-step-${stepNum}-ready`);
+      this.#currentStep++;
       return true;
+    }
+    // #endregion
+
+    async #processStep(step, routineNum, signal) {
+      if (signal?.aborted || routineNum !== this.#routineNum) return false;
+
+      // TEST STALL
+      await new Promise((r) => setTimeout(r, 800));
+
+      const el = this.#createStepHTML(step);
+      const acted = await this.#runActs(step, el, routineNum, signal);
+      if (!acted) return false;
+
+      return this.#finalize(el, routineNum, this.#currentStep, signal);
+    }
+
+    async loadRoutine(routine = {}) {
+      if (this.#abortCtrl) this.#abortCtrl.abort();
+      this.#abortCtrl = new AbortController();
+
+      this.#holder.replaceChildren();
+      this.#routine = routine;
+      const routineNum = ++this.#routineNum;
+      this.#currentStep = 0;
+
+      if (routine.intro) {
+        this.#holder.insertAdjacentHTML("afterbegin", routine.intro);
+      }
+
+      for (const step of routine.steps || []) {
+        if (routineNum !== this.#routineNum) break;
+        const success = await this.#processStep(
+          step,
+          routineNum,
+          this.#abortCtrl.signal,
+        );
+        if (!success) break;
+      }
+    }
+
+    #makeAPI(el, routineNum, signal) {
+      const spotter = this;
+      const api = {
+        makeNote: (txt) => {
+          console.log("[makeNote]", txt);
+          return api;
+        },
+        changeHTML: (html) => {
+          el.innerHTML = html;
+          return api;
+        },
+        isAlive: () => routineNum === spotter.#routineNum && !signal?.aborted,
+      };
+      return api;
     }
 
     disconnect() {
-      // cleanup
+      ++this.#routineNum;
+      this.#abortCtrl?.abort();
+      window.removeEventListener("resize", this.#resizeHandler);
+      this.#holder?.replaceChildren();
+
+      this.#holder = null;
+      this.#abortCtrl = null;
+      this.#resizeHandler = null;
+      this.#routine = {};
     }
   }
   // #endregion
 
   // #region MBX
   class MBX extends HTMLElement {
-    #ID;
-    #tagOpts;
     #spotter;
-    #holder;
+    #opts;
 
     constructor() {
       super();
-      this.#tagOpts = { ...devOpts };
-      this.#spotter = null;
-      this.#holder = null;
     }
 
-    async connectedCallback() {
-      await new Promise((r) => setTimeout(r, 500));
+    connectedCallback() {
+      this.#opts = sieve(opts, parseData(this.dataset[opts.fix]));
 
-      this.#tagOpts = sieve(
-        this.#tagOpts,
-        parseData(this.dataset[devOpts.fix]),
-      );
+      this.innerHTML = `<b data-holder style="--${opts.fix}-h:${this.#opts.color}"></b>`;
 
-      this.innerHTML = "";
+      this.#spotter = new Spotter(this.children[0], this.#opts);
 
-      const holder = document.createElement("b");
-      holder.setAttribute("data-holder", "");
-      holder.style.setProperty("--mbx-h", this.#tagOpts.color);
-      this.append(holder);
-      this.#holder = holder;
-
-      this.#spotter = new Spotter(this.#holder, this.#tagOpts);
-
-      dispatchReady(this.#holder, this.#tagOpts.fix);
+      dispatch(this.children[0], `${this.#opts.fix}-ready`);
     }
 
     disconnectedCallback() {
-      if (this.#spotter?.disconnect) this.#spotter.disconnect();
+      this.#spotter?.disconnect();
       this.#spotter = null;
     }
 
-    loadRoutine(routine = {}) {
-      this.#spotter.loadRoutine(routine);
+    loadRoutine(routine) {
+      this.#spotter?.loadRoutine(routine);
     }
   }
   // #endregion
 
   // #region INIT
   const boot = async () => {
-    if (!customElements.get(devOpts.tag)) {
-      customElements.define(devOpts.tag, MBX);
+    // INJECT CSS
+    const rez = await fetch("skeleton.css");
+    const CSSText = await rez.text();
+    const styleTag = document.createElement("style");
+    styleTag.textContent = CSSText.replaceAll(
+      defaults.tag,
+      opts.tag,
+    ).replaceAll(defaults.fix, opts.fix);
+    document.head.appendChild(styleTag); // No await needed
+
+    // REGISTER TAG
+    if (!customElements.get(opts.tag)) {
+      customElements.define(opts.tag, MBX);
     }
   };
 
-  document.readyState === "loading"
-    ? document.addEventListener("DOMContentLoaded", boot)
+  doc.readyState === "loading"
+    ? doc.addEventListener("DOMContentLoaded", boot)
     : boot();
   // #endregion
 })(document, document.currentScript);

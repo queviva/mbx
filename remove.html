@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Slash Overlay Demo</title>
+    <style>
+      :root {
+        --h: 300; /* default hue */
+        --s: 100%;
+        --viva-f1: 0 0 3px hsl(calc(var(--h) + 0), var(--s), 80%);
+        --viva-f2: 0 0 8px hsl(calc(var(--h) + 0), var(--s), 58%);
+        --viva-f3: 0 0 24px hsl(calc(var(--h) - 0), var(--s), 55%);
+
+        --viva-shadow: var(--viva-f1), var(--viva-f2), var(--viva-f3);
+
+        --viva-filter: drop-shadow(var(--viva-f1)) drop-shadow(var(--viva-f2))
+          drop-shadow(var(--viva-f3));
+      }
+
+      body {
+        font-family: "Times New Roman", Times, serif;
+        padding: 2rem;
+        background: #111;
+        color: #eee;
+      }
+
+      .controls {
+        margin-bottom: 1rem;
+        color: #ddd;
+      }
+
+      label {
+        font-size: 0.9rem;
+        margin-right: 0.5rem;
+      }
+
+      /* wrapper to hold b and overlay */
+      .root-wrap {
+        display: inline-block;
+        position: relative;
+      }
+
+      [data-toot] {
+        position: relative;
+        display: inline-block;
+        padding: 0.2em 0.4em;
+        font-size: 48px;
+        line-height: 1;
+        cursor: pointer;
+        --color: hsl(var(--h) 80% 60%);
+        color: var(--color);
+        text-decoration: none;
+      }
+      [data-root] {
+        position: relative;
+        display: inline-block;
+        padding: 0.2em 0.4em;
+        font-size: 48px;
+        line-height: 1;
+        cursor: pointer;
+        --color: hsl(var(--h) 80% 60%);
+        color: var(--color);
+        text-decoration: none;
+      }
+
+      [data-root].viva {
+        --color: hsl(var(--h) 100% 95%);
+        text-shadow: var(--viva-shadow);
+      }
+      /* overlay svg sits above the text */
+      svg.overlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 2;
+        overflow: visible;
+        filter: var(--viva-filter);
+      }
+
+      /* default hidden */
+      .overlay-hidden {
+        display: none;
+      }
+
+      svg .slash {
+        stroke: none;
+        fill: var(--color);
+      }
+
+      /* Small helpers */
+      .hint {
+        font-size: 0.85rem;
+        color: #bbb;
+        margin-top: 0.5rem;
+      }
+      input[type="range"] {
+        vertical-align: middle;
+      }
+
+      /* ensure the svg remains on top visually while letting wrapper filters work if applied */
+      .root-wrap.filter-on {
+        filter: none;
+      } /* placeholder if needed */
+    </style>
+  </head>
+  <body>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 100 100"
+      width="200"
+      height="200"
+      style="
+      overflow: visible;
+      "
+    >
+    <rect height="100" width="100" fill="#eee"/>
+      <path
+        id="animPath"
+        fill="green"
+        stroke="none"
+        d="
+        "
+      >
+        <animate
+          attributeName="d"
+          dur="0.5s"
+          repeatCount="indefinite"
+          fill="freeze"
+          keyTimes="0;0.45;0.55;1"
+          values="
+
+M 0 100 Q 0 100 0 100 L 0 100 Q 0 100 0 100 L 0 100 Q 0 100 0 100 L 0 100 Q 0 100 0 100 Z;
+M 0 100 Q 30 75 55 30 L 55 30 Q 55 30 55 30 L 50 55.5 Q 50 55.5 50 55.5 L 50 55.5 Q 30 80 0 100 Z;
+M 0 100 Q 30 75 55 30 L 55 42.5 Q 55 42.5 55 42.5 L 50 70 Q 50 70 50 70 L 50 55.5 Q 30 80 0 100 Z;
+M 0 100 Q 30 75 55 30 L 55 42.5 Q 71 20 100 0 L 100 0 Q 70 25 50 70 L 50 55.5 Q 30 80 0 100 Z "
+        />
+      </path>
+         <path
+        id="animPath"
+        fill="orange"
+        fill-opacity="0.5"
+        stroke="none"
+        d="
+    
+M0 100
+Q30 75 55 30
+L55 42.5
+Q 71 20 100 0
+Q 70 25 50 70
+L 50 55.5
+Q30 80 0 100
+Z
+        "
+      />
+    
+    </svg>
+
+    <div class="controls">
+      <label for="hue">Hue:</label>
+      <input id="hue" type="range" min="0" max="360" value="200" />
+      <span id="hueVal">200</span>
+    </div>
+
+    <p>
+      Click the text to toggle the slash overlay. Change the hue to recolor
+      text, shadows, and overlay.
+    </p>
+
+    <!-- wrapper containing the b and overlay svg -->
+    <span class="root-wrap">
+      <b data-root id="target" contenteditable="true"> cancelled </b>
+      <b data-toot>+ 3x<sup>2</sup></b>
+
+      <!-- SVG overlay; initial viewBox is 0 0 100 100 and we'll scale to element size -->
+      <svg
+        class="overlay overlay-hidden"
+        id="overlaySvg"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <g id="slashGroup">
+          <path
+            class="slash"
+            d="M0 100Q30 75 55 30L55 50Q30 80 0 100ZM 100 0Q70 25 50 70L50 50Q70 20 100 0Z"
+          />
+        </g>
+      </svg>
+    </span>
+
+    <div class="hint">
+      Text uses <code>text-shadow</code>; svg overlay uses <code>filter</code>.
+    </div>
+
+    <script>
+      (function () {
+        const hueEl = document.getElementById("hue");
+        const hueVal = document.getElementById("hueVal");
+        const target = document.getElementById("target");
+        const overlaySvg = document.getElementById("overlaySvg");
+        // const overlayGroup = document.getElementById("slashGroup");
+        const wrap = target.parentElement;
+
+        // set initial --h
+        function setHue(h) {
+          document.documentElement.style.setProperty("--h", h);
+          hueVal.textContent = h;
+          // compute current color in computed rgb so we can set feFlood colors
+          // Update SVG stroke to match CSS color variable (use computedColor), and also update stroke-opacity if needed
+          overlaySvg.style.setProperty("fill", "hsl(var(--h) 100% 95%)");
+        }
+
+        // Toggle overlay visibility and size it to the <b>
+        function toggleOverlay() {
+          const hidden = overlaySvg.classList.toggle("overlay-hidden");
+          if (!hidden) {
+            //positionOverlay();
+          }
+          target.classList.toggle("viva");
+        }
+
+        function positionOverlay() {
+          // compute size of target and set overlay svg size via CSS to match
+          const rect = target.getBoundingClientRect();
+          // set overlay SVG to cover the inline-block b by using inline styles on the svg (percentage already 100% but ensure wrapper fits)
+          // The wrapper is inline-block so overlay 100%/100% fits; ensure wrapper sizing equals target sizing:
+          wrap.style.width = rect.width + "px";
+          wrap.style.height = rect.height + "px";
+          // ensure svg viewBox covers path coordinate system (we used 0 0 100 100 already)
+          // If you want the path to align differently, you can transform the group
+        }
+
+        // Sync function for color & filter when hue changes or on load
+        function syncAll() {
+          setHue(hueEl.value);
+        }
+
+        // Event listeners
+        target.addEventListener("click", function () {
+          toggleOverlay();
+        });
+        hueEl.addEventListener("input", function (e) {
+          document.documentElement.style.setProperty("--h", e.target.value);
+          syncAll();
+        });
+
+        // Keep overlay sized when fonts/layout change
+        const ro = new ResizeObserver(() => {
+          //if (!overlaySvg.classList.contains("overlay-hidden"))
+          //positionOverlay();
+        });
+        ro.observe(target);
+
+        // initial setup
+        syncAll();
+
+        // Expose a quick resize on window to keep things tidy
+        window.addEventListener("resize", () => {
+          if (!overlaySvg.classList.contains("overlay-hidden"))
+            //positionOverlay();
+            // recompute color too (if inherited from elsewhere)
+            syncAll();
+        });
+      })();
+    </script>
+  </body>
+</html>

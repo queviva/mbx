@@ -1,4 +1,5 @@
 ((doc, self) => {
+
   // #region UTILS
   const log = console.log;
 
@@ -44,9 +45,9 @@
   // #region SPOTTER
   class Spotter {
     // #region PRIVATE FIELDS
-    #spotterCount = 0;
+    #holder;
     #routine = {};
-    #container;
+    #routineCount = 0;
     #opts = {};
     #supRegex = /([^\s])\^(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g;
     #subRegex = /([^\s])\_(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g;
@@ -77,9 +78,8 @@
     #resizeTimer = null;
     // #endregion
 
-    constructor(container, opts = {}) {
-      this.#spotterCount++;
-      this.#container = container;
+    constructor(holder, opts = {}) {
+      this.#holder = holder;
       this.#opts = opts;
 
       // !!! HAKC !!!
@@ -213,14 +213,15 @@
 
     async loadRoutine(routine = {}) {
       // zero out
+      this.#holder.replaceChildren();
       this.#routine = routine;
-      this.#container.replaceChildren();
+      this.#routineCount++;
       this.#stepCount = 0;
       this.#targets = new Set();
 
       // show any intro
       if (routine.intro) {
-        this.#container.append(
+        this.#holder.append(
           this.#sanitizeHTML(`<b data-intro>${routine.intro}</b>`),
         );
       }
@@ -228,14 +229,14 @@
       this.#stageString = routine.stage || "";
 
       for (let step of routine.steps || []) {
-        await this.#processStep(step);
+        await this.#processStep(step, );
       }
     }
 
     async #processStep(step) {
       // await new Promise((r) => setTimeout(r, 1000));
       this.#stepCount++;
-      const stepID = `${this.#container.parentNode.id}-${devOpts.fix}-s${this.#stepCount}`;
+      const stepID = `${this.#holder.parentNode.id}-${devOpts.fix}-s${this.#stepCount}`;
 
       if (step.load) this.#stageString = step.load;
 
@@ -245,7 +246,7 @@
       this.#stageObject = stage;
       stepDiv.setAttribute("data-measure", "");
       stepDiv.append(stage, comm);
-      this.#container.append(stepDiv);
+      this.#holder.append(stepDiv);
 
       // layout HAKC
       await new Promise((r) => requestAnimationFrame(r));

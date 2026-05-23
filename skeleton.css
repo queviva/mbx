@@ -1,7 +1,13 @@
+/* #region HOLDER */
+/* CONFIG */
 mathro-batix [data-holder] {
   --mbx-h: 300;
   --main-color: hsl(var(--mbx-h), 80%, 40%);
   --white-color: hsl(var(--mbx-h), 100%, 90%);
+}
+
+/* LAYOUT */
+mathro-batix [data-holder] {
   position: relative;
   display: inline-flex;
   flex-direction: column;
@@ -12,9 +18,22 @@ mathro-batix [data-holder] {
 
 /* SHAPES */
 mathro-batix [data-holder] {
+  --curl-00: path(
+    "M0 100 A10 55 0 0 1 10 45 H40 A10 45 0 0 0 50 0A10 45 0 0 0 60 45H90 A10 55 0 0 1 100 100A10 45 0 0 0 90 60 H60 A10 35 0 0 1 50 30 A10 35 0 0 1 40 60 H10 A10 45 0 0 0 0 100Z"
+  );
+
+  --curl-mask-00: path(
+    "M100 100 A10 45 0 0 0 90 60 H60 A10 35 0 0 1 50 30 A10 35 0 0 1 40 60 H10 A10 45 0 0 0 0 100Z"
+  );
+
   --cirk-02: path(
+    "M25 20A25 30 0 0 0 0 50A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0C-8 2 10 45 15 45C5 20 20 8 50 8A45 42 0 0 1 95 50A45 40 0 0 1 50 90A48 45 0 0 1 2 48A28 28 0 0 1 30 20Z"
+  );
+
+  --cirk-00: path(
     "M50 0A50 50 0 0 0 0 50A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0ZM 20 20A33 30 330 0 0 82 80A33 30 330 0 0 20 20Z"
   );
+
   --cirk-mask-00: path(
     "M50 0A50 50 0 0 0 0 50A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0Z"
   );
@@ -22,13 +41,14 @@ mathro-batix [data-holder] {
 
 /* FILTERS */
 mathro-batix [data-holder] {
-  --viva-f1: 0 0 3px hsl(var(--mbx-h), 90%, 80%);
-  --viva-f2: 0 0 8px hsl(var(--mbx-h), 100%, 58%);
-  --viva-f3: 0 0 24px hsl(var(--mbx-h), 100%, 55%);
+  --viva-f1: 0 0 1px hsl(var(--mbx-h), 90%, 80%);
+  --viva-f2: 0 0 2px hsl(var(--mbx-h), 100%, 58%);
+  --viva-f3: 0 0 3px hsl(var(--mbx-h), 100%, 55%);
   --viva-shadow: var(--viva-f1), var(--viva-f2), var(--viva-f3);
   --viva-filter: drop-shadow(var(--viva-f1)) drop-shadow(var(--viva-f2))
     drop-shadow(var(--viva-f3));
 }
+/* #endregion */
 
 /* #region batix */
 b {
@@ -68,7 +88,7 @@ svg {
   overflow: visible;
 }
 svg > path {
-  d: var(--cirk-02);
+  d: var(--cirk-00);
   fill-rule: evenodd;
   fill: var(--white-color);
   filter: var(--viva-filter);
@@ -77,7 +97,7 @@ svg > mask > path {
   d: var(--cirk-mask-00);
   fill: none;
   stroke: #fff;
-  stroke-width: 80px;
+  stroke-width: 40px;
   stroke-dasharray: 320px;
   stroke-dashoffset: 320px;
   animation: unmask linear forwards;

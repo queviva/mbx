@@ -1,0 +1,29 @@
+body {
+  background-color: #111;
+}
+mathro-batix {
+  --nose-h: 220;
+  --nose-s: 100%;
+  --nose-l: 50%;
+  --nose-a: 1;
+  --main-color: hsl(var(--nose-h), var(--nose-s), var(--nose-l));
+  color: blue;
+}
+[data-cank] {
+  --cank-00: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 94Q30 40 95 0L100 10Q33 43 10 100Z'/%3E%3C/svg%3E");
+  --cank-01: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 90Q55 55 90 0L100 8Q65 50 10 100Z'/%3E%3C/svg%3E");
+  --cank-02: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none' %3E%3Cpath d='M0 100Q30 75 55 30L55 50Q30 80 0 100ZM 100 0Q70 25 50 70L50 50Q70 20 100 0Z'/%3E%3C/svg%3E");
+  --back-mig: var(--cank-00);
+}
+[data-cank]::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  height: 100%;
+  width: calc(100% + 10px);
+  background-image: var(--back-mig);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  overflow: visible;
+  filter: url("#svgviva");
+}
