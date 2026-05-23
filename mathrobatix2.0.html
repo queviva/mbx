@@ -95,7 +95,7 @@
             note: " how are you ? ",
             acts: (S) => {
               S.spot("T2").ghost();
-              S.spot("T3x2").vaporize();
+              S.spot("T3x2").vaporize().shrink();
               S.spot("EQ", "T10").shrink();
               S.spot("T7x2").moveBefore("T2").vault().viva();
               S.spot("T2").tuck("0.5em");
@@ -105,21 +105,21 @@
             note: "will it remain moved?",
             acts: (S) => {
               S.spot("T3x2").cank();
-              // S.spot("T10").cirk();
+              S.spot("T10").filter("viva");
               // S.spot("T777").cank("1");
               // S.spot("EQ", "T10").dismount();
             },
           },
           {
             note: "root for the home team",
-            xxxload: `
+            load: `
             <b id="root" data-root><b>7x^2 </b><b id="T1"> + </b><b id="T2">2x</b><b id="T3"> + </b><b id="T4">3</b></b>
             <b id="99">= 49</b>
             `,
             acts: (S) => {
               // S.spot("T2").moveBefore("T7x2").viva();
               // S.spot("root").viva();
-              // S.spot("T1", "T2", "T3", "T4").unfurl();
+              S.spot("T1", "T2", "T3", "T4").unfurl();
             },
           },
         ],
@@ -167,16 +167,17 @@
           {
             note: "what about this?",
             acts: (S) => {
-              // S.spot("P1", "P2").dismount();
-              // S.spot("T10x2").vaporize().shrink().during(0.7);
-              // S.spot("T2").filter("ghost").filterClear();
+              S.spot("P1", "P2").dismount();
+              S.spot("T10x2").vaporize().shrink().during(0.7);
+              S.spot("T2").filter("ghost").filterClear();
             },
           },
           {
             note: "does +2 have the ghost from before?",
             acts: (S) => {
-              // S.spot("T10x2").dismount();
-              // S.spot("T2").filter("");
+              S.spot("T10x2").dismount();
+              S.spot("T2").filter("");
+              S.spot("T10").filter("viva");
             },
           },
           {
@@ -189,9 +190,9 @@
               <b id="T0">0</b>
             `,
             acts: (S) => {
-              // S.spot("T3x2", "T4x", "T1", "EQ", "T0").unfurl();
-              // S.spot("T0").spin().during(0.9);
-              // S.spot("T3x2").filter("viva").filterClear().during(0.7);
+              S.spot("T3x2", "T4x", "T1", "EQ", "T0").unfurl();
+              S.spot("T0").spin().during(0.9);
+              S.spot("T3x2").filter("viva").filterClear().during(0.7);
             },
           },
         ],

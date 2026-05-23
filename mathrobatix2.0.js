@@ -81,7 +81,6 @@
       this.#stageObject = stage;
       stepTag.setAttribute("data-measure", "");
       stepTag.append(stage, comm);
-      this.#holder.append(stepTag);
       return stepTag;
     }
 
@@ -177,6 +176,23 @@
       }
     }
 
+    #removeAborbs(step) {
+      for (const el of step.querySelectorAll("[data-absorb]")) {
+        while (el.children[1].firstChild)
+          el.parentNode.insertBefore(el.children[1].firstChild, el);
+        el.remove();
+      }
+    }
+
+    #removeAPIs(step) {
+      for (const api of this.#apis) {
+        for (const el of step.querySelectorAll(`[data-${api}]`)) {
+          while (el.firstChild) el.parentNode.insertBefore(el.firstChild, el);
+          el.remove();
+        }
+      }
+    }
+
     #namespaceIDs(stage, stepNum) {
       for (const el of stage.querySelectorAll("[id]")) {
         el.id = `${this.#opts.fix}-step-${stepNum}-${el.id}`;
@@ -203,7 +219,11 @@
       // make the step tags
       const stepTag = this.#createStepTag(step);
 
-      // layout HAKC
+      // should we keep going and add the tag?
+      if (signal?.aborted || routineNum !== this.#routineNum) return false;
+      this.#holder.append(stepTag);
+
+      // !!! layout HAKC - must be here !!!
       await new Promise((r) => requestAnimationFrame(r));
 
       // set measurements
@@ -211,41 +231,33 @@
 
       // try to run the actions
       const acted = await this.#runActs(step, stepTag, routineNum, signal);
+
+      // check if that werked
       if (!acted) return false;
 
       // copy the step tags for next time
       const nextStep = this.#makeTag("b", stepTag.innerHTML, "step");
 
       // remove absorbs from stage
-      for (const el of nextStep.querySelectorAll("[data-absorb]")) {
-        while (el.children[1].firstChild)
-          el.parentNode.insertBefore(el.children[1].firstChild, el);
-        // el.parentNode.insertBefore(el.children[1], el);
-        el.remove();
-      }
+      this.#removeAborbs(nextStep);
 
       // remove the API <b>'s
-      for (const api of this.#apis) {
-        for (const el of nextStep.querySelectorAll(`[data-${api}]`)) {
-          while (el.firstChild) el.parentNode.insertBefore(el.firstChild, el);
-          el.remove();
-        }
-      }
+      this.#removeAPIs(nextStep);
 
       // reset the stage string to trimmed tags
       this.#stageString = nextStep.children[0].innerHTML;
 
-      // remove, or unique, IDs
-      this.#removeIDs(stepTag.children[0]); // this.#namespaceIDs(stepTag.children[0], this.#currentStep);
+      // remove IDs [or make namespaceIDs()]
+      this.#removeIDs(stepTag.children[0]);
+
+      // should this still BE finalized?
+      if (signal?.aborted || routineNum !== this.#routineNum) {
+        stepTag.remove();
+        return false;
+      }
 
       // the tag is done with measurements
       stepTag.removeAttribute("data-measure");
-
-      // should this still BE finalized?
-      if (signal?.aborted || routineNum !== this.#routineNum) return false;
-
-      // add the step tags
-      this.#holder.append(stepTag);
 
       // let em know you're rockin
       dispatch(
@@ -360,7 +372,6 @@
         }
         return api;
       };
-
       const api = {
         pick: (id) => {
           return (
@@ -388,7 +399,6 @@
           }
         },
         insertBefore: (id) => {
-          log("inserting before", id);
           const beef = api.pick(id);
           if (!beef) return api;
           for (const el of spotter.#targets) {
@@ -461,15 +471,14 @@
           return api.spot(...ids);
         },
         unfurl: () => {
-          const targets = this.#targets;
+          const targets = spotter.#targets;
           const total = targets.length;
           for (const [i, el] of targets.entries()) {
-            this.spot(el.id).#wrap("grow", {
-              "--ani-start": i / total,
-            });
+            api.spot(el.id);
+            wrap("grow", { "--ani-start": i / total });
           }
-          this.#targets = targets;
-          return this;
+          spotter.#targets = targets;
+          return api;
         },
 
         isAlive: () => routineNum === spotter.#routineNum && !signal?.aborted,
@@ -502,11 +511,8 @@
 
     #svgString() {
       const filterID = this.#opts.fix + "-" + crypto.randomUUID();
-      return (
-        `
-        <svg height="0" width="0" style="
-          --hue: ${this.#opts.color};
-        ">
+      return `
+        <svg height="0" width="0" style="--hue:${this.#opts.color};">
           <filter id="${filterID}" x="-200%" y="-200%" height="900%" width="900%">
             <feGaussianBlur stdDeviation="0.3" result="B0" />
             <feFlood flood-color="hsl(var(--hue), 80%, 90%)" result="F0" />
@@ -532,14 +538,8 @@
             </feMerge>
           </filter>
         </svg>
-      ` +
-        `
-        <b data-holder style="
-          --${this.#opts.fix}-h:${this.#opts.color};
-          --viva-filterID: url(#${filterID});
-        "></b>
-      `
-      );
+        <b data-holder style="--${this.#opts.fix}-h:${this.#opts.color}; --viva-filterID: url(#${filterID}); "></b>
+      `;
     }
 
     connectedCallback() {
