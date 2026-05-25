@@ -331,22 +331,22 @@ svg {
   display: inline-block;
   margin: 0;
   padding: 0;
+  width: 0px;
   transform-origin: 0% 50%;
-  will-change: transform, width;
+  transform: scale(0);
+  will-change: margin, transform, width, opacity;
   animation: grow linear both;
   animation-timeline: view();
   animation-range: var(--animation-range);
 }
 @keyframes grow {
   from {
-    margin-left: -0.25em;
     margin-right: -0.25em;
     transform: scale(0);
     width: 0px;
     opacity: 0;
   }
   to {
-    margin-left: 0em;
     margin-right: 0em;
     transform: scale(var(--grow-val, 1));
     width: var(--mbx-width);
@@ -536,42 +536,45 @@ svg {
 
 /* #region cank */
 [data-cank] {
-  --cank-ani-A: var(--cank-00-A);
-  --cank-ani-B: var(--cank-00-B);
+  --cank-path: var(--cank-00);
+  --cank-clip-A: path("M-50 150V150H-50V150Z");
+  --cank-clip-B: path("M-50 150V-50H150V150Z");
+  --cank-rotate: 0deg;
 }
 [data-cank="1"] {
-  --cank-ani-A: var(--cank-01-A);
-  --cank-ani-B: var(--cank-01-B);
+  --cank-path: var(--cank-01);
 }
 [data-cank="2"] {
-  --cank-ani-A: var(--cank-02-A);
-  --cank-ani-B: var(--cank-02-B);
+  --cank-path: var(--cank-02);
+}
+[data-cank] > svg {
+  filter: var(--viva-filter);
 }
 [data-cank] > svg > path {
-  /* transform: rotate(40deg); */
-  /* transform-origin: 50% 50%; */
+  transform: rotate(var(--cank-rotate, 0deg));
+  transform-origin: 50% 50%;
   fill: var(--white-color);
-  d: var(--cank-ani-A);
-  filter: var(--viva-filterID);
+  d: var(--cank-path);
+}
+[data-cank] clipPath > path {
+  d: var(--cank-clip-A);
   animation: mbx-cank linear both;
   animation-timeline: view();
   animation-range: var(--animation-range);
 }
 @keyframes mbx-cank {
-  0% {
-    d: var(--cank-ani-A);
+  from {
+    d: var(--cank-clip-A);
   }
-  100% {
-    d: var(--cank-ani-B);
+  to {
+    d: var(--cank-clip-B);
   }
 }
 /* #endregion */
 
 /* #region cirk */
 [data-cirk] {
-  /* --cirk-path: var(--cirk-00); */
-  --cirk-path: var(--circle-loop);
-  --cirk-clip: var(--cirk-clip-00);
+  --cirk-path: var(--cirk-00);
 }
 [data-cirk="1"] {
   --cirk-path: var(--cirk-01);
@@ -579,35 +582,53 @@ svg {
 [data-cirk="2"] {
   --cirk-path: var(--cirk-02);
 }
+[data-cirk] > svg {
+  filter: var(--viva-filter);
+}
 [data-cirk] > svg > path {
   d: var(--cirk-path);
   fill-rule: evenodd;
   fill: var(--white-color);
-  filter: var(--viva-filterID);
+}
+[data-cirk] clipPath > path {
+  d: var(--cirk-clip-A);
+  animation: mbx-cirk linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-cirk {
+  0% {
+    d: path("M50 50 L -10 -10 L -10 -10 L -10 -10 L -10 -10 L -10 -10");
+  }
+  25% {
+    d: path("M50 50 L -10 -10 L 110 -10 L 110 -10 L 110 -10 L 110 -10");
+  }
+  50% {
+    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L 110 110 L 110 110");
+  }
+  75% {
+    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L -10 110 L -10 110");
+  }
+  100% {
+    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L -10 110 L -10 -10");
+  }
 }
 
 /* #endregion */
 
 /* #region dist */
-[data-dist] {
-  display: flex;
-  gap: 0.15em;
-}
-[data-dist] > #coefficient {
-  word-spacing: -0.15em;
-  --ani-end: 0.5;
-}
-[data-dist] > #coefficient > [data-shrink] {
+[data-coeff] > [data-shrink] {
   --ani-start: 0.5;
 }
-[data-dist] [data-vaporize="teleport"] {
+[data-grow-term] {
+  --ani-start: 0.65;
+}
+[data-term] [data-vaporize] {
   position: absolute;
   font-weight: bold;
-  --ani-start: 0.25;
+  color: var(--back-color);
+  /* --ani-start: 0.25; */
   --ani-end: 0.85;
-}
-[data-dist] [data-grow="teleport"] {
-  --ani-start: 0.65;
 }
 /* #endregion */
 

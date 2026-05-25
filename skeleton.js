@@ -118,12 +118,14 @@
     async #processStep(step, routineNum, signal) {
       if (signal?.aborted || routineNum !== this.#routineNum) return false;
 
-      // TEST STALL
+      // TEST STALL & NUMBER
       await new Promise((r) => setTimeout(r, 800));
+      log(`${this.#holder.parentNode.id} #${routineNum}-${this.#currentStep} - ${Date.now()}`);
 
       const el = this.#createStepHTML(step);
       const acted = await this.#runActs(step, el, routineNum, signal);
       if (!acted) return false;
+
 
       return this.#finalize(el, routineNum, this.#currentStep, signal);
     }
@@ -156,7 +158,6 @@
       const spotter = this;
       const api = {
         makeNote: (txt) => {
-          console.log("[makeNote]", txt);
           return api;
         },
         changeHTML: (html) => {

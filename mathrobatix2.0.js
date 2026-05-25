@@ -59,6 +59,9 @@
       "filter-clear",
       "move",
       "cank",
+      "cirk",
+      "term",
+      "original",
     ];
     #allowed = new Set(["id"]);
     #stageString = null;
@@ -82,20 +85,6 @@
       stepTag.setAttribute("data-measure", "");
       stepTag.append(stage, comm);
       return stepTag;
-    }
-
-    async #runActs(step, el, routineNum, signal) {
-      if (signal?.aborted || routineNum !== this.#routineNum) return false;
-      if (typeof step.acts !== "function") return true;
-
-      try {
-        const api = this.#makeAPI(el, routineNum, signal);
-        const result = step.acts(api, signal);
-        if (result?.then) await result;
-        return true;
-      } catch {
-        return false;
-      }
     }
 
     #sanitizeHTML(html = "") {
@@ -162,7 +151,7 @@
       return el;
     }
 
-    #measureElements(els) {
+    #measureElements(...els) {
       const props = ["width", "height", "x", "y"];
       for (const el of new Set(els)) {
         const rect = el.getBoundingClientRect();
@@ -180,6 +169,15 @@
       for (const el of step.querySelectorAll("[data-absorb]")) {
         while (el.children[1].firstChild)
           el.parentNode.insertBefore(el.children[1].firstChild, el);
+        el.remove();
+      }
+    }
+
+    #removeDist(step) {
+      for (const el of step.querySelectorAll("[data-coeff]")) {
+        el.remove();
+      }
+      for (const el of step.querySelectorAll("[data-term] > [data-vaporize]")) {
         el.remove();
       }
     }
@@ -206,98 +204,8 @@
     }
     // #endregion
 
-    async #processStep(step, routineNum, signal) {
-      // check if this should even run
-      if (signal?.aborted || routineNum !== this.#routineNum) return false;
-
-      // !!! REMOVE !!! testing stall
-      await new Promise((r) => setTimeout(r, 800));
-
-      // load new stage if needed
-      if (step.load) this.#stageString = step.load;
-
-      // make the step tags
-      const stepTag = this.#createStepTag(step);
-
-      // should we keep going and add the tag?
-      if (signal?.aborted || routineNum !== this.#routineNum) return false;
-      this.#holder.append(stepTag);
-
-      // !!! layout HAKC - must be here !!!
-      await new Promise((r) => requestAnimationFrame(r));
-
-      // set measurements
-      this.#measureElements(this.#stageObject.querySelectorAll("[id]"));
-
-      // try to run the actions
-      const acted = await this.#runActs(step, stepTag, routineNum, signal);
-
-      // check if that werked
-      if (!acted) return false;
-
-      // copy the step tags for next time
-      const nextStep = this.#makeTag("b", stepTag.innerHTML, "step");
-
-      // remove absorbs from stage
-      this.#removeAborbs(nextStep);
-
-      // remove the API <b>'s
-      this.#removeAPIs(nextStep);
-
-      // reset the stage string to trimmed tags
-      this.#stageString = nextStep.children[0].innerHTML;
-
-      // remove IDs [or make namespaceIDs()]
-      this.#removeIDs(stepTag.children[0]);
-
-      // should this still BE finalized?
-      if (signal?.aborted || routineNum !== this.#routineNum) {
-        stepTag.remove();
-        return false;
-      }
-
-      // the tag is done with measurements
-      stepTag.removeAttribute("data-measure");
-
-      // let em know you're rockin
-      dispatch(
-        this.#holder,
-        `${this.#opts.fix}-step-${this.#currentStep}-ready`,
-      );
-
-      // now you can increment the step
-      this.#currentStep++;
-
-      // let the rez know
-      return true;
-    }
-
-    async loadRoutine(routine = {}) {
-      if (this.#abortCtrl) this.#abortCtrl.abort();
-      this.#abortCtrl = new AbortController();
-
-      this.#holder.replaceChildren();
-      this.#routine = routine;
-      const routineNum = ++this.#routineNum;
-      this.#currentStep = 0;
-
-      if (routine.intro)
-        this.#holder.append(this.#makeTag("b", routine.intro, "intro"));
-
-      this.#stageString = routine.stage || "";
-
-      for (const step of routine.steps || []) {
-        if (routineNum !== this.#routineNum) break;
-        const success = await this.#processStep(
-          step,
-          routineNum,
-          this.#abortCtrl.signal,
-        );
-        if (!success) break;
-      }
-    }
-
     #makeAPI(el, routineNum, signal) {
+      // #region API UTILS
       const spotter = this;
       const move = (anchorId, direction) => {
         const anchor = spotter.#stageObject.querySelector(
@@ -360,7 +268,7 @@
               <b>${el.innerHTML}</b>
               <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                 <clipPath id="${id}"><path/></clipPath>
-                <path/><!-- clip-path="url(#${id})"/-->
+                <path clip-path="url(#${id})"/>
               </svg>
             </b>
           `;
@@ -372,7 +280,10 @@
         }
         return api;
       };
+      // #endregion
+
       const api = {
+        // #region FUNDAMENTALS
         pick: (id) => {
           return (
             spotter.#stageObject?.querySelector(`[id="${CSS.escape(id)}"]`) ||
@@ -386,11 +297,11 @@
             .filter((el) => el !== null);
           return api;
         },
-        mount: (id, html, data) => {
-          const el = spotter.#makeTag("b", html, data || null);
+        mount: (id, html, ...attrs) => {
+          const el = spotter.#makeTag("b", html, ...attrs);
           el.id = CSS.escape(id);
           spotter.#stageObject?.append(el);
-          spotter.#measureElements([el]);
+          spotter.#measureElements(el);
           return api.spot(el.id);
         },
         dismount: () => {
@@ -414,9 +325,21 @@
           }
           return api;
         },
+        alter: (html) => {
+          for (const el of spotter.#targets) {
+            el.replaceChildren(spotter.#sanitizeHTML(html));
+            spotter.#measureElements(el);
+          }
+        },
         hide: () => {
           for (const el of api.#targets) {
             el.style.display = "none";
+          }
+          return api;
+        },
+        show: () => {
+          for (const el of api.#targets) {
+            el.style.display = "revert";
           }
           return api;
         },
@@ -435,7 +358,9 @@
 
         moveBefore: (anchorId) => move(anchorId, "before"),
         moveAfter: (anchorId) => move(anchorId, "after"),
+        // #endregion
 
+        // #region FILTERS
         viva: () => wrap("viva"),
         ghost: () => wrap("ghost"),
         vaporize: () => wrap("vaporize"),
@@ -446,30 +371,22 @@
           }
           return api;
         },
+        // #endregion
 
+        // #region GROWTH
         grow: () => wrap("grow"),
         shrink: () => wrap("shrink"),
         vault: (v) => wrap("vault", v ? { "--vault-height": v } : null),
         tuck: (v) => wrap("tuck", v ? { "--tuck-depth": v } : null),
         spin: (v) => wrap("spin", v ? { "--spin-angle": v } : null),
+        // #endregion
 
-        cank: (v) => svgWrap("cank", v || null),
+        // #region ANIMATES
+        cank: (v, rot) => svgWrap("cank", v || null, rot ? {"--cank-rotate":rot} : null),
         cirk: (v) => svgWrap("cirk", v || null),
+        // #endregion
 
-        absorb: (...ids) => {
-          const absEl = spotter.#makeTag("b", "<b></b><b></b>", "absorb");
-          spotter.#stageObject.insertBefore(absEl, spotter.#targets[0]);
-          spotter.#targets.forEach((el) => {
-            absEl.children[0].append(el);
-          });
-          for (const id of new Set(ids)) {
-            absEl.children[1].append(api.pick(id));
-          }
-
-          spotter.#measureElements([absEl.children[0], absEl.children[1]]);
-
-          return api.spot(...ids);
-        },
+        // #region NEEDS UNDO
         unfurl: () => {
           const targets = spotter.#targets;
           const total = targets.length;
@@ -480,10 +397,156 @@
           spotter.#targets = targets;
           return api;
         },
+        absorb: (...ids) => {
+          const absEl = spotter.#makeTag("b", "<b></b><b></b>", "absorb");
+          spotter.#stageObject.insertBefore(absEl, spotter.#targets[0]);
+          spotter.#targets.forEach((el) => {
+            absEl.children[0].append(el);
+          });
+          for (const id of new Set(ids)) {
+            absEl.children[1].append(api.pick(id));
+          }
+
+          spotter.#measureElements(absEl.children[0], absEl.children[1]);
+
+          return api.spot(...ids);
+        },
+        dist(id) {
+          const targets = spotter.#targets;
+          const total = targets.length;
+          const coeff = api.pick(id);
+          const co_txt = coeff.innerText;
+          api.spot(id).vaporize().during(0, 0.5).shrink().during(0.5);
+          coeff.setAttribute("data-coeff", "");
+          for (const [i, el] of targets.entries()) {
+            api
+              .mount(`${coeff.id}-${el.id}`, co_txt, "grow-term")
+              .grow()
+              .during(0.6 + (i / total) * 0.4)
+              .insertBefore(el.id)
+              .viva();
+            el.innerHTML = `
+             <b data-term>
+              <b data-vaporize style="--ani-start:${0.25 + (i / total) * 0.4};--ani-end:${0.85 + (i / total) * 0.2}">${el.innerText}</b>
+              <b data-original>${el.innerHTML}</b>
+             </b>
+            `;
+          }
+          return api.spot(id);
+        },
+        // #endregion
 
         isAlive: () => routineNum === spotter.#routineNum && !signal?.aborted,
       };
       return api;
+    }
+
+    async #runActs(step, el, routineNum, signal) {
+      if (signal?.aborted || routineNum !== this.#routineNum) return false;
+      if (typeof step.acts !== "function") return true;
+ddddddddkj
+      try {
+        const api = this.#makeAPI(el, routineNum, signal);
+        const result = step.acts(api, signal);
+        if (result?.then) await result;
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    async #processStep(step, routineNum, signal) {
+      // check if this should even run
+      if (signal?.aborted || routineNum !== this.#routineNum) return false;
+
+      // !!! REMOVE !!! testing stall
+      await new Promise((r) => setTimeout(r, 800));
+
+      // load new stage if needed
+      if (step.load) this.#stageString = step.load;
+
+      // make the step tags
+      const stepTag = this.#createStepTag(step);
+
+      // should we keep going and add the tag?
+      if (signal?.aborted || routineNum !== this.#routineNum) return false;
+      this.#holder.append(stepTag);
+
+      // !!! layout HAKC - must be here !!!
+      await new Promise((r) => requestAnimationFrame(r));
+
+      // set measurements
+      this.#measureElements(...this.#stageObject.querySelectorAll("[id]"));
+
+      // try to run the actions
+      const acted = await this.#runActs(step, stepTag, routineNum, signal);
+
+      // check if that werked
+      if (!acted) return false;
+
+      // copy the step tags for next time
+      const nextStep = this.#makeTag("b", stepTag.innerHTML, "step");
+
+      // remove absorbs from stage
+      this.#removeAborbs(nextStep);
+
+      // remove distributions from stage
+      this.#removeDist(nextStep);
+
+      // remove the API <b>'s
+      this.#removeAPIs(nextStep);
+
+      // reset the stage string to trimmed tags
+      this.#stageString = nextStep.children[0].innerHTML;
+
+      // remove IDs [or make namespaceIDs()]
+      this.#removeIDs(stepTag.children[0]);
+
+      // should this still BE finalized?
+      if (signal?.aborted || routineNum !== this.#routineNum) {
+        stepTag.remove();
+        return false;
+      }
+
+      // the tag is done with measurements
+      stepTag.removeAttribute("data-measure");
+
+      // let em know you're rockin
+      dispatch(
+        this.#holder,
+        `${this.#opts.fix}-step-${this.#currentStep}-ready`,
+      );
+
+      // now you can increment the step
+      this.#currentStep++;
+
+      // let the rez know
+      return true;
+    }
+
+    async loadRoutine(routine = {}) {
+      if (this.#abortCtrl) this.#abortCtrl.abort();
+      this.#abortCtrl = new AbortController();
+
+      this.#holder.replaceChildren();
+      this.#routine = routine;
+      const routineNum = ++this.#routineNum;
+      this.#currentStep = 0;
+
+      if (routine.intro)
+        this.#holder.append(this.#makeTag("b", routine.intro, "intro"));
+
+      this.#stageString = routine.stage || "";
+
+      for (const step of routine.steps || []) {
+        if (routineNum !== this.#routineNum) break;
+        const success = await this.#processStep(
+          step,
+          routineNum,
+          this.#abortCtrl.signal,
+        );
+        if (!success) break;
+      }
     }
 
     disconnect() {

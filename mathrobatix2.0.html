@@ -2,9 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Mathro&middot;batiX Scroll Vault 0.9beta</title>
+    <title>Mathrobatix 2.0B</title>
     <script src="mathrobatix2.0.js" data-x='{"tag":"mathro-batix"}'></script>
     <style id="demoStyles">
+      @font-face {
+        font-family: "Luckiest Guy";
+        src: url(luckiest.ttf);
+      }
       body {
         margin: 0;
         padding: 0;
@@ -36,51 +40,50 @@
     </style>
   </head>
   <body>
-    <svg>
-      <filter
-        id="svg-filter-viva"
-        x="-100%"
-        y="-100%"
-        width="300%"
-        height="300%"
-      >
-        <feDropShadow
-          dx="0"
-          dy="0"
-          stdDeviation="1.5"
-          flood-color="hsl(var--mbx-h, 80%, 60%)"
-          result="shadow1"
-        />
-        <feDropShadow
-          dx="0"
-          dy="0"
-          stdDeviation="4"
-          flood-color="hsl(var(--mbx-h), 80%, 38%)"
-          in="SourceGraphic"
-          result="shadow2"
-        />
-        <feDropShadow
-          dx="0"
-          dy="0"
-          stdDeviation="12"
-          flood-color="hsl(var(--mbx-h), 80%, 25%)"
-          in="SourceGraphic"
-          result="shadow3"
-        />
-        <feMerge>
-          <feMergeNode in="shadow3" />
-          <feMergeNode in="shadow2" />
-          <feMergeNode in="shadow1" />
-          <feMergeNode in="SourceGraphic" />
-        </feMerge>
-      </filter>
-    </svg>
     <div data-logo>MATHROBATIX</div>
     <mathro-batix id="one" data-mbx='{"color":"40"}'></mathro-batix>
     <div style="margin: 30px; font-size: 30px">and some stuff</div>
     <mathro-batix id="two" data-mbx='{"color":"300"}'></mathro-batix>
     <script id="ROUTINE">
       const routineOne = {
+        intro: `distribute THIS, buddy`,
+        stage: `
+        <b id="T5x">5x</b> + <b id="T3">3</b>(<b id="Tx">x</b> + <b id="T1">1</b>) = <b id="T7">7</b>
+        `,
+        steps: [
+          {
+            note: "first step of distrobution test",
+            acts: (S) => {
+              S.mount("DOT", "&middot").insertAfter("T3").grow().viva();
+            },
+          },
+          {
+            note: "this is the distrobution",
+            acts: (S) => {
+              S.spot("T5x").cirk("2");
+              S.spot("DOT").dismount();
+              S.spot("T3").alter("3 &middot;");
+              S.spot("Tx", "T1").dist("T3");
+            },
+          },
+          {
+            note: "what remains with IDs?",
+            acts: (S) => {
+              S.spot("T3-Tx").filter("viva").filterClear().spin();
+              S.spot("T3-T1").filter("viva").filterClear().spin();
+            },
+          },
+          {
+            note: "actually DO the multiplications",
+            acts: (S) => {
+              S.spot("T3-Tx", "T3-T1").filter("");
+              S.mount("T3x", "3x").spot("T3-Tx", "Tx").absorb("T3x").viva();
+              S.mount("T3", "3").spot("T3-T1", "T1").absorb("T3").viva();
+            },
+          },
+        ],
+      };
+      const XXX_routineOne = {
         title: "Quadratic Mania",
         intro: "you must solve this equation for x",
         stage: `
