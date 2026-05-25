@@ -207,6 +207,7 @@
     #makeAPI(el, routineNum, signal) {
       // #region API UTILS
       const spotter = this;
+
       const move = (anchorId, direction) => {
         const anchor = spotter.#stageObject.querySelector(
           `[id="${CSS.escape(anchorId)}"]`,
@@ -382,7 +383,8 @@
         // #endregion
 
         // #region ANIMATES
-        cank: (v, rot) => svgWrap("cank", v || null, rot ? {"--cank-rotate":rot} : null),
+        cank: (v, rot) =>
+          svgWrap("cank", v || null, rot ? { "--cank-rotate": rot } : null),
         cirk: (v) => svgWrap("cirk", v || null),
         // #endregion
 
@@ -400,9 +402,9 @@
         absorb: (...ids) => {
           const absEl = spotter.#makeTag("b", "<b></b><b></b>", "absorb");
           spotter.#stageObject.insertBefore(absEl, spotter.#targets[0]);
-          spotter.#targets.forEach((el) => {
+          for (const el of spotter.#targets) {
             absEl.children[0].append(el);
-          });
+          }
           for (const id of new Set(ids)) {
             absEl.children[1].append(api.pick(id));
           }
@@ -434,6 +436,45 @@
           }
           return api.spot(id);
         },
+        root(id) {
+          id = id || `${spotter.#opts.fix}${crypto.randomUUID()}`;
+          const rootEl = document.createElement("b");
+          rootEl.id = CSS.escape(id);
+          rootEl.setAttribute("data-root-anim", "");
+          rootEl.innerHTML = `
+           <b id="${CSS.escape(id)}" data-root-terms></b>
+           <svg data-front-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <path/>
+           </svg>
+           <svg data-top-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <path/>
+           </svg>
+          `;
+          spotter.#stageObject.insertBefore(rootEl, spotter.#targets[0]);
+          const termB = rootEl.querySelector("[data-root-terms]");
+          for (const el of spotter.#targets) {
+            termB.append(el);
+          }
+          return api.spot(id);
+        },
+        divby(...ids) {
+          const divEl = document.createElement("b");
+          divEl.innerHTML =  `
+           <b data-divby>
+            <b data-numerator>
+             <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <path data-divby-slash />
+             </svg>
+            </b>
+            <b data-denominator></b>
+           </b>
+          `,
+          spotter.#stageObject.insertBefore(divEl, spotter.#targets[0]);
+          const numer = divEl.querySelector("[data-numerator]");
+          const denom = divEl.querySelector("[data-denominator]");
+          for (const el of spotter.#targets) numer.append(el);
+          for (const id of new Set(ids)) denom.append(api.pick(id));
+        },
         // #endregion
 
         isAlive: () => routineNum === spotter.#routineNum && !signal?.aborted,
@@ -457,9 +498,6 @@
     async #processStep(step, routineNum, signal) {
       // check if this should even run
       if (signal?.aborted || routineNum !== this.#routineNum) return false;
-
-      // !!! REMOVE !!! testing stall
-      await new Promise((r) => setTimeout(r, 800));
 
       // load new stage if needed
       if (step.load) this.#stageString = step.load;
@@ -571,47 +609,14 @@
       super();
     }
 
-    #svgString() {
-      const filterID = this.#opts.fix + "-" + crypto.randomUUID();
-      return `
-        <svg height="0" width="0" style="--hue:${this.#opts.color};">
-          <filter id="${filterID}" x="-200%" y="-200%" height="900%" width="900%">
-            <feGaussianBlur stdDeviation="0.3" result="B0" />
-            <feFlood flood-color="hsl(var(--hue), 80%, 90%)" result="F0" />
-            <feComposite in="F0" in2="B0" operator="in" result="Z0" />
-            <feGaussianBlur stdDeviation="2" result="B1" />
-            <feFlood flood-color="hsl(calc(var(--hue) + 12), 80%, 50%)" result="F1" />
-            <feComposite in="F1" in2="B1" operator="in" result="Z1" />
-            <feGaussianBlur stdDeviation="3" result="B2" />
-            <feFlood flood-color="hsl(calc(var(--hue) - 20), 50%, 45%)" result="F2" />
-            <feComposite in="F2" in2="B2" operator="in" result="Z2" />
-            <feGaussianBlur stdDeviation="4" result="B3" />
-            <feFlood flood-color="hsl(calc(var(--hue) - 40), 98%, 50%)" result="F3" />
-            <feComposite in="F3" in2="B3" operator="in" result="Z3" />
-            <feGaussianBlur stdDeviation="8" result="B4" />
-            <feFlood flood-color="hsl( var(--hue), 98%, 50%)" result="F4" />
-            <feComposite in="F4" in2="B4" operator="in" result="Z4" />
-            <feMerge>
-              <feMergeNode in="Z4" />
-              <feMergeNode in="Z3" />
-              <feMergeNode in="Z2" />
-              <feMergeNode in="Z1" />
-              <feMergeNode in="Z0" />
-            </feMerge>
-          </filter>
-        </svg>
-        <b data-holder style="--${this.#opts.fix}-h:${this.#opts.color}; --viva-filterID: url(#${filterID}); "></b>
-      `;
-    }
-
     connectedCallback() {
       this.#opts = sieve(opts, parseData(this.dataset[opts.fix]));
 
-      this.innerHTML = this.#svgString();
+      this.innerHTML = `<b data-holder style="--${this.#opts.fix}-h:${this.#opts.color};"></b>`;
 
-      this.#spotter = new Spotter(this.children[1], this.#opts);
+      this.#spotter = new Spotter(this.children[0], this.#opts);
 
-      dispatch(this.children[1], `${this.#opts.fix}-ready`);
+      dispatch(this.children[0], `${this.#opts.fix}-ready`);
     }
 
     disconnectedCallback() {

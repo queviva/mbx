@@ -122,7 +122,9 @@ b {
   display: inline-block;
   font-weight: normal;
   text-wrap: nowrap;
-
+}
+b,
+path {
   --ani-start: 0;
   --ani-end: 1;
 
@@ -144,8 +146,6 @@ svg {
   position: absolute;
   left: 0;
   top: 0;
-  width: 100%;
-  height: 100%;
   pointer-events: none;
   z-index: 2;
   overflow: visible;
@@ -493,13 +493,136 @@ svg {
 }
 /* #endregion */
 
+/* #region root animation */
+[data-root-anim] {
+  margin-left: 0.35em;
+}
+[data-root-anim] [data-front-svg] {
+  position: absolute;
+  top: -5px;
+  left: -0.5em;
+  height: 100%;
+  filter: var(--viva-filter);
+  overflow: visible;
+}
+[data-root-anim] [data-front-svg] path {
+  transform: scale(1.5, 1.2);
+  fill: var(--white-color);
+  d: path("M8 46L8 46 L8 46 L8 46L8 46L8 46 L8 46 Z");
+  --ani-end: 0.2;
+  animation: mbx-root-front linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-root-front {
+  to {
+    d: path("M8 46L14 30L19 52L18 0L23 1L24 90L11 43Z");
+  }
+}
+[data-root-anim] [data-top-svg] {
+  position: absolute;
+  top: -6px;
+  left: -0.18em;
+  height: 45px;
+  width: calc(100% + 0.25em);
+  filter: var(--viva-filter);
+  overflow: visible;
+}
+[data-root-anim] [data-top-svg] path {
+  transform-origin: -5px -7px;
+  transform: scale(1, 1.2);
+  fill: var(--white-color);
+  d: path("M0 0H 0  L0 3  L 0 7Z");
+  --ani-start: 0.325;
+  animation: mbx-root-top linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-root-top {
+  to {
+    d: path("M0 0H 100L98 3 L 2 7Z");
+  }
+}
+/* #endregion */
+
+/* #region divby */
+[data-divby] {
+  position: relative;
+  display: inline-grid;
+  padding: 0 0.5ch;
+  grid-template-rows: auto auto;
+  align-items: center;
+  justify-items: center;
+  vertical-align: 0%;
+  line-height: 1;
+  font-size: 1em;
+  will-change: font-size, vertical-align;
+  animation: mbx-divby linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-divby {
+  from {
+    vertical-align: 0%;
+    font-size: 1em;
+  }
+  to {
+    vertical-align: 50%;
+    font-size: 0.6em;
+  }
+}
+[data-divby] [data-numerator],
+[data-divby] [data-denominator] {
+  display: flex;
+  gap: 0.25em;
+  transform-origin: center top;
+}
+[data-numerator] > svg {
+  left: -0.25em;
+  width: calc(100% + 0.5em);
+  height: 100%;
+  filter: var(--viva-filter);
+}
+[data-divby] [data-divby-slash] {
+  fill: var(--white-color);
+  d: path("M50 100 L50 92 L 50 92 L 50 100 Z");
+  transform: rotate(-2deg);
+  transform-origin: 50% 100%;
+  animation: mbx-slash linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-slash {
+  from {
+    d: path("M50 100 L50 92 L 50 92 L 50 100 Z");
+  }
+  to {
+    d: path("M0 100 L5 92 L 100 92 L 97 100 Z");
+  }
+}
+[data-divby] [data-denominator] {
+  padding-top: 0.12ch;
+  opacity: 0;
+  transform: translateY(-0.25ch) scale(0);
+  will-change: tranform, opacity;
+  animation: mbx-den linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-den{
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+  */
+/* #endregion */
+
 /* #region root */
 [data-root] {
   --root-high: 120%;
   --root-for-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30px' height='100px' preserveAspectRatio='none'%3E%3Cpath d='M8 46L14 30L19 52L18 0L23 1L24 90L11 43Z' /%3E%3C/svg%3E");
   --root-aft-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100px' height='100px' preserveAspectRatio='none'%3E%3Cpath d='M0 0H 100V3L 2 7Z' /%3E%3C/svg%3E");
-  --root-filter: var(--viva-filterID);
-  /* --root-filter: url("#mbx-main-color"); */
+  /* --root-filter: var(--viva-filterID); */
+  --root-filter: url("#mbx-main-color");
   /* word-spacing: -0.2em; */
   margin-left: 0.6em;
   margin-right: 0.5ch;
@@ -548,6 +671,8 @@ svg {
   --cank-path: var(--cank-02);
 }
 [data-cank] > svg {
+  width: 100%;
+  height: 100%;
   filter: var(--viva-filter);
 }
 [data-cank] > svg > path {
@@ -583,6 +708,8 @@ svg {
   --cirk-path: var(--cirk-02);
 }
 [data-cirk] > svg {
+  width: 100%;
+  height: 100%;
   filter: var(--viva-filter);
 }
 [data-cirk] > svg > path {
