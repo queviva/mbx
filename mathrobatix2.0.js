@@ -72,8 +72,8 @@
     constructor(holder, opts) {
       this.#holder = holder;
       this.#opts = opts;
-      this.#resizeHandler = () => this.loadRoutine(this.#routine);
-      window.addEventListener("resize", this.#resizeHandler);
+      // this.#resizeHandler = () => this.loadRoutine(this.#routine);
+      // window.addEventListener("resize", this.#resizeHandler);
     }
 
     // #region PRIVATE METHS
