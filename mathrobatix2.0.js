@@ -444,7 +444,6 @@
     async #runActs(step, el, routineNum, signal) {
       if (signal?.aborted || routineNum !== this.#routineNum) return false;
       if (typeof step.acts !== "function") return true;
-ddddddddkj
       try {
         const api = this.#makeAPI(el, routineNum, signal);
         const result = step.acts(api, signal);
