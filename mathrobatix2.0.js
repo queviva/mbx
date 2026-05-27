@@ -51,6 +51,7 @@
       "viva",
       "ghost",
       "vaporize",
+      "colorize",
       "grow",
       "shrink",
       "spin",
@@ -378,16 +379,18 @@
         viva: () => wrap("viva"),
         ghost: () => wrap("ghost"),
         vaporize: () => wrap("vaporize"),
+        colorize: (v) => wrap("colorize", { [`--${spotter.#opts.fix}-h`]: v }),
+        setColor: (v) => {
+          for (const el of spotter.#targets) {
+            el.style.setProperty(`--${spotter.#opts.fix}-h`, v);
+            el.style.color = "var(--main-color)";
+          }
+          return api;
+        },
         filterClear: () => wrap("filter-clear"),
         filter: (type) => {
           for (const el of spotter.#targets) {
             el.setAttribute("data-filter", type);
-          }
-          return api;
-        },
-        color: (v) => {
-          for (const el of spotter.#targets) {
-            el.style.color = `hsl(${v},80%,60%)`;
           }
           return api;
         },
@@ -420,7 +423,10 @@
         },
         absorb: (...ids) => {
           const absEl = spotter.#makeTag("b", "<b></b><b></b>", "absorb");
-          spotter.#stageObject.insertBefore(absEl, spotter.#targets[0]);
+          spotter.#targets[0].parentNode.insertBefore(
+            absEl,
+            spotter.#targets[0],
+          );
           for (const el of spotter.#targets) {
             absEl.children[0].append(el);
           }
@@ -456,6 +462,7 @@
           return api.spot(id);
         },
         root(id) {
+          const target0 = spotter.#targets[0];
           id = id || `${spotter.#opts.fix}${crypto.randomUUID()}`;
           const rootEl = document.createElement("b");
           rootEl.id = CSS.escape(id);
@@ -469,10 +476,7 @@
             <path/>
            </svg>
           `;
-          spotter.#targets[0].parentNode.insertBefore(
-            rootEl,
-            spotter.#targets[0],
-          );
+          target0.parentNode.insertBefore(rootEl, target0);
           const termB = rootEl.querySelector("[data-root-terms]");
           for (const el of spotter.#targets) {
             termB.append(el);

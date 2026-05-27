@@ -30,34 +30,10 @@ mathro-batix [data-holder] {
 
 /* COLORS */
 mathro-batix [data-holder] {
-  --main-color: hsl(var(--mbx-h), 80%, 50%);
-  --white-color: hsl(var(--mbx-h), 100%, 98%);
-  --grey-color: hsl(var(--mbx-h), 10%, 40%);
-  --inverse-color: hsl(calc(var(--mbx-h) + 180), 80%, 50%);
 }
 
 /* FILTER */
 mathro-batix [data-holder] {
-  --viva-f1: 0 0 3px hsl(var(--mbx-h), 90%, 80%);
-  --viva-f2: 0 0 8px hsl(var(--mbx-h), 100%, 58%);
-  --viva-f3: 0 0 24px hsl(var(--mbx-h), 100%, 55%);
-  --viva-shadow: var(--viva-f1), var(--viva-f2), var(--viva-f3);
-  --viva-filter: drop-shadow(var(--viva-f1)) drop-shadow(var(--viva-f2))
-    drop-shadow(var(--viva-f3));
-
-  --ghost-f1: 0 0 1px var(--back-color);
-  --ghost-f2: 0 0 3px hsl(var(--mbx-h), 100%, 80%);
-  --ghost-f3: 0 0 12px hsl(var(--mbx-h), 100%, 98%);
-  --ghost-shadow: var(--ghost-f1), var(--ghost-f2), var(--ghost-f3);
-  --ghost-filter: drop-shadow(var(--ghost-f1)) drop-shadow(var(--ghost-f2))
-    drop-shadow(var(--ghost-f3));
-
-  --vapor-f1: 0 0 5px var(--back-color);
-  --vapor-f2: 0 0 40px var(--main-color);
-  --vapor-f3: 0 0 41px #fff;
-  --vapor-shadow: var(--vapor-f1), var(--vapor-f2), var(--vapor-f3);
-  --vapor-filter: drop-shadow(var(--vapor-f1)) drop-shadow(var(--vapor-f2))
-    drop-shadow(var(--vapor-f3));
 }
 
 /* SHAPES */
@@ -117,17 +93,21 @@ mathro-batix [data-holder] {
 
 /* #region batix */
 b {
+  --main-color: hsl(var(--mbx-h), 80%, 50%);
+  --white-color: hsl(var(--mbx-h), 100%, 98%);
+  --grey-color: hsl(var(--mbx-h), 10%, 40%);
+  --inverse-color: hsl(calc(var(--mbx-h) + 180), 80%, 50%);
+  --ani-start: 0;
+  --ani-end: 1;
+
   box-sizing: border-box;
   position: relative;
   display: inline-block;
   font-weight: normal;
   text-wrap: nowrap;
-  --ani-start: 0;
-  --ani-end: 1;
 }
 b,
 path {
-
   --animation-range: cover
     calc(
       var(--animation-start) + (var(--animation-end) - var(--animation-start)) *
@@ -397,11 +377,24 @@ svg {
 /* #endregion */
 
 /* #region viva */
+[data-viva],
+[data-filter="viva"] {
+  --viva-f1: 0 0 3px hsl(var(--mbx-h), 90%, 80%);
+  --viva-f2: 0 0 8px hsl(var(--mbx-h), 100%, 58%);
+  --viva-f3: 0 0 24px hsl(var(--mbx-h), 100%, 55%);
+  --viva-shadow: var(--viva-f1), var(--viva-f2), var(--viva-f3);
+  --viva-filter: drop-shadow(var(--viva-f1)) drop-shadow(var(--viva-f2))
+    drop-shadow(var(--viva-f3));
+}
 [data-viva] {
   text-shadow: none;
   animation: viva linear both;
   animation-timeline: view();
   animation-range: var(--animation-range);
+}
+[data-filter="viva"] {
+  color: var(--white-color);
+  text-shadow: var(--viva-shadow);
 }
 @keyframes viva {
   to {
@@ -412,11 +405,24 @@ svg {
 /* #endregion */
 
 /* #region ghost */
+[data-ghost],
+[data-filter="ghost"] {
+  --ghost-f1: 0 0 1px var(--back-color);
+  --ghost-f2: 0 0 3px hsl(var(--mbx-h), 100%, 80%);
+  --ghost-f3: 0 0 12px hsl(var(--mbx-h), 100%, 98%);
+  --ghost-shadow: var(--ghost-f1), var(--ghost-f2), var(--ghost-f3);
+  --ghost-filter: drop-shadow(var(--ghost-f1)) drop-shadow(var(--ghost-f2))
+    drop-shadow(var(--ghost-f3));
+}
 [data-ghost] {
   text-shadow: none;
   animation: ghost linear both;
   animation-timeline: view();
   animation-range: var(--animation-range);
+}
+[data-filter="ghost"] {
+  color: var(--back-color);
+  text-shadow: var(--ghost-shadow);
 }
 @keyframes ghost {
   to {
@@ -428,9 +434,27 @@ svg {
 
 /* #region vaporize */
 [data-vaporize] {
+  --ghost-f1: 0 0 1px var(--back-color);
+  --ghost-f2: 0 0 3px hsl(var(--mbx-h), 100%, 80%);
+  --ghost-f3: 0 0 12px hsl(var(--mbx-h), 100%, 98%);
+  --ghost-shadow: var(--ghost-f1), var(--ghost-f2), var(--ghost-f3);
+  --ghost-filter: drop-shadow(var(--ghost-f1)) drop-shadow(var(--ghost-f2))
+    drop-shadow(var(--ghost-f3));
+
+  --vapor-f1: 0 0 5px var(--back-color);
+  --vapor-f2: 0 0 40px var(--main-color);
+  --vapor-f3: 0 0 41px #fff;
+  --vapor-shadow: var(--vapor-f1), var(--vapor-f2), var(--vapor-f3);
+  --vapor-filter: drop-shadow(var(--vapor-f1)) drop-shadow(var(--vapor-f2))
+    drop-shadow(var(--vapor-f3));
+
   animation: vaporize linear both;
   animation-timeline: view();
   animation-range: var(--animation-range);
+}
+[data-filter="vapor"] {
+  color: var(--back-color);
+  text-shadow: var(--vapor-shadow);
 }
 @keyframes vaporize {
   0% {
@@ -450,6 +474,34 @@ svg {
     color: transparent;
     text-shadow: var(--vapor-shadow);
     opacity: 0;
+  }
+}
+/* #endregion */
+
+/* #region colorize */
+[data-colorize] {
+  text-shadow: none;
+  animation: colorize linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes colorize {
+  to {
+    color: hsl(var(--mbx-h), 80%, 60%);
+  }
+}
+/* #endregion */
+
+/* #region clear filter */
+[data-filter-clear] {
+  animation: mbx-filter-clear linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-filter-clear {
+  to {
+    color: var(--main-color);
+    text-shadow: none;
   }
 }
 /* #endregion */
@@ -768,19 +820,19 @@ svg {
 }
 @keyframes mbx-cirk {
   0% {
-    d: path("M50 50 L -10 -10 L -10 -10 L -10 -10 L -10 -10 L -10 -10");
+    d: path("M50 50 L -10 -10 L -10 -10 L -10 -10 L -10 -10 L -10 -10 Z");
   }
   25% {
-    d: path("M50 50 L -10 -10 L 110 -10 L 110 -10 L 110 -10 L 110 -10");
+    d: path("M50 50 L -10 -10 L 110 -10 L 110 -10 L 110 -10 L 110 -10 Z");
   }
   50% {
-    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L 110 110 L 110 110");
+    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L 110 110 L 110 110 Z");
   }
   75% {
-    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L -10 110 L -10 110");
+    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L -10 110 L -10 110 Z");
   }
   100% {
-    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L -10 110 L -10 -10");
+    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L -10 110 L -10 -10 Z");
   }
 }
 
@@ -799,32 +851,6 @@ svg {
   color: var(--back-color);
   /* --ani-start: 0.25; */
   --ani-end: 0.85;
-}
-/* #endregion */
-
-/* #region flat filters */
-[data-filter="viva"] {
-  color: var(--white-color);
-  text-shadow: var(--viva-shadow);
-}
-[data-filter="ghost"] {
-  color: var(--back-color);
-  text-shadow: var(--ghost-shadow);
-}
-[data-filter="vapor"] {
-  color: var(--back-color);
-  text-shadow: var(--vapor-shadow);
-}
-[data-filter-clear] {
-  animation: mbx-filter-clear linear both;
-  animation-timeline: view();
-  animation-range: var(--animation-range);
-}
-@keyframes mbx-filter-clear {
-  to {
-    color: var(--main-color);
-    text-shadow: none;
-  }
 }
 /* #endregion */
 

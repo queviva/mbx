@@ -159,8 +159,8 @@
           {
             note: "they have a common variable and exponent",
             acts: (S) => {
-              S.spot("Tx2-A").cirk("2").during(0, 0.3);
-              S.spot("Tx2-B").cirk("2").during(0.45, 1);
+              S.spot("Tx2-A").cirk("2").during(0, 0.9);
+              S.spot("Tx2-B").cirk("2").during(0.3, 1);
             },
           },
           {
@@ -204,7 +204,7 @@
               S.spot("P1", "P2").dismount();
               S.spot("Tploos").vaporize().shrink().during(0, 0.4);
               S.mount("T-new", "-").grow().insertAfter("T4");
-              S.spot("T1").spin("720deg").vault().moveAfter("T-new");
+              S.spot("T1").viva().during(0.85).spin("720deg").vault().moveAfter("T-new");
             },
           },
           {
@@ -226,15 +226,22 @@
           {
             note: "three divided by three is one",
             acts: (S) => {
-              S.mount("T1", "1").insertAfter("T3-frak").grow();
-              S.spot("T3-frak").vaporize().shrink();
+              S.mount("T1", "1");
+              S.spot("T3-frak").absorb("T1");
             },
           },
           {
-            note: "hmmm",
+            note: "colorize that 1",
             acts: (S) => {
-              S.spot("T1").color("189");
               S.spot("T3-frak").dismount();
+              S.spot("T1").setColor("189").viva();
+              S.spot("EQ").viva();
+            },
+          },
+          {
+            note: "does the color remain",
+            acts: (S) => {
+              // S.spot("T1").filter("viva").filterClear();
             },
           },
         ],
@@ -321,7 +328,7 @@
         one.loadRoutine(routineOne);
       });
       two.addEventListener("mbx-ready", (e) => {
-        two.loadRoutine(routineTwo);
+        // two.loadRoutine(routineTwo);
       });
       one.addEventListener("mbx-step-ready", (e) => {
         // console.log(e.detail, "ready");
