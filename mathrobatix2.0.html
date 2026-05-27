@@ -83,34 +83,160 @@
           },
         ],
       };
-      const routineOne = {
+      const YYYroutineOne = {
         title: "Quadratic Mania",
         intro: "make root if you can",
         stage: `
-          <b id="T7">7 +</b>
-          <b id="T2x2">2x<b id="T222" data-sup>2</b></b>
-          <b id="T5">+ 5</b>
-          <b id="EQ">=</b>
-          <b id="T100">100</b>
+          <b id="T1">
+            <b data-frak>
+              <b data-numerator>3x + 3</b>
+              <b data-denominator>3</b>
+            </b>
+          </b>
+          <b id="T+2">
+           <b id="T+">+ </b>
+           <b id="Tx2">x<b data-sup><b id="T2">2</b></b></b>
+          </b>
+          <b id="T3">+ 3</b>
+          <b id="T4">+ 4</b>
         `,
         steps: [
           {
             note: " how are you ? ",
             acts: (S) => {
-              S.spot("EQ").viva();
-              S.spot("T100").spin();
+              S.spot("T1").viva();
+              // S.spot("T100").spin();
             },
           },
           {
             note: " root each side ",
             acts: (S) => {
-              S.mount("T3-a", "3");
-              S.spot("T3-a", "T3-b").filter("viva");
-              S.spot("T2x2").divby("T3-a");
-              S.spot("T100").root("Troot100");
-            }
-          }
-
+              S.mount("T3-a", "3").mount("T3-b", "3");
+              S.spot("T2").frak("T3-a");
+              S.spot("T4").frak("T3-b");
+            },
+          },
+          {
+            note: "what is left of this?",
+            acts: (S) => {
+              S.spot("Tx2").cirk("2");
+              S.mount("Tploos", "+").insertBefore("T1").grow();
+              S.spot("T4-frak").root("T-RAT");
+              S.spot("T-RAT").tuck().moveBefore("Tploos");
+            },
+          },
+        ],
+      };
+      const routineOne = {
+        title: "Root Root Root For The Home Team",
+        intro: "you are asked to solve this for x",
+        stage: `
+          <b id="T1">1</b>
+          <b id="Tploos">+</b>
+          <b id="T2x2">
+            2<b id="Tx2-A">x^2</b>
+          </b>
+          <b id="T+x2">
+            + <b id="Tx2-B">x^2</b> 
+          </b>
+          <b id="EQ">=</b>
+          <b id="T4">4</b>
+        `,
+        steps: [
+          {
+            note: `
+              notice the like-terms
+              <b>
+                "like terms" refers to when terms each have the
+                same variable with same exponent - in this
+                instance, 2x^2 and x^2 both have x^2 in common
+              </b>
+            `,
+            acts: (S) => {
+              S.spot("T2x2", "Tx2-B").viva();
+            },
+          },
+          {
+            note: "they have a common variable and exponent",
+            acts: (S) => {
+              S.spot("Tx2-A").cirk("2").during(0, 0.3);
+              S.spot("Tx2-B").cirk("2").during(0.45, 1);
+            },
+          },
+          {
+            note: "group those together",
+            acts: (S) => {
+              S.mount("P1", "(").insertBefore("T2x2").grow().viva();
+              S.mount("P2", ")").insertBefore("EQ").grow().viva();
+            },
+          },
+          {
+            note: `
+              combine those into one term
+              <b>
+                you can add the coeffcients - those are the
+                numbers in front of the variabel - in this
+                case, two and the implied one combine to make
+                3x^2
+              </b> 
+            `,
+            acts: (S) => {
+              S.mount("T3x2", "3x^2");
+              S.spot("T2x2", "T+x2").absorb("T3x2");
+            },
+          },
+          {
+            note: "we can drop the ()'s now",
+            acts: (S) => {
+              S.spot("P1", "P2").vaporize().shrink().during(0.5);
+            },
+          },
+          {
+            note: `
+              flip that 1 to the other side
+              <b>
+                terms can move to the other side of an equals
+                sign if you flip their sign; in this case,
+                positive one on the left hand side becomes
+                negative one on the right hand side
+            `,
+            acts: (S) => {
+              S.spot("P1", "P2").dismount();
+              S.spot("Tploos").vaporize().shrink().during(0, 0.4);
+              S.mount("T-new", "-").grow().insertAfter("T4");
+              S.spot("T1").spin("720deg").vault().moveAfter("T-new");
+            },
+          },
+          {
+            note: "that subtraction is fairly simple",
+            acts: (S) => {
+              S.spot("Tploos").dismount();
+              S.mount("T3", "3");
+              S.spot("T4", "T-new", "T1").absorb("T3");
+            },
+          },
+          {
+            note: "divide both sides by three",
+            acts: (S) => {
+              S.mount("D3-A", "3").mount("D3-B", "3");
+              S.spot("T3x2").frak("D3-A");
+              S.spot("T3").frak("D3-B");
+            },
+          },
+          {
+            note: "three divided by three is one",
+            acts: (S) => {
+              S.mount("T1", "1").insertAfter("T3-frak").grow();
+              S.spot("T3-frak").vaporize().shrink();
+            },
+          },
+          {
+            note: "hmmm",
+            acts: (S) => {
+              S.spot("T1").color("189");
+              S.spot("T3-frak").dismount();
+            },
+          },
         ],
       };
       const routineTwo = {

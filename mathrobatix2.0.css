@@ -122,11 +122,11 @@ b {
   display: inline-block;
   font-weight: normal;
   text-wrap: nowrap;
+  --ani-start: 0;
+  --ani-end: 1;
 }
 b,
 path {
-  --ani-start: 0;
-  --ani-end: 1;
 
   --animation-range: cover
     calc(
@@ -172,8 +172,6 @@ svg {
   margin-bottom: 30vh;
 }
 [data-step] > :nth-child(1) {
-  /* don't use interpolate-size if possible */
-  /* interpolate-size: allow-keywords; */
   display: flex;
   gap: 0.25em;
   align-items: baseline;
@@ -201,6 +199,10 @@ svg {
   font-size: 0.55em;
   font-style: italic;
   line-height: 0.5;
+}
+[data-sup] [data-frak],
+[data-sup] [data-frak-anim] {
+  --vertical-align: 90%;
 }
 /* #endregion */
 
@@ -545,77 +547,6 @@ svg {
 }
 /* #endregion */
 
-/* #region divby */
-[data-divby] {
-  position: relative;
-  display: inline-grid;
-  padding: 0 0.5ch;
-  grid-template-rows: auto auto;
-  align-items: center;
-  justify-items: center;
-  vertical-align: 0%;
-  line-height: 1;
-  font-size: 1em;
-  will-change: font-size, vertical-align;
-  animation: mbx-divby linear both;
-  animation-timeline: view();
-  animation-range: var(--animation-range);
-}
-@keyframes mbx-divby {
-  from {
-    vertical-align: 0%;
-    font-size: 1em;
-  }
-  to {
-    vertical-align: 50%;
-    font-size: 0.6em;
-  }
-}
-[data-divby] [data-numerator],
-[data-divby] [data-denominator] {
-  display: flex;
-  gap: 0.25em;
-  transform-origin: center top;
-}
-[data-numerator] > svg {
-  left: -0.25em;
-  width: calc(100% + 0.5em);
-  height: 100%;
-  filter: var(--viva-filter);
-}
-[data-divby] [data-divby-slash] {
-  fill: var(--white-color);
-  d: path("M50 100 L50 92 L 50 92 L 50 100 Z");
-  transform: rotate(-2deg);
-  transform-origin: 50% 100%;
-  animation: mbx-slash linear both;
-  animation-timeline: view();
-  animation-range: var(--animation-range);
-}
-@keyframes mbx-slash {
-  from {
-    d: path("M50 100 L50 92 L 50 92 L 50 100 Z");
-  }
-  to {
-    d: path("M0 100 L5 92 L 100 92 L 97 100 Z");
-  }
-}
-[data-divby] [data-denominator] {
-  padding-top: 0.12ch;
-  opacity: 0;
-  transform: translateY(-0.25ch) scale(0);
-  will-change: tranform, opacity;
-  animation: mbx-den linear both;
-  animation-timeline: view();
-  animation-range: var(--animation-range);
-}
-@keyframes mbx-den{
-  from { transform: scale(0); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
-}
-  */
-/* #endregion */
-
 /* #region root */
 [data-root] {
   --root-high: 120%;
@@ -655,6 +586,118 @@ svg {
   --root-filter: url("#mbx-svg-viva");
 }
 
+/* #endregion */
+
+/* #region frak animation */
+[data-frak-anim] {
+  position: relative;
+  display: inline-grid;
+  padding: 0 0.5ch;
+  margin-left: -0.25em;
+  margin-right: -0.25em;
+  grid-template-rows: auto auto;
+  align-items: center;
+  justify-items: center;
+  vertical-align: 0%;
+  line-height: 1;
+  font-size: 1em;
+  will-change: font-size, vertical-align;
+  --vertical-align: 55%;
+  --ani-start: 0.2;
+  animation: mbx-frak-anim linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-frak-anim {
+  from {
+    vertical-align: 0%;
+    font-size: 1em;
+  }
+  to {
+    vertical-align: var(--vertical-align);
+    font-size: 0.6em;
+  }
+}
+[data-frak-anim] > [data-numerator],
+[data-frak-anim] > [data-denominator] {
+  display: flex;
+  gap: 0.25em;
+  transform-origin: center top;
+}
+[data-numerator] > svg {
+  left: -0.25em;
+  width: calc(100% + 0.5em);
+  height: 100%;
+  filter: var(--viva-filter);
+}
+[data-frak-anim] [data-frak-anim-slash] {
+  fill: var(--white-color);
+  d: path("M50 100 L50 92 L 50 92 L 50 100 Z");
+  transform: rotate(-2deg);
+  transform-origin: 50% 100%;
+  --ani-start: 0;
+  --ani-end: 0.35;
+  animation: mbx-slash linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-slash {
+  from {
+    d: path("M50 100 L50 92 L 50 92 L 50 100 Z");
+  }
+  to {
+    d: path("M0 100 L5 92 L 100 92 L 97 100 Z");
+  }
+}
+[data-frak-anim] > [data-denominator] {
+  padding-top: 0.12ch;
+  opacity: 0;
+  transform: translateY(-0.25ch) scale(0);
+  will-change: tranform, opacity;
+  animation: mbx-den linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-den {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+/* #endregion */
+
+/* #region frak */
+[data-frak] {
+  position: relative;
+  display: inline-grid;
+  padding: 0 0.5ch;
+  margin-left: -0.25em;
+  margin-right: -0.125em;
+  grid-template-rows: auto auto;
+  align-items: center;
+  justify-items: center;
+  vertical-align: var(--vertical-align, 55%);
+  transform-origin: calc(50% + 0.25em) 55%;
+  line-height: 1;
+  font-size: 0.6em;
+}
+[data-frak] > [data-numerator],
+[data-frak] > [data-denominator] {
+  display: flex;
+  justify-content: center;
+  gap: 0.25em;
+  width: calc(100% + 0.25em);
+}
+[data-frak] > [data-numerator] {
+  border-bottom: 2px solid;
+}
+[data-frak] > [data-denominator] {
+  padding-top: 0.12ch;
+}
 /* #endregion */
 
 /* #region cank */

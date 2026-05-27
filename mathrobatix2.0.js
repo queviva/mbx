@@ -90,20 +90,21 @@
     #sanitizeHTML(html = "") {
       if (!html) return document.createDocumentFragment();
 
-      const marked = String(html)
-        .trim()
+      let markup = String(html).trim();
+
+      markup = markup
         .replace(/\s+/g, " ")
         .replace(
           /([^\s])\^(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g,
-          (m, base, sup) => `${base}<b data-sup>${sup}</b>`,
+          "$1<b data-sup>$2</b>",
         )
         .replace(
           /([^\s])\_(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g,
-          (m, base, sub) => `${base}<b data-sub>${sub}</b>`,
+          "$1<b data-sub>$2</b>",
         );
 
       const tpl = document.createElement("template");
-      tpl.innerHTML = marked;
+      tpl.innerHTML = markup;
 
       const walker = document.createTreeWalker(
         tpl.content,
@@ -114,18 +115,22 @@
       let node = walker.nextNode();
       while (node) {
         const nextNode = walker.nextNode();
+
         if (node.nodeType === Node.TEXT_NODE) {
-          const text = node.textContent;
-          if (!text) {
-            node.parentNode.removeChild(node);
+          if (!node.textContent.trim()) {
+            node.parentNode?.removeChild(node);
           }
         } else if (node.nodeType === Node.ELEMENT_NODE) {
           const tag = node.tagName.toLowerCase();
+
           if (tag !== "b") {
-            while (node.firstChild) {
-              node.parentNode.insertBefore(node.firstChild, node);
+            const parent = node.parentNode;
+            if (parent) {
+              while (node.firstChild) {
+                parent.insertBefore(node.firstChild, node);
+              }
+              parent.removeChild(node);
             }
-            node.parentNode.removeChild(node);
           } else {
             for (const attr of Array.from(node.attributes)) {
               const name = attr.name.toLowerCase();
@@ -173,12 +178,20 @@
       }
     }
 
-    #removeDist(step) {
+    #removeDists(step) {
       for (const el of step.querySelectorAll("[data-coeff]")) {
         el.remove();
       }
       for (const el of step.querySelectorAll("[data-term] > [data-vaporize]")) {
         el.remove();
+      }
+    }
+
+    #resetFraks(step) {
+      for (const el of step.querySelectorAll("[data-frak-anim]")) {
+        el.removeAttribute("data-frak-anim");
+        // el.setAttribute("data-frak", "");
+        el.innerHTML = `<b data-frak>${el.innerHTML}</b>`;
       }
     }
 
@@ -322,7 +335,7 @@
           const beef = api.pick(id);
           if (!beef) return api;
           for (const el of spotter.#targets) {
-            el.parentNode.insertBefore(el, beef.nextSibling);
+            beef.parentNode.insertBefore(el, beef.nextSibling);
           }
           return api;
         },
@@ -369,6 +382,12 @@
         filter: (type) => {
           for (const el of spotter.#targets) {
             el.setAttribute("data-filter", type);
+          }
+          return api;
+        },
+        color: (v) => {
+          for (const el of spotter.#targets) {
+            el.style.color = `hsl(${v},80%,60%)`;
           }
           return api;
         },
@@ -450,26 +469,32 @@
             <path/>
            </svg>
           `;
-          spotter.#stageObject.insertBefore(rootEl, spotter.#targets[0]);
+          spotter.#targets[0].parentNode.insertBefore(
+            rootEl,
+            spotter.#targets[0],
+          );
           const termB = rootEl.querySelector("[data-root-terms]");
           for (const el of spotter.#targets) {
             termB.append(el);
           }
           return api.spot(id);
         },
-        divby(...ids) {
+        frak(...ids) {
+          if (!spotter.#targets.length) return api;
+          const target0 = spotter.#targets[0];
+
           const divEl = document.createElement("b");
-          divEl.innerHTML =  `
-           <b data-divby>
+          divEl.innerHTML = `
+           <b id="${spotter.#targets[0].id}-frak" data-frak-anim>
             <b data-numerator>
              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              <path data-divby-slash />
+              <path data-frak-anim-slash />
              </svg>
             </b>
             <b data-denominator></b>
            </b>
-          `,
-          spotter.#stageObject.insertBefore(divEl, spotter.#targets[0]);
+          `;
+          target0.parentNode.insertBefore(divEl, target0);
           const numer = divEl.querySelector("[data-numerator]");
           const denom = divEl.querySelector("[data-denominator]");
           for (const el of spotter.#targets) numer.append(el);
@@ -528,7 +553,9 @@
       this.#removeAborbs(nextStep);
 
       // remove distributions from stage
-      this.#removeDist(nextStep);
+      this.#removeDists(nextStep);
+
+      this.#resetFraks(nextStep);
 
       // remove the API <b>'s
       this.#removeAPIs(nextStep);
