@@ -186,6 +186,57 @@ svg {
 }
 /* #endregion */
 
+/* #region POWER RULE */
+[date-power-rule-expo] {
+  display: inline-flex;
+  flex-direction: row;
+}
+[data-power-rule-expo-move] {
+  animation: mbx-power-rule linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-power-rule {
+  to {
+    font-size: 1em;
+    vertical-align: 0;
+  }
+}
+[data-power-rule-dot] {
+  font-size: 0;
+  margin: -0.25em;
+  will-change: font-size;
+  transform-origin: 0% 0%;
+  --ani-start: 0.4;
+  animation: mbx-power-rule-dot linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-power-rule-dot {
+  to {
+    font-size: 1em;
+  }
+}
+[data-power-rule-expo-copy] {
+} 
+/* #endregion */
+
+/* #region move */
+[data-move] {
+  animation: move linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes move {
+  from {
+    transform: translate(var(--dx), var(--dy));
+  }
+  to {
+    transform: translate(0, 0);
+  }
+}
+/* #endregion */
+
 /* #region move */
 [data-move] {
   animation: move linear both;

@@ -371,8 +371,8 @@
           return api;
         },
 
-        moveBefore: (anchorId) => move(anchorId, "before"),
-        moveAfter: (anchorId) => move(anchorId, "after"),
+        moveBefore: (id) => move(id, "before"),
+        moveAfter: (id) => move(id, "after"),
         // #endregion
 
         // #region FILTERS
@@ -422,11 +422,9 @@
           return api;
         },
         absorb: (...ids) => {
+          const target0 = spotter.#targets[0];
           const absEl = spotter.#makeTag("b", "<b></b><b></b>", "absorb");
-          spotter.#targets[0].parentNode.insertBefore(
-            absEl,
-            spotter.#targets[0],
-          );
+          target0.parentNode.insertBefore(absEl, target0);
           for (const el of spotter.#targets) {
             absEl.children[0].append(el);
           }
@@ -438,7 +436,7 @@
 
           return api.spot(...ids);
         },
-        dist(id) {
+        dist: (id) => {
           const targets = spotter.#targets;
           const total = targets.length;
           const coeff = api.pick(id);
@@ -461,7 +459,7 @@
           }
           return api.spot(id);
         },
-        root(id) {
+        root: (id) => {
           const target0 = spotter.#targets[0];
           id = id || `${spotter.#opts.fix}${crypto.randomUUID()}`;
           const rootEl = document.createElement("b");
@@ -483,7 +481,7 @@
           }
           return api.spot(id);
         },
-        frak(...ids) {
+        frak: (...ids) => {
           if (!spotter.#targets.length) return api;
           const target0 = spotter.#targets[0];
 
@@ -503,6 +501,41 @@
           const denom = divEl.querySelector("[data-denominator]");
           for (const el of spotter.#targets) numer.append(el);
           for (const id of new Set(ids)) denom.append(api.pick(id));
+        },
+        // #endregion
+        powerRule: () => {
+          const targets = spotter.#targets;
+          for (const el of targets) {
+            el.innerHTML = `<b data-power-rule>${el.innerHTML}</b>`;
+            const sup = el.querySelector("[data-sup]");
+            if (!sup) return api;
+            sup.id = sup.id || `${spotter.#opts.fix}-${crypto.randomUUID()}`;
+            sup.innerHTML = `
+              <b data-power-rule-expo>
+                <b id="${sup.id}-expo-move" data-sup data-power-rule-expo-move>
+                  ${sup.innerText}
+                  <b data-power-rule-dot>&middot;</b>
+                </b>
+                <b data-power-rule-expo-copy>${sup.innerText}</b>
+                <b data-filter="viva" data-grow style="--ani-start:0.5">-1</b>
+              </b>
+            `;
+            api.spot(`${sup.id}-expo-move`).moveBefore(el.id);
+          }
+          spotter.#targets = targets;
+          return api;
+        },
+
+        // #region !!! STILL TO DO !!!
+        moreMethods() {
+          return [
+            "power rule - for derivate and integral",
+            "redux - opposite of frak",
+            "split - opposite of absorb",
+            "faktor - opposite of distribute",
+            "colorize - better css layout of coloring/filters",
+            "cross-fade",
+          ];
         },
         // #endregion
 

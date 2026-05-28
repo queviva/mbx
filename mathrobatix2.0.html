@@ -45,6 +45,31 @@
     <div style="margin: 30px; font-size: 30px">and some stuff</div>
     <mathro-batix id="two" data-mbx='{"color":"300"}'></mathro-batix>
     <script id="ROUTINE">
+      const routineOne = {
+        intro: "power rule for derivaties",
+        stage: `
+          <b id="T1+">1 +</b>
+          <b id="T2x3">
+            <b id="Tx">2x</b>
+            <b id="Tpow2" data-sup>3</b>
+          </b>
+          <b id="EQ">=</b>
+          <b id="T4x3">
+            4x^3
+          </b>
+        `,
+        steps: [
+          {
+            note: "can you do this?"
+          },
+          {
+            note: "move the exponent in front",
+            acts: (S) => {
+              S.spot("T2x3").powerRule();
+            }
+          }
+        ]
+      }
       const XXX_routineOne = {
         intro: `distribute THIS, buddy`,
         stage: `
@@ -127,7 +152,7 @@
           },
         ],
       };
-      const routineOne = {
+      const ZZZ_routineOne = {
         title: "Root Root Root For The Home Team",
         intro: "you are asked to solve this for x",
         stage: `
