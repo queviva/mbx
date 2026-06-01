@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mathro&middot;batix 3B</title>
+    <script
+      src="mbx3.js"
+      data-mbx='{"tag":"mathro-batix","fix":"rat","css":"mbx3.css"}'
+    ></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 100vh;
+        background-color: #888;
+        color: #111;
+        font-size: 2rem;
+      }
+      rat-xxx {
+        position: relative;
+        display: inline;
+        min-width: 70%;
+        min-height: 100px;
+        user-select: none;
+      }
+      mathro-batix {
+        position: relative;
+        display: inline-flex;
+        min-width: 70%;
+        min-height: 100px;
+        user-select: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div>MBX3</div>
+    <rat-xxx>
+      <b data-holder>
+        <b data-step>
+          <b>
+            <b>1 +</b>
+            <b data-grow>2 +</b>
+            <b> 3 = x</b>
+          </b>
+          <b data-comm> you must suck it </b>
+        </b>
+      </b>
+    </rat-xxx>
+    and something
+
+    <mathro-batix id="one"></mathro-batix>
+    <div>and also</div>
+    <mathro-batix id="two" data-rat='{"fix":"cow","color":"40"}'></mathro-batix>
+    <script id="routines">
+      const routineOne = {
+        intro: "Routine ONE",
+        stage: `
+        <b id="T1">1 +</b>
+        <b id="T2">2 +</b>
+        <b id="T3">3</b>
+        <b id="EQ">=</b>
+        <b id="Tx">x</b>
+        `,
+        steps: [
+          {
+            note: "1st of #one",
+            acts: (S) => {
+              S.spot("T1").grow();
+            },
+          },
+          {
+            note: "second of first",
+            acts: (S) => {},
+          },
+          {
+            note: "third of first",
+          },
+        ],
+      };
+      const routineTwo = {
+        intro: "Routine TWO",
+        stage: `
+        (<b id="T1">1</b>) +
+        <b>(</b><b id="T2+">2nig +</b>
+        <b id="T3">3</b><b>)</b>
+        <b id="EQ">=</b>
+        <b id="Tx">x</b>
+        `,
+        steps: [
+          {
+            note: "1st of routine #2",
+            acts: (S) => {
+              S.spot("T2+").grow();
+            },
+          },
+          {
+            note: "2nd of routine #2",
+            load: `(1) + (2 + 3) = x`,
+            acts: (S) => {},
+          },
+          {
+            note: "3rd of routine #2",
+            load: `<b id=T777>7x^3</b>`,
+            acts: (S) => {},
+          },
+        ],
+      };
+    </script>
+    <script id="lizzers">
+      const log = console.log;
+      const one = document.getElementById("one");
+      const two = document.getElementById("two");
+      one.addEventListener("rat-ready", (e) => {
+        one.loadRoutine(routineOne);
+      });
+      two.addEventListener("cow-ready", (e) => {
+        two.loadRoutine(routineTwo);
+      });
+      two.addEventListener("cow-step-1-ready", (e) => {
+        // log("cow's step two is ready");
+      });
+    </script>
+  </body>
+</html>

@@ -2,10 +2,12 @@
   // #region UTILS
   const log = console.log;
 
-  const sieve = (defaults, incoming) => ({
-    ...defaults,
-    ...(incoming && typeof incoming === "object" ? incoming : {}),
-  });
+  const sieve = (base, incoming) => {
+    incoming = incoming && typeof incoming === "object" ? incoming : {};
+    return Object.fromEntries(
+      Object.keys(base).map((k) => [k, k in incoming ? incoming[k] : base[k]]),
+    );
+  };
 
   const parseData = (raw) => {
     if (typeof raw !== "string") return {};
@@ -26,17 +28,37 @@
       }),
     );
   };
+
+  const timeoutPromise = (p, ms) => {
+    if (ms <= 0) return Promise.resolve(p);
+
+    const promise = Promise.resolve(p);
+    const controller = new AbortController();
+    let timerId;
+
+    const tPromise = new Promise((_, reject) => {
+      timerId = setTimeout(() => {
+        controller.abort();
+        reject(new Error("timed out"));
+      }, ms);
+    });
+
+    return Promise.race([promise, tPromise]).finally(() => {
+      clearTimeout(timerId);
+    });
+  };
   // #endregion
 
   // #region OPTS
-  const defaults = {
+  const defOpts = {
     tag: "mathro-batix",
     fix: "mbx",
+    css: "mbx3.css",
     color: 300,
-    css: "mathrobatix2.0.css"
+    timeout: 5000,
   };
 
-  const opts = sieve(defaults, parseData(script?.dataset[defaults.fix]));
+  const devOpts = sieve(defOpts, parseData(script.dataset[defOpts.fix]));
   // #endregion
 
   // #region SPOTTER
@@ -47,8 +69,7 @@
     #routine = {};
     #routineNum = 0;
     #currentStep = 0;
-    #resizeHandler = null;
-    #abortCtrl = null;
+    #isLoading = false;
     #apis = [
       "viva",
       "ghost",
@@ -75,21 +96,9 @@
     constructor(holder, opts) {
       this.#holder = holder;
       this.#opts = opts;
-      // this.#resizeHandler = () => this.loadRoutine(this.#routine);
-      // window.addEventListener("resize", this.#resizeHandler);
     }
 
     // #region PRIVATE METHS
-    #createStepTag(step) {
-      const stepTag = this.#makeTag("b", "", "step");
-      const stage = this.#makeTag("b", this.#stageString, "stage");
-      const comm = this.#makeTag("b", step.note || "", "comm");
-      this.#stageObject = stage;
-      stepTag.setAttribute("data-measure", "");
-      stepTag.append(stage, comm);
-      return stepTag;
-    }
-
     #sanitizeHTML(html = "") {
       if (!html) return document.createDocumentFragment();
 
@@ -150,6 +159,20 @@
       return tpl.content;
     }
 
+    #measureElements(...els) {
+      const props = ["width", "height", "x", "y"];
+      for (const el of new Set(els)) {
+        const rect = el.getBoundingClientRect();
+        const style = el.style;
+        for (const prop of props) {
+          style.setProperty(
+            `--${defOpts.fix}-${prop}`,
+            Math.round(rect[prop]) + "px",
+          );
+        }
+      }
+    }
+
     #makeTag(tag, html, ...attrs) {
       const el = document.createElement(tag);
       el.append(this.#sanitizeHTML(html));
@@ -159,16 +182,32 @@
       return el;
     }
 
-    #measureElements(...els) {
-      const props = ["width", "height", "x", "y"];
-      for (const el of new Set(els)) {
-        const rect = el.getBoundingClientRect();
-        const style = el.style;
-        for (const prop of props) {
-          style.setProperty(
-            `--${this.#opts.fix}-${prop}`,
-            Math.round(rect[prop]) + "px",
-          );
+    #createStepTag(step) {
+      const stepTag = this.#makeTag("b", "", "step");
+      const stage = this.#makeTag("b", this.#stageString, "stage");
+      const comm = this.#makeTag("b", step.note || "", "comm");
+      stepTag.setAttribute("data-measure", "");
+      stepTag.append(stage, comm);
+      return stepTag;
+    }
+
+    #removeIDs(stage) {
+      for (const el of stage.querySelectorAll("b[id]")) {
+        el.removeAttribute("id");
+      }
+    }
+
+    #namespaceIDs(stage, stepNum) {
+      for (const el of stage.querySelectorAll("[id]")) {
+        el.id = `${this.#opts.fix}-step-${stepNum}-${el.id}`;
+      }
+    }
+
+    #removeAPIs(step) {
+      for (const api of this.#apis) {
+        for (const el of step.querySelectorAll(`[data-${api}]`)) {
+          while (el.firstChild) el.parentNode.insertBefore(el.firstChild, el);
+          el.remove();
         }
       }
     }
@@ -197,30 +236,9 @@
         el.innerHTML = `<b data-frak>${el.innerHTML}</b>`;
       }
     }
-
-    #removeAPIs(step) {
-      for (const api of this.#apis) {
-        for (const el of step.querySelectorAll(`[data-${api}]`)) {
-          while (el.firstChild) el.parentNode.insertBefore(el.firstChild, el);
-          el.remove();
-        }
-      }
-    }
-
-    #namespaceIDs(stage, stepNum) {
-      for (const el of stage.querySelectorAll("[id]")) {
-        el.id = `${this.#opts.fix}-step-${stepNum}-${el.id}`;
-      }
-    }
-
-    #removeIDs(stage) {
-      for (const el of stage.querySelectorAll("b[id]")) {
-        el.removeAttribute("id");
-      }
-    }
     // #endregion
 
-    #makeAPI(el, routineNum, signal) {
+    #makeAPI = () => {
       // #region API UTILS
       const spotter = this;
 
@@ -266,8 +284,9 @@
         }
         return api;
       };
+
       const wrap = (type, cssVars) => {
-        for (const el of spotter.#targets) {
+        for (const el of this.#targets) {
           el.innerHTML = `<b data-${type}>${el.innerHTML}</b>`;
           if (cssVars) {
             for (const [key, value] of Object.entries(cssVars)) {
@@ -277,6 +296,7 @@
         }
         return api;
       };
+
       const svgWrap = (type, data, cssVars) => {
         const id = `${spotter.#opts.fix}-${crypto.randomUUID()}`;
         for (const el of spotter.#targets) {
@@ -303,13 +323,12 @@
         // #region FUNDAMENTALS
         pick: (id) => {
           return (
-            spotter.#stageObject?.querySelector(`[id="${CSS.escape(id)}"]`) ||
-            null
+            this.#stageObject?.querySelector(`[id="${CSS.escape(id)}"]`) || null
           );
         },
         spot: (...ids) => {
           const unique = [...new Set(ids)];
-          spotter.#targets = unique
+          this.#targets = unique
             .map((id) => api.pick(id))
             .filter((el) => el !== null);
           return api;
@@ -377,18 +396,10 @@
         moveAfter: (id) => move(id, "after"),
         // #endregion
 
-        // #region FILTERS
+        // #region COLOR|FILTER
         viva: () => wrap("viva"),
         ghost: () => wrap("ghost"),
         vaporize: () => wrap("vaporize"),
-        colorize: (v) => wrap("colorize", { [`--${spotter.#opts.fix}-h`]: v }),
-        setColor: (v) => {
-          for (const el of spotter.#targets) {
-            el.style.setProperty(`--${spotter.#opts.fix}-h`, v);
-            el.style.color = "var(--main-color)";
-          }
-          return api;
-        },
         filterClear: () => wrap("filter-clear"),
         filter: (type) => {
           for (const el of spotter.#targets) {
@@ -396,32 +407,22 @@
           }
           return api;
         },
+        colorize: (v) =>
+          wrap("colorize", { [`--${this.#opts.fix}-colorize-val`]: v }),
+        setColor: (v) => {
+          for (const el of this.#targets) {
+            el.style.setProperty(`--${this.#opts.fix}-h`, v);
+          }
+          return api;
+        },
         // #endregion
 
         // #region GROWTH
-        grow: () => {
-          for (const el of this.#targets) {
-            el.setAttribute("data-grow", "");
-          }
-          log("growing!!");
-          return api;
-        },
-        shrink: () => {
-          for (const el of this.#targets) {
-            el.setAttribute("data-shrink", "");
-          }
-          return;
-          api;
-        },
+        grow: () => wrap("grow"),
+        shrink: () => wrap("shrink"),
         vault: (v) => wrap("vault", v ? { "--vault-height": v } : null),
         tuck: (v) => wrap("tuck", v ? { "--tuck-depth": v } : null),
         spin: (v) => wrap("spin", v ? { "--spin-angle": v } : null),
-        // #endregion
-
-        // #region ANIMATES
-        cank: (v, rot) =>
-          svgWrap("cank", v || null, rot ? { "--cank-rotate": rot } : null),
-        cirk: (v) => svgWrap("cirk", v || null),
         // #endregion
 
         // #region NEEDS UNDO
@@ -454,16 +455,16 @@
           const targets = spotter.#targets;
           const total = targets.length;
           const coeff = api.pick(id);
-          const co_txt = coeff.innerText;
+          const co_html = coeff.innerHTML;
           api.spot(id).vaporize().during(0, 0.5).shrink().during(0.5);
           coeff.setAttribute("data-coeff", "");
           for (const [i, el] of targets.entries()) {
             api
-              .mount(`${coeff.id}-${el.id}`, co_txt, "grow-term")
-              .grow()
-              .during(0.6 + (i / total) * 0.4)
+              .mount(`${coeff.id}-${el.id}`, co_html, "grow-term")
               .insertBefore(el.id)
-              .viva();
+              .viva()
+              .grow()
+              .during(0.6 + (i / total) * 0.4);
             el.innerHTML = `
              <b data-term>
               <b data-vaporize style="--ani-start:${0.25 + (i / total) * 0.4};--ani-end:${0.85 + (i / total) * 0.2}">${el.innerText}</b>
@@ -540,62 +541,80 @@
           return api;
         },
 
-        // #region !!! STILL TO DO !!!
-        moreMethods() {
-          return [
-            "power rule - for derivate and integral",
-            "redux - opposite of frak",
-            "split - opposite of absorb",
-            "faktor - opposite of distribute",
-            "colorize - better css layout of coloring/filters",
-            "cross-fade",
-          ];
-        },
+        // #region !!! MORE TO DO !!!
+        moreToDo: [
+          "clone/dopple - copy immediately ontop of",
+          "power rule - for derivate and integral",
+          "redux - opposite of frak",
+          "split - opposite of absorb",
+          "faktor - opposite of distribute",
+          "colorize - better css layout of coloring/filters",
+          "cross-fade",
+        ],
         // #endregion
-
-        isAlive: () => routineNum === spotter.#routineNum && !signal?.aborted,
       };
-      return api;
-    }
 
-    async #runActs(step, el, routineNum, signal) {
-      if (signal?.aborted || routineNum !== this.#routineNum) return false;
-      if (typeof step.acts !== "function") return true;
+      return new Proxy(api, {
+        set(target, prop, value) {
+          throw new Error("API mutation not allowed");
+        },
+        defineProperty() {
+          throw new Error("API mutation not allowed");
+        },
+        deleteProperty() {
+          throw new Error("API mutation not allowed");
+        },
+        get(target, prop, receiver) {
+          const val = Reflect.get(target, prop, receiver);
+          return typeof val === "function" ? val.bind(target) : val;
+        },
+      });
+    };
+
+    async #runActs(step) {
+      if (typeof step.acts !== "function") return { ok: true };
+
+      const api = this.#makeAPI();
+
       try {
-        const api = this.#makeAPI(el, routineNum, signal);
-        const result = step.acts(api, signal);
-        if (result?.then) await result;
-        return true;
-      } catch {
-        return false;
+        const result = step.acts(api);
+        const resolved = result?.then ? await result : result;
+        if (resolved === false) {
+          return { ok: false, reason: "explicit false return" };
+        }
+        return { ok: true, value: resolved };
+      } catch (err) {
+        return { ok: false, reason: err };
       }
     }
 
-    async #processStep(step, routineNum, signal) {
-      // check if this should even run
-      if (signal?.aborted || routineNum !== this.#routineNum) return false;
+    async #processStep(step) {
+      // TEST & STALL
+      // await new Promise((r) => setTimeout(r, 800));
 
       // load new stage if needed
-      if (step.load) this.#stageString = step.load;
+      if (step.load) this.#stageString = step.load.replace(/>\s+</g, "> <");
 
       // make the step tags
       const stepTag = this.#createStepTag(step);
 
-      // should we keep going and add the tag?
-      if (signal?.aborted || routineNum !== this.#routineNum) return false;
+      // set the stage object
+      this.#stageObject = stepTag.children[0];
+
+      // append the steptags
       this.#holder.append(stepTag);
 
-      // !!! layout HAKC - must be here !!!
+      // !!! layout HAKC - must be here for measuring !!!
       await new Promise((r) => requestAnimationFrame(r));
 
       // set measurements
       this.#measureElements(...this.#stageObject.querySelectorAll("[id]"));
 
-      // try to run the actions
-      const acted = await this.#runActs(step, stepTag, routineNum, signal);
+      // try to run the acts
+      const acted = await this.#runActs(step);
 
       // check if that werked
-      if (!acted) return false;
+      if (!acted) return { ok: false, reason: acted };
 
       // copy the step tags for next time
       const nextStep = this.#makeTag("b", stepTag.innerHTML, "step");
@@ -618,62 +637,55 @@
       // remove IDs [or make namespaceIDs()]
       this.#removeIDs(stepTag.children[0]);
 
-      // should this still BE finalized?
-      if (signal?.aborted || routineNum !== this.#routineNum) {
-        stepTag.remove();
-        return false;
-      }
-
       // the tag is done with measurements
       stepTag.removeAttribute("data-measure");
 
       // let em know you're rockin
-      dispatch(
-        this.#holder,
-        `${this.#opts.fix}-step-${this.#currentStep}-ready`,
-      );
-
-      // now you can increment the step
-      this.#currentStep++;
+      dispatch(this.#holder, `${this.#opts.fix}-#${this.#currentStep}-ready`);
 
       // let the rez know
-      return true;
+      return { ok: true };
     }
 
     async loadRoutine(routine = {}) {
-      if (this.#abortCtrl) this.#abortCtrl.abort();
-      this.#abortCtrl = new AbortController();
+      if (this.#isLoading) return { ok: false, reason: "already loading" };
+      this.#isLoading = true;
 
       this.#holder.replaceChildren();
       this.#routine = routine;
       const routineNum = ++this.#routineNum;
       this.#currentStep = 0;
 
-      if (routine.intro)
+      if (routine.intro) {
         this.#holder.append(this.#makeTag("b", routine.intro, "intro"));
+      }
 
-      this.#stageString = routine.stage || "";
+      this.#stageString = routine.stage.replace(/>\s+</g, "> <") || "";
+
+      dispatch(this.#holder, `${this.#opts.fix}-routine-start`);
 
       for (const step of routine.steps || []) {
         if (routineNum !== this.#routineNum) break;
-        const success = await this.#processStep(
-          step,
-          routineNum,
-          this.#abortCtrl.signal,
-        );
-        if (!success) break;
+
+        const stepIndex = this.#currentStep++;
+        const result = await this.#processStep(step);
+
+        if (!result?.ok) {
+          dispatch(this.#holder, `${this.#opts.fix}-routine-failed`);
+          this.#isLoading = false;
+          return { ok: false, step: stepIndex, reason: result?.reason };
+        }
       }
+
+      this.#isLoading = false;
+      dispatch(this.#holder, `${this.#opts.fix}-routine-complete`);
+      return { ok: true };
     }
 
     disconnect() {
       ++this.#routineNum;
-      this.#abortCtrl?.abort();
-      window.removeEventListener("resize", this.#resizeHandler);
       this.#holder?.replaceChildren();
-
       this.#holder = null;
-      this.#abortCtrl = null;
-      this.#resizeHandler = null;
       this.#routine = {};
     }
   }
@@ -689,9 +701,9 @@
     }
 
     connectedCallback() {
-      this.#opts = sieve(opts, parseData(this.dataset[opts.fix]));
+      this.#opts = sieve(devOpts, parseData(this.dataset[devOpts.fix]));
 
-      this.innerHTML = `<b data-holder style="--${this.#opts.fix}-h:${this.#opts.color};"></b>`;
+      this.innerHTML = `<b data-holder style="--${devOpts.fix}-h:${this.#opts.color}"></b>`;
 
       this.#spotter = new Spotter(this.children[0], this.#opts);
 
@@ -712,18 +724,26 @@
   // #region INIT
   const boot = async () => {
     // INJECT CSS
-    const rez = await fetch(opts.css);
-    const CSSText = await rez.text();
-    const styleTag = document.createElement("style");
-    styleTag.textContent = CSSText.replaceAll(
-      defaults.tag,
-      opts.tag,
-    ).replaceAll(defaults.fix, opts.fix);
-    document.head.appendChild(styleTag); // No await needed
+    try {
+      const rez = await fetch(devOpts.css);
+      if (!rez.ok) throw new Error("oops");
+
+      const CSSText = await rez.text();
+      const styleTag = document.createElement("style");
+
+      styleTag.textContent = CSSText.replaceAll(
+        defOpts.tag,
+        devOpts.tag,
+      ).replaceAll(defOpts.fix, devOpts.fix);
+
+      document.head.appendChild(styleTag);
+    } catch (err) {
+      log(err, "what happened?");
+    }
 
     // REGISTER TAG
-    if (!customElements.get(opts.tag)) {
-      customElements.define(opts.tag, MBX);
+    if (!customElements.get(devOpts.tag)) {
+      customElements.define(devOpts.tag, MBX);
     }
   };
 

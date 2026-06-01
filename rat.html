@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>rat testing</title>
+    <!-- <link rel="stylesheet" href="rat.css" /> -->
+    <script
+      src="mbx3.js"
+      data-mbx='{"tag":"rat-batix","css":"rat.css"}'
+    ></script>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 100vh;
+      }
+      rat-batix {
+        min-width: 70%;
+        font-size: 3rem;
+        background-color: #111;
+      }
+    </style>
+  </head>
+
+  <body>
+    <rat-batix id="two" data-mbx='{"color":300}'></rat-batix>
+
+    <script id="ROUTINES">
+      const routineTwo = {
+        intro: `
+          <b data-logo>MATHROBATIX</b>
+          illuminated acrobatic gestural mathematics
+        `,
+        stage: `
+          <b id="T3x2">3x<b id="Tsup2" data-sup>2</b></b>
+          <b id="Tplus1">+</b>
+          <b id="T7">7 <b data-middot>&middot;</b></b>
+          <b id="P1" data-parens-left>(</b>
+          <b id="Tx">x</b>
+          <b id="Tplus2">+</b>
+          <b id="T1">1</b>
+          <b id="P2" data-parens-rite>)</b>
+          <b id="EQ">=</b>
+          <b id="T5">5</b>
+        `,
+        steps: [
+          {
+            note: "let's see if we can solve this",
+            acts: (S) => {
+              S.spot("Tplus1", "T7", "P1", "Tx", "Tplus2", "T1", "P2").unfurl();
+            },
+          },
+          {
+            note: "go get em, boss",
+            acts: (S) => {
+              S.spot("Tsup2").spin();
+              S.spot("Tx", "T1").dist("T7");
+            },
+          },
+          {
+            note: "what happens here",
+            acts: (S) => {
+              S.mount("T7x", "7x").spot("T7-Tx", "Tx").absorb("T7x").viva();
+              S.mount("T7", "7").spot("T7-T1", "T1").absorb("T7").viva();
+            },
+          },
+          {
+            note: "clearing filter",
+            acts: (S) => {
+              S.spot("T7x").filter("viva").filterClear();
+            },
+          },
+          {
+            note: "trying clearing again",
+            acts: (S) => {
+              S.spot("T7x").filter("clear");
+            },
+          },
+          {
+            note: "try to frak",
+            load: `
+            <b id="T3x2">3x^2</b>
+            <b id="EQ">=</b>
+            <b id="T27">27</b>
+            `,
+            acts: (S) => {
+              S.spot("T27").colorize("180");
+              S.mount("T3-a","3").mount("T3-b","3");
+              S.spot("T3x2").frak("T3-a");
+              S.spot("T27").frak("T3-b");
+            },
+          },
+          {
+            note: "what becomes of that?",
+            acts: (S) => {
+              S.spot("T3x2-frak").setColor(40).viva();
+            }
+          }
+        ],
+      };
+      const two = document.getElementById("two");
+      two.addEventListener("mbx-ready", (e) => {
+        two.loadRoutine(routineTwo);
+      });
+    </script>
+
+    <script id="DEBUGG">
+      const log = console.log;
+    </script>
+
+    <script id="widthScript">
+      const getWidths = () => {
+        document
+          .querySelectorAll(
+            "[data-dist] > b, [data-grow], [data-shrink], [data-absorb] > b",
+          )
+          .forEach((el) => {
+            el.style.animationTimeline = "none";
+            el.style.animation = "none";
+            el.style.setProperty("--mbx-width", el.offsetWidth + "px");
+            el.style.animationTimeline = "view()";
+            el.style.animation = "";
+          });
+      };
+      window.addEventListener("load", getWidths);
+    </script>
+  </body>
+</html>
