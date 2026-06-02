@@ -1,8 +1,9 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
     <title>rat testing</title>
+    <meta charset="UTF-8" />
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
     <!-- <link rel="stylesheet" href="rat.css" /> -->
     <script
       src="mbx3.js"
@@ -14,6 +15,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        padding-top: 50vh;
         padding-bottom: 100vh;
       }
       rat-batix {
@@ -36,68 +38,29 @@
         stage: `
           <b id="T3x2">3x<b id="Tsup2" data-sup>2</b></b>
           <b id="Tplus1">+</b>
-          <b id="T7">7 <b data-middot>&middot;</b></b>
-          <b id="P1" data-parens-left>(</b>
-          <b id="Tx">x</b>
+          <b id="T7x">7x</b>
           <b id="Tplus2">+</b>
           <b id="T1">1</b>
-          <b id="P2" data-parens-rite>)</b>
           <b id="EQ">=</b>
           <b id="T5">5</b>
         `,
         steps: [
           {
-            note: "let's see if we can solve this",
+            note: "this is it you see?",
             acts: (S) => {
-              S.spot("Tplus1", "T7", "P1", "Tx", "Tplus2", "T1", "P2").unfurl();
+              S.spot("T7x").root("T7x-root");
+              // S.spot("T7x-root", "Tplus2")
+              // .vault()
+              // .moveAfter("EQ");
+              // S.mount("T-RAT", "RAT");
+              // S.mount("T-ATAT", "ATAT");
+              // S.spot("T7x", "Tplus2", "T1").unfurl();//.xfade("T-RAT", "T-ATAT");
             },
           },
           {
-            note: "go get em, boss",
-            acts: (S) => {
-              S.spot("Tsup2").spin();
-              S.spot("Tx", "T1").dist("T7");
-            },
+            note: "check the un-doing of these",
+            acts: (S) => {},
           },
-          {
-            note: "what happens here",
-            acts: (S) => {
-              S.mount("T7x", "7x").spot("T7-Tx", "Tx").absorb("T7x").viva();
-              S.mount("T7", "7").spot("T7-T1", "T1").absorb("T7").viva();
-            },
-          },
-          {
-            note: "clearing filter",
-            acts: (S) => {
-              S.spot("T7x").filter("viva").filterClear();
-            },
-          },
-          {
-            note: "trying clearing again",
-            acts: (S) => {
-              S.spot("T7x").filter("clear");
-            },
-          },
-          {
-            note: "try to frak",
-            load: `
-            <b id="T3x2">3x^2</b>
-            <b id="EQ">=</b>
-            <b id="T27">27</b>
-            `,
-            acts: (S) => {
-              S.spot("T27").colorize("180");
-              S.mount("T3-a","3").mount("T3-b","3");
-              S.spot("T3x2").frak("T3-a");
-              S.spot("T27").frak("T3-b");
-            },
-          },
-          {
-            note: "what becomes of that?",
-            acts: (S) => {
-              S.spot("T3x2-frak").setColor(40).viva();
-            }
-          }
         ],
       };
       const two = document.getElementById("two");
@@ -108,23 +71,6 @@
 
     <script id="DEBUGG">
       const log = console.log;
-    </script>
-
-    <script id="widthScript">
-      const getWidths = () => {
-        document
-          .querySelectorAll(
-            "[data-dist] > b, [data-grow], [data-shrink], [data-absorb] > b",
-          )
-          .forEach((el) => {
-            el.style.animationTimeline = "none";
-            el.style.animation = "none";
-            el.style.setProperty("--mbx-width", el.offsetWidth + "px");
-            el.style.animationTimeline = "view()";
-            el.style.animation = "";
-          });
-      };
-      window.addEventListener("load", getWidths);
     </script>
   </body>
 </html>

@@ -99,13 +99,11 @@
     }
 
     // #region PRIVATE METHS
-    #sanitizeHTML(html = "") {
-      if (!html) return document.createDocumentFragment();
-
-      let markup = String(html).trim();
-
-      markup = markup
+    #markup(html) {
+      return html
+        .trim()
         .replace(/\s+/g, " ")
+        .replace(/>\s+</g, "> <")
         .replace(
           /([^\s])\^(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g,
           "$1<b data-sup>$2</b>",
@@ -114,6 +112,10 @@
           /([^\s])\_(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g,
           "$1<b data-sub>$2</b>",
         );
+    }
+
+    #sanitizeHTML(html) {
+      const markup = this.#markup(String(html));
 
       const tpl = document.createElement("template");
       tpl.innerHTML = markup;
@@ -156,7 +158,9 @@
         node = nextNode;
       }
 
-      return tpl.content;
+      const tmpB = document.createElement("b");
+      tmpB.appendChild(tpl.content.cloneNode(true));
+      return tmpB.innerHTML;
     }
 
     #measureElements(...els) {
@@ -175,7 +179,7 @@
 
     #makeTag(tag, html, ...attrs) {
       const el = document.createElement(tag);
-      el.append(this.#sanitizeHTML(html));
+      el.innerHTML = this.#markup(html);
       for (const attr of new Set((attrs || []).filter((a) => a != null))) {
         el.setAttribute(`data-${attr}`, "");
       }
@@ -203,17 +207,18 @@
       }
     }
 
-    #removeAPIs(step) {
-      for (const api of this.#apis) {
-        for (const el of step.querySelectorAll(`[data-${api}]`)) {
-          while (el.firstChild) el.parentNode.insertBefore(el.firstChild, el);
-          el.remove();
-        }
+    #removeAbsorbs(step) {
+      for (const el of step.querySelectorAll("[data-absorb]")) {
+        log(el.parentNode);
+        return;
+        while (el.children[1].firstChild)
+          el.parentNode.insertBefore(el.children[1].firstChild, el);
+        el.remove();
       }
     }
 
-    #removeAbsorbs(step) {
-      for (const el of step.querySelectorAll("[data-absorb]")) {
+    #removeXfades(step) {
+      for (const el of step.querySelectorAll("[data-xfade]")) {
         while (el.children[1].firstChild)
           el.parentNode.insertBefore(el.children[1].firstChild, el);
         el.remove();
@@ -236,20 +241,27 @@
         el.innerHTML = `<b data-frak>${el.innerHTML}</b>`;
       }
     }
+
+    #removeAPIs(step) {
+      for (const api of this.#apis) {
+        for (const el of step.querySelectorAll(`[data-${api}]`)) {
+          while (el.firstChild) el.parentNode.insertBefore(el.firstChild, el);
+          el.remove();
+        }
+      }
+    }
+
     // #endregion
 
     #makeAPI = () => {
       // #region API UTILS
-      const spotter = this;
 
       const move = (anchorId, direction) => {
-        const anchor = spotter.#stageObject.querySelector(
-          `[id="${CSS.escape(anchorId)}"]`,
-        );
+        const anchor = api.pick(anchorId);
         if (!anchor) return api;
 
         const allElements = Array.from(
-          spotter.#stageObject.querySelectorAll("[id]"),
+          this.#stageObject.querySelectorAll("[id]"),
         );
 
         const snapshots = new Map();
@@ -259,8 +271,8 @@
 
         const targetArray =
           direction === "after"
-            ? Array.from(spotter.#targets).reverse()
-            : Array.from(spotter.#targets);
+            ? Array.from(this.#targets).reverse()
+            : Array.from(this.#targets);
 
         for (const el of targetArray) {
           const ref = direction === "before" ? anchor : anchor.nextSibling;
@@ -298,8 +310,8 @@
       };
 
       const svgWrap = (type, data, cssVars) => {
-        const id = `${spotter.#opts.fix}-${crypto.randomUUID()}`;
-        for (const el of spotter.#targets) {
+        const id = `${this.#opts.fix}-${crypto.randomUUID()}`;
+        for (const el of this.#targets) {
           el.innerHTML = `
             <b data-${type}="${data || null}">
               <b>${el.innerHTML}</b>
@@ -334,21 +346,21 @@
           return api;
         },
         mount: (id, html, ...attrs) => {
-          const el = spotter.#makeTag("b", html, ...attrs);
+          const el = this.#makeTag("b", html, ...attrs);
           el.id = CSS.escape(id);
-          spotter.#stageObject?.append(el);
-          spotter.#measureElements(el);
+          this.#stageObject?.append(el);
+          this.#measureElements(el);
           return api.spot(el.id);
         },
         dismount: () => {
-          for (const el of spotter.#targets) {
+          for (const el of this.#targets) {
             el.remove();
           }
         },
         insertBefore: (id) => {
           const beef = api.pick(id);
           if (!beef) return api;
-          for (const el of spotter.#targets) {
+          for (const el of this.#targets) {
             el.parentNode.insertBefore(el, beef);
           }
           return api;
@@ -356,15 +368,15 @@
         insertAfter: (id) => {
           const beef = api.pick(id);
           if (!beef) return api;
-          for (const el of spotter.#targets) {
+          for (const el of this.#targets) {
             beef.parentNode.insertBefore(el, beef.nextSibling);
           }
           return api;
         },
         alter: (html) => {
-          for (const el of spotter.#targets) {
-            el.replaceChildren(spotter.#sanitizeHTML(html));
-            spotter.#measureElements(el);
+          for (const el of this.#targets) {
+            el.replaceChildren(this.#sanitizeHTML(html));
+            this.#measureElements(el);
           }
         },
         hide: () => {
@@ -383,7 +395,7 @@
           const s = start != null ? Math.max(0, Math.min(1, start)) : null;
           const e = end != null ? Math.max(0, Math.min(1, end)) : null;
 
-          spotter.#targets.forEach((el) => {
+          this.#targets.forEach((el) => {
             const fc = el.children[0];
             if (start != null) fc.style.setProperty("--ani-start", start);
             if (end != null) fc.style.setProperty("--ani-end", end);
@@ -402,7 +414,7 @@
         vaporize: () => wrap("vaporize"),
         filterClear: () => wrap("filter-clear"),
         filter: (type) => {
-          for (const el of spotter.#targets) {
+          for (const el of this.#targets) {
             el.setAttribute("data-filter", type);
           }
           return api;
@@ -427,32 +439,57 @@
 
         // #region NEEDS UNDO
         unfurl: () => {
-          const targets = spotter.#targets;
+          const targets = this.#targets;
           const total = targets.length;
           for (const [i, el] of targets.entries()) {
-            api.spot(el.id);
-            wrap("grow", { "--ani-start": i / total });
+            api
+              .spot(el.id)
+              .grow()
+              .during(i / total);
           }
-          spotter.#targets = targets;
+          this.#targets = targets;
           return api;
         },
         absorb: (...ids) => {
-          const target0 = spotter.#targets[0];
-          const absEl = spotter.#makeTag("b", "<b></b><b></b>", "absorb");
+          const target0 = this.#targets[0];
+          const absEl = this.#makeTag("b", "<b></b><b></b>", "absorb");
+          absEl.id = `${ids[0]}-absorb`;
           target0.parentNode.insertBefore(absEl, target0);
-          for (const el of spotter.#targets) {
-            absEl.children[0].append(el);
-          }
-          for (const id of new Set(ids)) {
-            absEl.children[1].append(api.pick(id));
-          }
+          for (const el of this.#targets) absEl.children[0].append(el);
+          for (const id of new Set(ids)) absEl.children[1].append(api.pick(id));
 
-          spotter.#measureElements(absEl.children[0], absEl.children[1]);
+          this.#measureElements(absEl.children[0], absEl.children[1]);
+
+          return api.spot(absEl.id);
+        },
+        xfade: (...ids) => {
+          const target0 = this.#targets[0];
+          const fadeEl = this.#makeTag("b", "<b></b><b></b>", "xfade");
+          const [org, dop] = fadeEl.children;
+
+          target0.parentNode.insertBefore(fadeEl, target0);
+
+          for (const el of this.#targets) org.append(el);
+          for (const id of new Set(ids)) dop.append(api.pick(id));
+
+          this.#measureElements(fadeEl, ...fadeEl.children);
+
+          fadeEl.style.setProperty(
+            `--${this.#opts.fix}-xfade-wide0`,
+            `${Math.round(fadeEl.children[0].getBoundingClientRect().width)}px`,
+          );
+
+          fadeEl.style.setProperty(
+            `--${this.#opts.fix}-xfade-wide1`,
+            `${Math.round(fadeEl.children[1].getBoundingClientRect().width)}px`,
+          );
+
+          fadeEl.setAttribute("id", `${ids[0]}-xfade`);
 
           return api.spot(...ids);
         },
         dist: (id) => {
-          const targets = spotter.#targets;
+          const targets = this.#targets;
           const total = targets.length;
           const coeff = api.pick(id);
           const co_html = coeff.innerHTML;
@@ -475,8 +512,8 @@
           return api.spot(id);
         },
         root: (id) => {
-          const target0 = spotter.#targets[0];
-          id = id || `${spotter.#opts.fix}${crypto.randomUUID()}`;
+          const target0 = this.#targets[0];
+          id = id || `${this.#opts.fix}${crypto.randomUUID()}`;
           const rootEl = document.createElement("b");
           rootEl.id = CSS.escape(id);
           rootEl.setAttribute("data-root-anim", "");
@@ -491,18 +528,16 @@
           `;
           target0.parentNode.insertBefore(rootEl, target0);
           const termB = rootEl.querySelector("[data-root-terms]");
-          for (const el of spotter.#targets) {
-            termB.append(el);
-          }
+          for (const el of this.#targets) termB.append(el);
           return api.spot(id);
         },
         frak: (...ids) => {
-          if (!spotter.#targets.length) return api;
-          const target0 = spotter.#targets[0];
+          if (!this.#targets.length) return api;
+          const target0 = this.#targets[0];
 
-          const divEl = document.createElement("b");
-          divEl.innerHTML = `
-           <b id="${spotter.#targets[0].id}-frak" data-frak-anim>
+          const frakEl = document.createElement("b");
+          frakEl.innerHTML = `
+           <b id="${this.#targets[0].id}-frak" data-frak-anim>
             <b data-numerator>
              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               <path data-frak-anim-slash />
@@ -511,20 +546,21 @@
             <b data-denominator></b>
            </b>
           `;
-          target0.parentNode.insertBefore(divEl, target0);
-          const numer = divEl.querySelector("[data-numerator]");
-          const denom = divEl.querySelector("[data-denominator]");
-          for (const el of spotter.#targets) numer.append(el);
+          target0.parentNode.insertBefore(frakEl, target0);
+          const numer = frakEl.querySelector("[data-numerator]");
+          const denom = frakEl.querySelector("[data-denominator]");
+          for (const el of this.#targets) numer.append(el);
           for (const id of new Set(ids)) denom.append(api.pick(id));
+          return api;
         },
         // #endregion
         powerRule: () => {
-          const targets = spotter.#targets;
+          const targets = this.#targets;
           for (const el of targets) {
             el.innerHTML = `<b data-power-rule>${el.innerHTML}</b>`;
             const sup = el.querySelector("[data-sup]");
             if (!sup) return api;
-            sup.id = sup.id || `${spotter.#opts.fix}-${crypto.randomUUID()}`;
+            sup.id = sup.id || `${this.#opts.fix}-${crypto.randomUUID()}`;
             sup.innerHTML = `
               <b data-power-rule-expo>
                 <b id="${sup.id}-expo-move" data-sup data-power-rule-expo-move>
@@ -537,7 +573,7 @@
             `;
             api.spot(`${sup.id}-expo-move`).moveBefore(el.id);
           }
-          spotter.#targets = targets;
+          this.#targets = targets;
           return api;
         },
 
@@ -593,7 +629,7 @@
       // await new Promise((r) => setTimeout(r, 800));
 
       // load new stage if needed
-      if (step.load) this.#stageString = step.load.replace(/>\s+</g, "> <");
+      if (step.load) this.#stageString = step.load
 
       // make the step tags
       const stepTag = this.#createStepTag(step);
@@ -622,6 +658,9 @@
       // remove absorbs from stage
       this.#removeAbsorbs(nextStep);
 
+      // remove xfades from stage
+      this.#removeXfades(nextStep);
+
       // remove distributions from stage
       this.#removeDists(nextStep);
 
@@ -631,10 +670,10 @@
       // remove the API <b>'s
       this.#removeAPIs(nextStep);
 
-      // reset the stage string to trimmed tags
+      // reset the stage string to the cleaned tags
       this.#stageString = nextStep.children[0].innerHTML;
 
-      // remove IDs [or make namespaceIDs()]
+      // remove IDs [or make #namespaceIDs()]
       this.#removeIDs(stepTag.children[0]);
 
       // the tag is done with measurements
@@ -657,7 +696,7 @@
       this.#currentStep = 0;
 
       if (routine.intro) {
-        this.#holder.append(this.#makeTag("b", routine.intro, "intro"));
+        this.#holder.append(this.#makeTag("b", this.#sanitizeHTML(routine.intro), "intro"));
       }
 
       this.#stageString = routine.stage.replace(/>\s+</g, "> <") || "";
