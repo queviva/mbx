@@ -66,10 +66,12 @@
     // #region PRIVATE FIELDS
     #opts;
     #holder = null;
+    #isLoading = false;
     #routine = {};
     #routineNum = 0;
     #currentStep = 0;
-    #isLoading = false;
+    #stageObj = null;
+    #batties = new Set();
     #apis = [
       "viva",
       "ghost",
@@ -88,9 +90,6 @@
       "original",
     ];
     #allowed = new Set(["id"]);
-    #stageString = null;
-    #stageObject = null;
-    #targets = new Set();
     // #endregion
 
     constructor(holder, opts) {
@@ -98,7 +97,7 @@
       this.#opts = opts;
     }
 
-    // #region PRIVATE METHS
+    // #region SPOT UTILS
     #markup(html) {
       return html
         .trim()
@@ -114,7 +113,7 @@
         );
     }
 
-    #sanitizeHTML(html) {
+    #strip(html) {
       const markup = this.#markup(String(html));
 
       const tpl = document.createElement("template");
@@ -163,6 +162,28 @@
       return tmpB.innerHTML;
     }
 
+    #makeTag(tag, html, ...attrs) {
+      const el = document.createElement(tag);
+      el.innerHTML = this.#markup(html);
+      for (const attr of new Set((attrs || []).filter((a) => a != null))) {
+        el.setAttribute(`data-${attr}`, "");
+      }
+      return el;
+    }
+
+    #saniTag(tag, html, ...attrs) {
+      return this.#makeTag(tag, this.#strip(html), ...attrs);
+    }
+
+    #makeStepTag(load, note) {
+      const stepTag = this.#makeTag("b", "", "step");
+      const stage = this.#makeTag("b", load, "stage");
+      const comm = this.#makeTag("b", note, "comm");
+      stepTag.setAttribute("data-measure", "");
+      stepTag.append(stage, comm);
+      return stepTag;
+    }
+
     #measureElements(...els) {
       const props = ["width", "height", "x", "y"];
       for (const el of new Set(els)) {
@@ -177,40 +198,22 @@
       }
     }
 
-    #makeTag(tag, html, ...attrs) {
-      const el = document.createElement(tag);
-      el.innerHTML = this.#markup(html);
-      for (const attr of new Set((attrs || []).filter((a) => a != null))) {
-        el.setAttribute(`data-${attr}`, "");
+    #namespaceIDs(stage, stepNum) {
+      for (const el of stage.querySelectorAll("[id]")) {
+        el.id = `${this.#opts.fix}-step-${stepNum}-${el.id}`;
       }
-      return el;
     }
+    // #endregion
 
-    #createStepTag(step) {
-      const stepTag = this.#makeTag("b", "", "step");
-      const stage = this.#makeTag("b", this.#stageString, "stage");
-      const comm = this.#makeTag("b", step.note || "", "comm");
-      stepTag.setAttribute("data-measure", "");
-      stepTag.append(stage, comm);
-      return stepTag;
-    }
-
+    // #region REMOVE METHS
     #removeIDs(stage) {
       for (const el of stage.querySelectorAll("b[id]")) {
         el.removeAttribute("id");
       }
     }
 
-    #namespaceIDs(stage, stepNum) {
-      for (const el of stage.querySelectorAll("[id]")) {
-        el.id = `${this.#opts.fix}-step-${stepNum}-${el.id}`;
-      }
-    }
-
     #removeAbsorbs(step) {
       for (const el of step.querySelectorAll("[data-absorb]")) {
-        log(el.parentNode);
-        return;
         while (el.children[1].firstChild)
           el.parentNode.insertBefore(el.children[1].firstChild, el);
         el.remove();
@@ -260,36 +263,34 @@
         const anchor = api.pick(anchorId);
         if (!anchor) return api;
 
-        const allElements = Array.from(
-          this.#stageObject.querySelectorAll("[id]"),
-        );
+        const allBats = Array.from(this.#stageObj.querySelectorAll("*"));
 
         const snapshots = new Map();
-        for (const el of allElements) {
-          snapshots.set(el.id, el.getBoundingClientRect());
+        for (const bat of allBats) {
+          snapshots.set(bat.id, bat.getBoundingClientRect());
         }
 
-        const targetArray =
+        const batsArray =
           direction === "after"
-            ? Array.from(this.#targets).reverse()
-            : Array.from(this.#targets);
+            ? Array.from(this.#batties).reverse()
+            : Array.from(this.#batties);
 
-        for (const el of targetArray) {
+        for (const bat of batsArray) {
           const ref = direction === "before" ? anchor : anchor.nextSibling;
-          anchor.parentNode.insertBefore(el, ref);
+          anchor.parentNode.insertBefore(bat, ref);
         }
 
-        for (const el of allElements) {
-          const oldRect = snapshots.get(el.id);
-          const newRect = el.getBoundingClientRect();
+        for (const bat of allBats) {
+          const oldRect = snapshots.get(bat.id);
+          const newRect = bat.getBoundingClientRect();
 
           const dx = oldRect.left - newRect.left;
           const dy = oldRect.top - newRect.top;
 
           // don't make little jiggles
           if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-            el.innerHTML = `<b data-move>${el.innerHTML}</b>`;
-            const wrapper = el.children[0];
+            bat.innerHTML = `<b data-move>${bat.innerHTML}</b>`;
+            const wrapper = bat.children[0];
             wrapper.style.setProperty("--dx", `${Math.round(dx)}px`);
             wrapper.style.setProperty("--dy", `${Math.round(dy)}px`);
           }
@@ -298,11 +299,11 @@
       };
 
       const wrap = (type, cssVars) => {
-        for (const el of this.#targets) {
-          el.innerHTML = `<b data-${type}>${el.innerHTML}</b>`;
+        for (const bat of this.#batties) {
+          bat.innerHTML = `<b data-${type}>${bat.innerHTML}</b>`;
           if (cssVars) {
             for (const [key, value] of Object.entries(cssVars)) {
-              el.children[0].style.setProperty(key, value);
+              bat.children[0].style.setProperty(key, value);
             }
           }
         }
@@ -311,10 +312,10 @@
 
       const svgWrap = (type, data, cssVars) => {
         const id = `${this.#opts.fix}-${crypto.randomUUID()}`;
-        for (const el of this.#targets) {
-          el.innerHTML = `
+        for (const bat of this.#batties) {
+          bat.innerHTML = `
             <b data-${type}="${data || null}">
-              <b>${el.innerHTML}</b>
+              <b>${bat.innerHTML}</b>
               <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                 <clipPath id="${id}"><path/></clipPath>
                 <path clip-path="url(#${id})"/>
@@ -323,7 +324,7 @@
           `;
           if (cssVars) {
             for (const [key, value] of Object.entries(cssVars)) {
-              el.children[0].style.setProperty(key, value);
+              bat.children[0].style.setProperty(key, value);
             }
           }
         }
@@ -335,12 +336,12 @@
         // #region FUNDAMENTALS
         pick: (id) => {
           return (
-            this.#stageObject?.querySelector(`[id="${CSS.escape(id)}"]`) || null
+            this.#stageObj?.querySelector(`[id="${CSS.escape(id)}"]`) || null
           );
         },
         spot: (...ids) => {
           const unique = [...new Set(ids)];
-          this.#targets = unique
+          this.#batties = unique
             .map((id) => api.pick(id))
             .filter((el) => el !== null);
           return api;
@@ -348,19 +349,19 @@
         mount: (id, html, ...attrs) => {
           const el = this.#makeTag("b", html, ...attrs);
           el.id = CSS.escape(id);
-          this.#stageObject?.append(el);
+          this.#stageObj?.append(el);
           this.#measureElements(el);
           return api.spot(el.id);
         },
         dismount: () => {
-          for (const el of this.#targets) {
+          for (const el of this.#batties) {
             el.remove();
           }
         },
         insertBefore: (id) => {
           const beef = api.pick(id);
           if (!beef) return api;
-          for (const el of this.#targets) {
+          for (const el of this.#batties) {
             el.parentNode.insertBefore(el, beef);
           }
           return api;
@@ -368,25 +369,25 @@
         insertAfter: (id) => {
           const beef = api.pick(id);
           if (!beef) return api;
-          for (const el of this.#targets) {
+          for (const el of this.#batties) {
             beef.parentNode.insertBefore(el, beef.nextSibling);
           }
           return api;
         },
         alter: (html) => {
-          for (const el of this.#targets) {
-            el.replaceChildren(this.#sanitizeHTML(html));
+          for (const el of this.#batties) {
+            el.replaceChildren(this.#strip(html));
             this.#measureElements(el);
           }
         },
         hide: () => {
-          for (const el of api.#targets) {
+          for (const el of api.#batties) {
             el.style.display = "none";
           }
           return api;
         },
         show: () => {
-          for (const el of api.#targets) {
+          for (const el of api.#batties) {
             el.style.display = "revert";
           }
           return api;
@@ -395,7 +396,7 @@
           const s = start != null ? Math.max(0, Math.min(1, start)) : null;
           const e = end != null ? Math.max(0, Math.min(1, end)) : null;
 
-          this.#targets.forEach((el) => {
+          this.#batties.forEach((el) => {
             const fc = el.children[0];
             if (start != null) fc.style.setProperty("--ani-start", start);
             if (end != null) fc.style.setProperty("--ani-end", end);
@@ -414,7 +415,7 @@
         vaporize: () => wrap("vaporize"),
         filterClear: () => wrap("filter-clear"),
         filter: (type) => {
-          for (const el of this.#targets) {
+          for (const el of this.#batties) {
             el.setAttribute("data-filter", type);
           }
           return api;
@@ -422,7 +423,7 @@
         colorize: (v) =>
           wrap("colorize", { [`--${this.#opts.fix}-colorize-val`]: v }),
         setColor: (v) => {
-          for (const el of this.#targets) {
+          for (const el of this.#batties) {
             el.style.setProperty(`--${this.#opts.fix}-h`, v);
           }
           return api;
@@ -439,63 +440,89 @@
 
         // #region NEEDS UNDO
         unfurl: () => {
-          const targets = this.#targets;
-          const total = targets.length;
-          for (const [i, el] of targets.entries()) {
+          const batties = this.#batties;
+          const total = batties.length;
+          for (const [i, el] of batties.entries()) {
             api
               .spot(el.id)
               .grow()
               .during(i / total);
           }
-          this.#targets = targets;
+          this.#batties = batties;
           return api;
         },
-        absorb: (...ids) => {
-          const target0 = this.#targets[0];
+        xxx_absorb: (...ids) => {
+          const bat0 = this.#batties[0];
           const absEl = this.#makeTag("b", "<b></b><b></b>", "absorb");
           absEl.id = `${ids[0]}-absorb`;
-          target0.parentNode.insertBefore(absEl, target0);
-          for (const el of this.#targets) absEl.children[0].append(el);
+          bat0.parentNode.insertBefore(absEl, bat0);
+          for (const el of this.#batties) absEl.children[0].append(el);
           for (const id of new Set(ids)) absEl.children[1].append(api.pick(id));
 
           this.#measureElements(absEl.children[0], absEl.children[1]);
 
           return api.spot(absEl.id);
-        },
-        xfade: (...ids) => {
-          const target0 = this.#targets[0];
-          const fadeEl = this.#makeTag("b", "<b></b><b></b>", "xfade");
-          const [org, dop] = fadeEl.children;
+        },        
+        absorb: (...ids) => {
+          const batties = this.#batties;
+          const bat0 = batties[0];
+          const fadeID = `${ids[0]}-absorb`;
 
-          target0.parentNode.insertBefore(fadeEl, target0);
+          api.mount(fadeID, "<b></b><b></b>", "original");
+          wrap("absorb");
 
-          for (const el of this.#targets) org.append(el);
+          const fadeEl = api.pick(fadeID);
+
+          const [org, dop] = fadeEl.children[0].children;
+
+          bat0.parentNode.insertBefore(fadeEl, bat0);
+
+          for (const bat of batties) org.appendChild(bat);
           for (const id of new Set(ids)) dop.append(api.pick(id));
 
-          this.#measureElements(fadeEl, ...fadeEl.children);
+          this.#measureElements(fadeEl, ...fadeEl.children[0].children);
 
-          fadeEl.style.setProperty(
+          return api.spot(fadeID);
+        },
+        xfade: (...ids) => {
+          const batties = this.#batties;
+          const bat0 = batties[0];
+          const fadeID = `${ids[0]}-xfade`;
+
+          api.mount(fadeID, "<b></b><b></b>", "original");
+          wrap("xfade");
+
+          const fadeEl = api.pick(fadeID);
+
+          const [org, dop] = fadeEl.children[0].children;
+
+          bat0.parentNode.insertBefore(fadeEl, bat0);
+
+          for (const bat of batties) org.appendChild(bat);
+          for (const id of new Set(ids)) dop.append(api.pick(id));
+
+          this.#measureElements(fadeEl, ...fadeEl.children[0].children);
+
+          fadeEl.children[0].style.setProperty(
             `--${this.#opts.fix}-xfade-wide0`,
-            `${Math.round(fadeEl.children[0].getBoundingClientRect().width)}px`,
+            `${Math.round(org.getBoundingClientRect().width)}px`,
           );
 
-          fadeEl.style.setProperty(
+          fadeEl.children[0].style.setProperty(
             `--${this.#opts.fix}-xfade-wide1`,
-            `${Math.round(fadeEl.children[1].getBoundingClientRect().width)}px`,
+            `${Math.round(dop.getBoundingClientRect().width)}px`,
           );
 
-          fadeEl.setAttribute("id", `${ids[0]}-xfade`);
-
-          return api.spot(...ids);
+          return api.spot(fadeID);
         },
         dist: (id) => {
-          const targets = this.#targets;
-          const total = targets.length;
+          const batties = this.#batties;
+          const total = batties.length;
           const coeff = api.pick(id);
           const co_html = coeff.innerHTML;
           api.spot(id).vaporize().during(0, 0.5).shrink().during(0.5);
           coeff.setAttribute("data-coeff", "");
-          for (const [i, el] of targets.entries()) {
+          for (const [i, el] of batties.entries()) {
             api
               .mount(`${coeff.id}-${el.id}`, co_html, "grow-term")
               .insertBefore(el.id)
@@ -512,7 +539,7 @@
           return api.spot(id);
         },
         root: (id) => {
-          const target0 = this.#targets[0];
+          const bat0 = this.#batties[0];
           id = id || `${this.#opts.fix}${crypto.randomUUID()}`;
           const rootEl = document.createElement("b");
           rootEl.id = CSS.escape(id);
@@ -526,18 +553,18 @@
             <path/>
            </svg>
           `;
-          target0.parentNode.insertBefore(rootEl, target0);
+          bat0.parentNode.insertBefore(rootEl, bat0);
           const termB = rootEl.querySelector("[data-root-terms]");
-          for (const el of this.#targets) termB.append(el);
+          for (const el of this.#batties) termB.append(el);
           return api.spot(id);
         },
         frak: (...ids) => {
-          if (!this.#targets.length) return api;
-          const target0 = this.#targets[0];
+          if (!this.#batties.length) return api;
+          const bat0 = this.#batties[0];
 
           const frakEl = document.createElement("b");
           frakEl.innerHTML = `
-           <b id="${this.#targets[0].id}-frak" data-frak-anim>
+           <b id="${this.#batties[0].id}-frak" data-frak-anim>
             <b data-numerator>
              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               <path data-frak-anim-slash />
@@ -546,19 +573,19 @@
             <b data-denominator></b>
            </b>
           `;
-          target0.parentNode.insertBefore(frakEl, target0);
+          bat0.parentNode.insertBefore(frakEl, bat0);
           const numer = frakEl.querySelector("[data-numerator]");
           const denom = frakEl.querySelector("[data-denominator]");
-          for (const el of this.#targets) numer.append(el);
+          for (const el of this.#batties) numer.append(el);
           for (const id of new Set(ids)) denom.append(api.pick(id));
           return api;
         },
         // #endregion
         powerRule: () => {
-          const targets = this.#targets;
-          for (const el of targets) {
-            el.innerHTML = `<b data-power-rule>${el.innerHTML}</b>`;
-            const sup = el.querySelector("[data-sup]");
+          const batties = this.#batties;
+          for (const bat of batties) {
+            bat.innerHTML = `<b data-power-rule>${bat.innerHTML}</b>`;
+            const sup = bat.querySelector("[data-sup]");
             if (!sup) return api;
             sup.id = sup.id || `${this.#opts.fix}-${crypto.randomUUID()}`;
             sup.innerHTML = `
@@ -571,9 +598,9 @@
                 <b data-filter="viva" data-grow style="--ani-start:0.5">-1</b>
               </b>
             `;
-            api.spot(`${sup.id}-expo-move`).moveBefore(el.id);
+            api.spot(`${sup.id}-expo-move`).moveBefore(bat.id);
           }
-          this.#targets = targets;
+          this.#batties = batties;
           return api;
         },
 
@@ -629,13 +656,13 @@
       // await new Promise((r) => setTimeout(r, 800));
 
       // load new stage if needed
-      if (step.load) this.#stageString = step.load
+      step.load = step.load ? this.#strip(step.load) : this.#stageObj.innerHTML;
 
       // make the step tags
-      const stepTag = this.#createStepTag(step);
+      const stepTag = this.#makeStepTag(step.load, step.note || "");
 
       // set the stage object
-      this.#stageObject = stepTag.children[0];
+      this.#stageObj = stepTag.children[0];
 
       // append the steptags
       this.#holder.append(stepTag);
@@ -644,7 +671,7 @@
       await new Promise((r) => requestAnimationFrame(r));
 
       // set measurements
-      this.#measureElements(...this.#stageObject.querySelectorAll("[id]"));
+      this.#measureElements(...this.#stageObj.querySelectorAll("[id]"));
 
       // try to run the acts
       const acted = await this.#runActs(step);
@@ -670,11 +697,11 @@
       // remove the API <b>'s
       this.#removeAPIs(nextStep);
 
-      // reset the stage string to the cleaned tags
-      this.#stageString = nextStep.children[0].innerHTML;
+      // reset the stage to the cleaned version
+      this.#stageObj = nextStep.children[0];
 
       // remove IDs [or make #namespaceIDs()]
-      this.#removeIDs(stepTag.children[0]);
+      // this.#removeIDs(stepTag.children[0]);
 
       // the tag is done with measurements
       stepTag.removeAttribute("data-measure");
@@ -696,10 +723,10 @@
       this.#currentStep = 0;
 
       if (routine.intro) {
-        this.#holder.append(this.#makeTag("b", this.#sanitizeHTML(routine.intro), "intro"));
+        this.#holder.append(this.#saniTag("b", routine.intro, "intro"));
       }
 
-      this.#stageString = routine.stage.replace(/>\s+</g, "> <") || "";
+      this.#stageObj = this.#saniTag("b", routine.stage, "stage");
 
       dispatch(this.#holder, `${this.#opts.fix}-routine-start`);
 

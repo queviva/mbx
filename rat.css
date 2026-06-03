@@ -297,7 +297,6 @@ svg {
 /* #endregion */
 
 /* #region VIVA */
-
 svg,
 [data-viva],
 [data-filter="viva"] {
@@ -308,7 +307,6 @@ svg,
   --viva-filter: drop-shadow(var(--viva-f1)) drop-shadow(var(--viva-f2))
     drop-shadow(var(--viva-f3));
 }
-[data-viva] b,
 [data-viva] {
   text-shadow: none;
   animation: mbx-viva linear both;

@@ -48,13 +48,12 @@
           {
             note: "this is it you see?",
             acts: (S) => {
-              S.spot("T7x").root("T7x-root");
-              // S.spot("T7x-root", "Tplus2")
-              // .vault()
-              // .moveAfter("EQ");
-              // S.mount("T-RAT", "RAT");
-              // S.mount("T-ATAT", "ATAT");
-              // S.spot("T7x", "Tplus2", "T1").unfurl();//.xfade("T-RAT", "T-ATAT");
+              S.mount("T3x", "3x")
+                .mount("T2x", "+ 2x")
+                .spot("T7x", "Tplus2", "T1")
+                .absorb("T3x", "T2x")
+                .spin()
+
             },
           },
           {
