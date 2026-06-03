@@ -1,3 +1,25 @@
+/* #region DEBGG */
+[data-at-fifty] {
+  animation: mbx-at-fifty linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-at-fifty {
+  0% {
+    color: white;
+  }
+  49% {
+    color: white;
+  }
+  50% {
+    color: green;
+  }
+  100% {
+    color: green;
+  }
+}
+/* #endregion */
+
 /* #region MATHRO HOLDER */
 /* CONFIG */
 mathro-batix [data-holder] {
@@ -18,6 +40,7 @@ mathro-batix [data-holder] {
   flex-direction: column;
   overflow: visible;
   background-color: var(--back-color);
+  color: var(--main-color);
 }
 
 /* FONTS */
@@ -59,7 +82,6 @@ b {
   display: inline-block;
   font-weight: normal;
   text-wrap: nowrap;
-  color: var(--main-color);
 }
 /* #endregion */
 
@@ -99,7 +121,7 @@ svg {
   line-height: 50px;
   text-align: center;
   color: hsl(var(--mbx-h), 100%, 85%);
-  -webkit-text-stroke: 2px hsl(var(--mbx-h), 80%, 60%);
+  -webkit-text-stroke: 2px var(--main-color);
   background-color: #111;
 }
 /* #endregion */
@@ -117,16 +139,23 @@ svg {
   align-items: baseline;
   justify-content: center;
   container-type: inline-size;
+  contain: layout size style;
   font-family: "Times New Roman", Times, serif;
 }
 [data-step] > :nth-child(2) {
-  margin-top: 1.5em;
+  margin-top: 3.5em;
   width: 100%;
 }
 /* #endregion */
 
 /* #region SUP|SUB */
 [data-sup] {
+  display: inline-flex;
+  flex-direction: row;
+  gap: 0.25em;
+  align-items: baseline;
+  justify-content: center;
+  white-space: nowrap;
   font-size: 0.55em;
   vertical-align: 70%;
   line-height: 1;
@@ -160,8 +189,18 @@ svg {
 }
 /* #endregion */
 
+/* #region DOPPLE */
+[data-dopple] {
+  display: inline-grid;
+  grid-template: 1fr 1fr;
+}
+[data-dopple] > b {
+  grid-area: 1 / 1 / 2 / 2;
+}
+/* #endregion */
+
 /* #region GROW */
-[data-stage] > b:has([data-grow]) {
+b:has(> [data-grow]) {
   animation: mbx-grow-margin linear both;
   animation-timeline: view();
   animation-range: var(--animation-range);
@@ -177,7 +216,7 @@ svg {
 [data-grow] {
   display: inline-block;
   transform-origin: 0% 50%;
-  will-change: transform;
+  will-change: margin, transform, width, opacity;
   animation: mbx-grow linear both;
   animation-timeline: view();
   animation-range: var(--animation-range);
@@ -432,17 +471,20 @@ svg,
 
 /* #region PARENS */
 [data-parens-left] {
-  /* margin-right: -0.2em; */
+  margin-right: -0.2em;
 }
 [data-parens-rite] {
-  /* margin-left: -0.2em; */
+  margin-left: -0.2em;
 }
 /* #endregion */
 
 /* #region MIDDOT */
 [data-middot] {
-  /* margin-left: -0.2em; */
-  /* margin-right: -0.2em; */
+  margin-left: -0.12em;
+  margin-right: -0.12em;
+}
+[data-middot]::after {
+  content: "\00B7";
 }
 /* #endregion */
 
@@ -625,8 +667,9 @@ svg,
   grid-template-rows: auto auto;
   align-items: center;
   justify-items: center;
-  vertical-align: 0%;
   line-height: 1;
+
+  vertical-align: 0%;
   font-size: 1em;
   will-change: font-size, vertical-align;
   --vertical-align: 55%;
@@ -687,11 +730,13 @@ svg,
 }
 @keyframes mbx-den {
   from {
-    transform: scale(0);
+    max-height: 0;
+    transform: translateY(-0.25ch) scale(0);
     opacity: 0;
   }
   to {
-    transform: scale(1);
+    max-height: var(--mbx-height);
+    transform: translateY(0) scale(1);
     opacity: 1;
   }
 }
@@ -707,9 +752,10 @@ svg,
   grid-template-rows: auto auto;
   align-items: center;
   justify-items: center;
+  line-height: 1;
+
   vertical-align: var(--vertical-align, 55%);
   transform-origin: calc(50% + 0.25em) 55%;
-  line-height: 1;
   font-size: 0.6em;
 }
 [data-frak] > [data-numerator],
@@ -821,5 +867,135 @@ svg,
   transform: scale(1, 1.2);
   fill: var(--main-color);
   d: path("M0 0H 0  L0 3  L 0 7Z");
+}
+/* #endregion */
+
+/* #region SALUTE */
+[data-salute] {
+  will-change: opacity, transform;
+  animation: mbx-salute ease-in both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-salute {
+  from {
+    opacity: 0;
+    transform: translateY(0.8em) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+/* #endregion */
+
+/* #region POWER RULE */
+[data-XXX] {
+  display: inline-flex;
+  flex-direction: rows;
+  gap: 0em;
+}
+[data-XXX-base] {
+  border: 0.4px solid orange;
+}
+[data-XXX-expo] {
+  border: 0.4px solid green;
+  position: relative;
+  display: inline-grid;
+  grid-template: 1fr 1fr;
+  justify-items: flex-start;
+  align-items: baseline;
+}
+[data-XXX-org],
+[data-XXX-dop] {
+  display: inline-flex;
+  flex-direction: row;
+  gap: 0.25em;
+  white-space: nowrap;
+  grid-area: 1 / 1 / 2 / 2;
+}
+[data-XXX-dop] {
+  color: pink;
+}
+/*
+[data-XXX-dop] {
+  animation: mbx-power-rule linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+  */
+@keyframes mbx-power-rule {
+  to {
+    font-size: 1em;
+    vertical-align: 0;
+  }
+}
+[data-XXX-dot] {
+  font-size: 0;
+  margin: -0.25em;
+  will-change: font-size;
+  transform-origin: 0% 0%;
+  --ani-start: 0.4;
+  animation: mbx-XXX-dot linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-XXX-dot {
+  to {
+    font-size: 1em;
+  }
+}
+/* #endregion */
+
+/* #region POWER AGAIN */
+[data-prx] {
+  display: inline-flex;
+  flex-direction: rows;
+  gap: 0em;
+}
+/* #endregion */
+
+/* #region CANK */
+[data-cank] {
+  --cank-00: path("M0 94Q30 40 95 0L100 10Q33 43 10 100Z");
+  --cank-01: path("M0 90Q55 55 90 0L100 8Q65 50 10 100Z");
+  --cank-02: path(
+    "M0 100Q30 75 55 30L55 50Q30 80 0 100ZM 100 0Q70 25 50 70L50 50Q70 20 100 0Z"
+  );
+  --cank-path: var(--cank-00);
+  --cank-clip-A: path("M-50 150V150H-50V150Z");
+  --cank-clip-B: path("M-50 150V-50H150V150Z");
+  --cank-rotate: 0deg;
+}
+[data-cank="1"] {
+  --cank-path: var(--cank-01);
+}
+[data-cank="2"] {
+  --cank-path: var(--cank-02);
+}
+[data-cank] > svg {
+  width: 100%;
+  height: 100%;
+  filter: var(--viva-filter);
+}
+[data-cank] > svg > path {
+  transform: rotate(var(--cank-rotate, 0deg));
+  transform-origin: 50% 50%;
+  fill: var(--white-color);
+  d: var(--cank-path);
+}
+[data-cank] clipPath > path {
+  d: var(--cank-clip-A);
+  animation: mbx-cank linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-cank {
+  from {
+    d: var(--cank-clip-A);
+  }
+  to {
+    d: var(--cank-clip-B);
+  }
 }
 /* #endregion */

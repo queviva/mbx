@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>rat testing</title>
+    <title>mbx3.0 beta</title>
     <meta charset="UTF-8" />
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
     <!-- <link rel="stylesheet" href="rat.css" /> -->
@@ -17,6 +17,7 @@
         justify-content: center;
         padding-top: 50vh;
         padding-bottom: 100vh;
+        background-color: #888;
       }
       rat-batix {
         min-width: 70%;
@@ -27,7 +28,7 @@
   </head>
 
   <body>
-    <rat-batix id="two" data-mbx='{"color":300}'></rat-batix>
+    <rat-batix id="two" data-mbx='{"XXX_color":300}'></rat-batix>
 
     <script id="ROUTINES">
       const routineTwo = {
@@ -35,31 +36,49 @@
           <b data-logo>MATHROBATIX</b>
           illuminated acrobatic gestural mathematics
         `,
-        stage: `
-          <b id="T3x2">3x<b id="Tsup2" data-sup>2</b></b>
-          <b id="Tplus1">+</b>
-          <b id="T7x">7x</b>
-          <b id="Tplus2">+</b>
+        xxx_stage: `
+          <b id="T7x">7x +</b>
+          <b id="T3x2">
+            <b data-prx>
+              3x
+              <b data-sup>
+                2
+                <b data-grow>
+                  <b data-viva>- 1</b>
+                </b>
+              </b>
+            </b>
+          </b>
+          <b id="T+2">+</b>
           <b id="T1">1</b>
           <b id="EQ">=</b>
+          <b id="T5">5</b>
+        `,
+        stage: `
+          <b id="T7">7</b>
+          <b data-parens-left>(</b>
+          <b id="Tx">x</b>
+           + 
+           <b id="T1">1</b>
+          <b data-parens-rite>)</b>
+          = 
           <b id="T5">5</b>
         `,
         steps: [
           {
             note: "this is it you see?",
             acts: (S) => {
-              S.mount("T3x", "3x")
-                .mount("T2x", "+ 2x")
-                .spot("T7x", "Tplus2", "T1")
-                .absorb("T3x", "T2x")
-                .spin()
-
+              S.spot("Tx", "T1").dist("T7");
+              S.spot("T5").cank(2,"45deg");
             },
           },
           {
-            note: "check the un-doing of these",
-            acts: (S) => {},
-          },
+            note: "preservation of popin-all?",
+            acts: (S) => { 
+              // S.spot("T7x-frak").viva();
+            }
+          }
+
         ],
       };
       const two = document.getElementById("two");

@@ -54,7 +54,7 @@
     tag: "mathro-batix",
     fix: "mbx",
     css: "mbx3.css",
-    color: 300,
+    color: 33,
     timeout: 5000,
   };
 
@@ -71,7 +71,7 @@
     #routineNum = 0;
     #currentStep = 0;
     #stageObj = null;
-    #batties = new Set();
+    #batties = [];
     #apis = [
       "viva",
       "ghost",
@@ -88,6 +88,7 @@
       "cirk",
       "term",
       "original",
+      "popin",
     ];
     #allowed = new Set(["id"]);
     // #endregion
@@ -191,7 +192,7 @@
         const style = el.style;
         for (const prop of props) {
           style.setProperty(
-            `--${defOpts.fix}-${prop}`,
+            `--${devOpts.fix}-${prop}`,
             Math.round(rect[prop]) + "px",
           );
         }
@@ -238,10 +239,10 @@
     }
 
     #resetFraks(step) {
-      for (const el of step.querySelectorAll("[data-frak-anim]")) {
-        el.removeAttribute("data-frak-anim");
-        // el.setAttribute("data-frak", "");
-        el.innerHTML = `<b data-frak>${el.innerHTML}</b>`;
+      for (const frak of step.querySelectorAll("[data-frak-anim]")) {
+        frak.removeAttribute("data-frak-anim");
+        frak.innerHTML = `<b data-frak>${frak.innerHTML}</b>`;
+        // frak.innerHTML = frak.innerHTML.replace("-amin","");
       }
     }
 
@@ -258,7 +259,6 @@
 
     #makeAPI = () => {
       // #region API UTILS
-
       const move = (anchorId, direction) => {
         const anchor = api.pick(anchorId);
         if (!anchor) return api;
@@ -266,7 +266,8 @@
         const allBats = Array.from(this.#stageObj.querySelectorAll("*"));
 
         const snapshots = new Map();
-        for (const bat of allBats) {
+        for (const [i, bat] of allBats.entries()) {
+          bat.id ||= `${this.#opts.fix}-${i}`;
           snapshots.set(bat.id, bat.getBoundingClientRect());
         }
 
@@ -287,7 +288,6 @@
           const dx = oldRect.left - newRect.left;
           const dy = oldRect.top - newRect.top;
 
-          // don't make little jiggles
           if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
             bat.innerHTML = `<b data-move>${bat.innerHTML}</b>`;
             const wrapper = bat.children[0];
@@ -330,6 +330,7 @@
         }
         return api;
       };
+
       // #endregion
 
       const api = {
@@ -343,52 +344,60 @@
           const unique = [...new Set(ids)];
           this.#batties = unique
             .map((id) => api.pick(id))
-            .filter((el) => el !== null);
+            .filter((bat) => bat !== null);
+          return api;
+        },
+        spotAll: () => {
+          this.#batties = [...this.#stageObj.querySelectorAll("*")];
+          return api;
+        },
+        spotStage: () => {
+          this.#batties = [this.#stageObj];
           return api;
         },
         mount: (id, html, ...attrs) => {
-          const el = this.#makeTag("b", html, ...attrs);
-          el.id = CSS.escape(id);
-          this.#stageObj?.append(el);
-          this.#measureElements(el);
-          return api.spot(el.id);
+          const bat = this.#makeTag("b", html, ...attrs);
+          bat.id = CSS.escape(id);
+          this.#stageObj?.append(bat);
+          this.#measureElements(bat);
+          return api.spot(bat.id);
         },
         dismount: () => {
-          for (const el of this.#batties) {
-            el.remove();
+          for (const bat of this.#batties) {
+            bat.remove();
           }
         },
         insertBefore: (id) => {
           const beef = api.pick(id);
           if (!beef) return api;
-          for (const el of this.#batties) {
-            el.parentNode.insertBefore(el, beef);
+          for (const bat of this.#batties) {
+            bat.parentNode.insertBefore(bat, beef);
           }
           return api;
         },
         insertAfter: (id) => {
           const beef = api.pick(id);
           if (!beef) return api;
-          for (const el of this.#batties) {
-            beef.parentNode.insertBefore(el, beef.nextSibling);
+          for (const bat of this.#batties) {
+            beef.parentNode.insertBefore(bat, beef.nextSibling);
           }
           return api;
         },
         alter: (html) => {
-          for (const el of this.#batties) {
-            el.replaceChildren(this.#strip(html));
-            this.#measureElements(el);
+          for (const bat of this.#batties) {
+            bat.replaceChildren(this.#strip(html));
+            this.#measureElements(bat);
           }
         },
         hide: () => {
-          for (const el of api.#batties) {
-            el.style.display = "none";
+          for (const bat of api.#batties) {
+            bat.style.display = "none";
           }
           return api;
         },
         show: () => {
-          for (const el of api.#batties) {
-            el.style.display = "revert";
+          for (const bat of api.#batties) {
+            bat.style.display = "revert";
           }
           return api;
         },
@@ -396,11 +405,11 @@
           const s = start != null ? Math.max(0, Math.min(1, start)) : null;
           const e = end != null ? Math.max(0, Math.min(1, end)) : null;
 
-          this.#batties.forEach((el) => {
-            const fc = el.children[0];
+          for (const bat of this.#batties) {
+            const fc = bat.children[0];
             if (start != null) fc.style.setProperty("--ani-start", start);
             if (end != null) fc.style.setProperty("--ani-end", end);
-          });
+          }
 
           return api;
         },
@@ -415,16 +424,16 @@
         vaporize: () => wrap("vaporize"),
         filterClear: () => wrap("filter-clear"),
         filter: (type) => {
-          for (const el of this.#batties) {
-            el.setAttribute("data-filter", type);
+          for (const bat of this.#batties) {
+            bat.setAttribute("data-filter", type);
           }
           return api;
         },
         colorize: (v) =>
           wrap("colorize", { [`--${this.#opts.fix}-colorize-val`]: v }),
         setColor: (v) => {
-          for (const el of this.#batties) {
-            el.style.setProperty(`--${this.#opts.fix}-h`, v);
+          for (const bat of this.#batties) {
+            bat.style.setProperty(`--${this.#opts.fix}-h`, v);
           }
           return api;
         },
@@ -433,12 +442,38 @@
         // #region GROWTH
         grow: () => wrap("grow"),
         shrink: () => wrap("shrink"),
+        popin: () => wrap("popin"),
         vault: (v) => wrap("vault", v ? { "--vault-height": v } : null),
         tuck: (v) => wrap("tuck", v ? { "--tuck-depth": v } : null),
         spin: (v) => wrap("spin", v ? { "--spin-angle": v } : null),
         // #endregion
 
+        // #region ANIMATES
+        cank: (v, rot) =>
+          svgWrap("cank", v || null, rot ? { "--cank-rotate": rot } : null),
+        cirk: (v) => svgWrap("cirk", v || null),
+        // #endregion
+
         // #region NEEDS UNDO
+        dopple: (v = 1) => {
+          if (!Number.isFinite(v) || v > 10) return;
+
+          for (const bat of this.#batties) {
+            const html = bat.innerHTML;
+            bat.innerHTML = `
+              <b data-dopple>
+                <b id="${bat.id}-original">${html}</b>
+              </b>
+            `;
+            for (let i = 0; i < v; i++) {
+              const bbb = this.#makeTag("b", `<b>${html}</b>`);
+              bbb.id = `${bat.id}-dopple${v > 1 ? i + 1 : ""}`;
+              bat.children[0].append(bbb);
+            }
+            this.#measureElements(...bat.querySelectorAll("*"));
+          }
+          return api;
+        },
         unfurl: () => {
           const batties = this.#batties;
           const total = batties.length;
@@ -451,38 +486,26 @@
           this.#batties = batties;
           return api;
         },
-        xxx_absorb: (...ids) => {
-          const bat0 = this.#batties[0];
-          const absEl = this.#makeTag("b", "<b></b><b></b>", "absorb");
-          absEl.id = `${ids[0]}-absorb`;
-          bat0.parentNode.insertBefore(absEl, bat0);
-          for (const el of this.#batties) absEl.children[0].append(el);
-          for (const id of new Set(ids)) absEl.children[1].append(api.pick(id));
-
-          this.#measureElements(absEl.children[0], absEl.children[1]);
-
-          return api.spot(absEl.id);
-        },        
         absorb: (...ids) => {
           const batties = this.#batties;
           const bat0 = batties[0];
-          const fadeID = `${ids[0]}-absorb`;
+          const absID = `${ids[0]}-absorb`;
 
-          api.mount(fadeID, "<b></b><b></b>", "original");
+          api.mount(absID, "<b></b><b></b>", "original");
           wrap("absorb");
 
-          const fadeEl = api.pick(fadeID);
+          const absEl = api.pick(absID);
 
-          const [org, dop] = fadeEl.children[0].children;
+          const [org, dop] = absEl.children[0].children;
 
-          bat0.parentNode.insertBefore(fadeEl, bat0);
+          bat0.parentNode.insertBefore(absEl, bat0);
 
           for (const bat of batties) org.appendChild(bat);
           for (const id of new Set(ids)) dop.append(api.pick(id));
 
-          this.#measureElements(fadeEl, ...fadeEl.children[0].children);
+          this.#measureElements(absEl, ...absEl.children[0].children);
 
-          return api.spot(fadeID);
+          return api.spot(absID);
         },
         xfade: (...ids) => {
           const batties = this.#batties;
@@ -524,7 +547,7 @@
           coeff.setAttribute("data-coeff", "");
           for (const [i, el] of batties.entries()) {
             api
-              .mount(`${coeff.id}-${el.id}`, co_html, "grow-term")
+              .mount(`${coeff.id}-${el.id}`, co_html +" <b data-middot></b>", "grow-term")
               .insertBefore(el.id)
               .viva()
               .grow()
@@ -559,18 +582,18 @@
           return api.spot(id);
         },
         frak: (...ids) => {
-          if (!this.#batties.length) return api;
           const bat0 = this.#batties[0];
+          const frakID = `${bat0.id}-frak`;
 
           const frakEl = document.createElement("b");
           frakEl.innerHTML = `
-           <b id="${this.#batties[0].id}-frak" data-frak-anim>
-            <b data-numerator>
+           <b id="${frakID}" data-frak-anim>
+            <b data-numerator id="${frakID}-num">
              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               <path data-frak-anim-slash />
              </svg>
             </b>
-            <b data-denominator></b>
+            <b data-denominator id="${frakID}-den"></b>
            </b>
           `;
           bat0.parentNode.insertBefore(frakEl, bat0);
@@ -581,28 +604,38 @@
           return api;
         },
         // #endregion
+
+        // #region ATTEMPTS
         powerRule: () => {
           const batties = this.#batties;
           for (const bat of batties) {
-            bat.innerHTML = `<b data-power-rule>${bat.innerHTML}</b>`;
             const sup = bat.querySelector("[data-sup]");
             if (!sup) return api;
-            sup.id = sup.id || `${this.#opts.fix}-${crypto.randomUUID()}`;
-            sup.innerHTML = `
-              <b data-power-rule-expo>
-                <b id="${sup.id}-expo-move" data-sup data-power-rule-expo-move>
-                  ${sup.innerText}
-                  <b data-power-rule-dot>&middot;</b>
+            sup.remove();
+            bat.innerHTML = `
+              <b data-prx>
+                <b id="baseXXX" data-prx-base>${bat.innerText}</b>
+                <b data-sup data-prx-expo>
+                  <b data-prx-org>
+                    <b>${sup.innerText}</b>
+                    <b data-grow>- 1</b>
+                  </b>
+                  <b id="dop" data-prx-dop>
+                    <b>${sup.innerText}</b>
+                    <b data-grow>&middot;</b>
+                  </b>
                 </b>
-                <b data-power-rule-expo-copy>${sup.innerText}</b>
-                <b data-filter="viva" data-grow style="--ani-start:0.5">-1</b>
               </b>
             `;
-            api.spot(`${sup.id}-expo-move`).moveBefore(bat.id);
+            this.#measureElements(...bat.querySelectorAll("*"));
+            const base = bat.querySelector("[data-prx-base]");
+            const dop = bat.querySelector("[data-prx-dop]");
+            api.spot("dop").moveBefore("baseXXX");
           }
           this.#batties = batties;
           return api;
         },
+        // #endregion
 
         // #region !!! MORE TO DO !!!
         moreToDo: [
@@ -671,7 +704,7 @@
       await new Promise((r) => requestAnimationFrame(r));
 
       // set measurements
-      this.#measureElements(...this.#stageObj.querySelectorAll("[id]"));
+      this.#measureElements(...this.#stageObj.querySelectorAll("*"));
 
       // try to run the acts
       const acted = await this.#runActs(step);
@@ -701,7 +734,7 @@
       this.#stageObj = nextStep.children[0];
 
       // remove IDs [or make #namespaceIDs()]
-      // this.#removeIDs(stepTag.children[0]);
+      this.#removeIDs(stepTag.children[0]);
 
       // the tag is done with measurements
       stepTag.removeAttribute("data-measure");
