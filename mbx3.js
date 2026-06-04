@@ -76,19 +76,21 @@
       "viva",
       "ghost",
       "vaporize",
+      "materialize",
       "colorize",
+      "wink",
+      "filter-clear",
       "grow",
       "shrink",
       "spin",
       "vault",
       "tuck",
-      "filter-clear",
       "move",
       "cank",
       "cirk",
       "term",
       "original",
-      "popin",
+      "salute",
     ];
     #allowed = new Set(["id"]);
     // #endregion
@@ -366,6 +368,7 @@
           for (const bat of this.#batties) {
             bat.remove();
           }
+          return api;
         },
         insertBefore: (id) => {
           const beef = api.pick(id);
@@ -388,6 +391,7 @@
             bat.replaceChildren(this.#strip(html));
             this.#measureElements(bat);
           }
+          return api;
         },
         hide: () => {
           for (const bat of api.#batties) {
@@ -422,6 +426,7 @@
         viva: () => wrap("viva"),
         ghost: () => wrap("ghost"),
         vaporize: () => wrap("vaporize"),
+        materialize: () => wrap("materialize"),
         filterClear: () => wrap("filter-clear"),
         filter: (type) => {
           for (const bat of this.#batties) {
@@ -442,7 +447,7 @@
         // #region GROWTH
         grow: () => wrap("grow"),
         shrink: () => wrap("shrink"),
-        popin: () => wrap("popin"),
+        salute: () => wrap("salute"),
         vault: (v) => wrap("vault", v ? { "--vault-height": v } : null),
         tuck: (v) => wrap("tuck", v ? { "--tuck-depth": v } : null),
         spin: (v) => wrap("spin", v ? { "--spin-angle": v } : null),
@@ -452,6 +457,24 @@
         cank: (v, rot) =>
           svgWrap("cank", v || null, rot ? { "--cank-rotate": rot } : null),
         cirk: (v) => svgWrap("cirk", v || null),
+        wink: (v = 1000) => {
+          const batties = this.#batties;
+          log(batties,'batties in wink');
+          for (const bat of this.#batties) {
+            api.spot(bat.id);
+            wrap("wink");
+            bat.style.setProperty("--mbx-wink-dur", `${v}ms`);
+            const wink = bat.children[0];
+            const anim = wink.getAnimations()?.[0];
+            if (!anim) break;
+            anim.onfinish = (e) => {
+              bat.classList.add("mbx-wink");
+              setTimeout(() => bat.classList.remove("mbx-wink"), v);
+            };
+          }
+          this.#batties = batties;
+          return api;
+        },
         // #endregion
 
         // #region NEEDS UNDO
@@ -545,17 +568,24 @@
           const co_html = coeff.innerHTML;
           api.spot(id).vaporize().during(0, 0.5).shrink().during(0.5);
           coeff.setAttribute("data-coeff", "");
-          for (const [i, el] of batties.entries()) {
+          for (const [i, bat] of batties.entries()) {
             api
-              .mount(`${coeff.id}-${el.id}`, co_html +" <b data-middot></b>", "grow-term")
-              .insertBefore(el.id)
-              .viva()
+              .mount(
+                `${coeff.id}-${bat.id}`,
+                co_html + " <b data-middot></b>",
+                "grow-term",
+              )
+              .insertBefore(bat.id)
+              // .viva()
+              .materialize()
+              .during(0.5)
               .grow()
-              .during(0.6 + (i / total) * 0.4);
-            el.innerHTML = `
+              // .during(0.6 + (i / total) * 0.4);
+              .during(0.6);
+            bat.innerHTML = `
              <b data-term>
-              <b data-vaporize style="--ani-start:${0.25 + (i / total) * 0.4};--ani-end:${0.85 + (i / total) * 0.2}">${el.innerText}</b>
-              <b data-original>${el.innerHTML}</b>
+              <b data-vaporize style="--ani-start:${0.25 + (i / total) * 0.4};--ani-end:${0.85 + (i / total) * 0.2}">${bat.innerText}</b>
+              <b data-original>${bat.innerHTML}</b>
              </b>
             `;
           }

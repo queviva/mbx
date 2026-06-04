@@ -337,6 +337,7 @@ b:has(> [data-grow]) {
 
 /* #region VIVA */
 svg,
+.mbx-wink,
 [data-viva],
 [data-filter="viva"] {
   --viva-f1: 0 0 3px hsl(var(--mbx-h), 90%, 80%);
@@ -393,7 +394,8 @@ svg,
 }
 /* #endregion */
 
-/* #region VAPORIZE */
+/* #region VAPORIZE|MATERIALIZE */
+[data-materialize],
 [data-vaporize] {
   --ghost-f1: 0 0 2px var(--back-color);
   --ghost-f2: 0 0 6px hsl(var(--mbx-h), 100%, 80%);
@@ -408,14 +410,11 @@ svg,
   --vapor-shadow: var(--vapor-f1), var(--vapor-f2), var(--vapor-f3);
   --vapor-filter: drop-shadow(var(--vapor-f1)) drop-shadow(var(--vapor-f2))
     drop-shadow(var(--vapor-f3));
-
+}
+[data-vaporize] {
   animation: mbx-vaporize linear both;
   animation-timeline: view();
   animation-range: var(--animation-range);
-}
-[data-filter="vapor"] {
-  color: var(--back-color);
-  text-shadow: var(--vapor-shadow);
 }
 @keyframes mbx-vaporize {
   0% {
@@ -437,6 +436,36 @@ svg,
     opacity: 0;
   }
 }
+[data-filter="vapor"] {
+  color: var(--back-color);
+  text-shadow: var(--vapor-shadow);
+}
+[data-materialize] {
+  animation: mbx-materialize linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-materialize {
+  0% {
+    color: transparent;
+    text-shadow: var(--vapor-shadow);
+    opacity: 0;
+  }
+  40% {
+    color: transparent;
+    text-shadow: var(--vapor-shadow);
+    opacity: 0.7;
+  }
+  75% {
+    color: var(--back-color);
+    text-shadow: var(--ghost-shadow);
+    opacity: 1;
+  }
+  100% {
+    color: var(--main-color);
+    text-shadow: none;
+  }
+}
 /* #endregion */
 
 /* #region COLORIZE */
@@ -450,6 +479,41 @@ svg,
     color: hsl(var(--mbx-colorize-val, var(--mbx-h)), 80%, 60%);
   }
 }
+/* #endregion */
+
+/* #region WINK */
+[data-wink] {
+  animation: mbx-wink-trigger linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-wink-trigger {
+  from {
+    --mbx-trig: 0;
+  }
+  to {
+    --mbx-trig: 1;
+  }
+}
+.mbx-wink {
+  will-change: color, filter;
+  animation: mbx-wink ease-in-out var(--mbx-wink-dur);
+}
+@keyframes mbx-wink {
+  0% {
+    color: currentColor;
+    filter: none;
+  }
+  50% {
+    color: var(--white-color);
+    filter: var(--viva-filter);
+  }
+  100% {
+    color: currentColor;
+    filter: none;
+  }
+}
+
 /* #endregion */
 
 /* #region FILTER CLEAR */
@@ -471,10 +535,12 @@ svg,
 
 /* #region PARENS */
 [data-parens-left] {
-  margin-right: -0.2em;
+  /* font-size: 1em; */
+  margin-right: -0.2rem;
 }
 [data-parens-rite] {
-  margin-left: -0.2em;
+  /* font-size: 1em; */
+  margin-left: -0.2rem;
 }
 /* #endregion */
 
@@ -485,6 +551,12 @@ svg,
 }
 [data-middot]::after {
   content: "\00B7";
+}
+/* #endregion */
+
+/* #region X-VAR */
+[data-xvar]::after {
+  content: "\1d6a1";
 }
 /* #endregion */
 
@@ -999,3 +1071,15 @@ svg,
   }
 }
 /* #endregion */
+
+/* #region GROUP */
+[data-group] {
+  display: inline-flex;
+  flex-direction: row;
+  gap: 0.25em;
+  align-items: baseline;
+  justify-content: center;
+  font-family: "Times New Roman", Times, serif;
+}
+/* #endregion */
+

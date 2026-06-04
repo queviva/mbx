@@ -56,29 +56,114 @@
         `,
         stage: `
           <b id="T7">7</b>
-          <b data-parens-left>(</b>
+          <b id="DOT">&middot</b>
+          <b id="P1" data-parens-left>(</b>
           <b id="Tx">x</b>
            + 
            <b id="T1">1</b>
-          <b data-parens-rite>)</b>
+          <b id="P2" data-parens-rite>)</b>
           = 
           <b id="T5">5</b>
         `,
         steps: [
           {
+            note: "",
+            acts: (S) => {
+              S.spotStage().spin().viva();
+              // S.spot("DOT").materialize().grow();
+            },
+          },
+          {
             note: "this is it you see?",
             acts: (S) => {
+              S.spot("DOT").shrink().during(0, 0.3);
               S.spot("Tx", "T1").dist("T7");
-              S.spot("T5").cank(2,"45deg");
+              // S.spot("T5").cank(2,"45deg");
             },
           },
           {
             note: "preservation of popin-all?",
+            acts: (S) => {
+              S.spot("DOT").dismount();
+              S.mount("T7x", "7x").mount("T77", "7");
+              S.spot("T7-Tx", "Tx").absorb("T7x");
+              S.spot("T7-T1", "T1").absorb("T77");
+              S.spot("T7x", "T77").viva();
+            },
+          },
+          {
+            note: "drop the parenthesis",
+            load: `
+            <b id="P1">(</b>
+            7x + 1
+            <b id="P2">)</b>
+            = 5
+            `,
+            acts: (S) => {
+              S.spot("P1", "P2").vaporize().shrink().during(0.7);
+            },
+          },
+          {
+            note: "flip flop for fun",
+            load: `
+            <b>7x</b>
+            <b id="T+1">
+              <b data-group>
+              <b id="T+">+</b>
+              <b>1</b>
+              </b>
+            </b>
+            <b id="EQ">=</b>
+            <b id="T5">5</b>
+              <b id="T-">-</b>
+            `,
+            acts: (S) => {
+              S.spot("T+").xfade("T-");
+              S.spot("T+1").viva().spin().vault().moveAfter("T5");
+            },
+          },
+          {
+            note: "don't add numbers -- wink",
+            load: `
+            7x = <b id="T5-1">5 - 1</b>
+            <b id="T4">4</b>
+            `,
+            acts: (S) => {
+              S.spot("T5-1").xfade("T4").spin().wink(500);
+            },
+          },
+          {
+            note: "what's preverved from wink?",
             acts: (S) => { 
-              // S.spot("T7x-frak").viva();
+              S.spot("T4").alter("12345").cank(1,"70deg");
             }
           }
+          /*
+          {
+            note: "divide both sides by seven",
+            load: `
+            <b id="T7x">
+              <b id="T7">7</b>
+              <b id="Tx">x</b>
+            </b>
+            =
+            <b id="T4">4</b>
+            <b id="T7a">7</b><b id="T7b">7</b>
+            `,
+            acts: (S) => {
+              S.spot("T7x").frak("T7a").spot("T4").frak("T7b");
+            },
+          },
+          {
+            note: "new fractions",
 
+            acts: (S) => {
+              S.spot("T7").cank(1,"90deg").during(0.74);
+              S.spot("T7a").cank(1,"90deg").during(0, 0.7);
+            }
+          }
+       
+          */
         ],
       };
       const two = document.getElementById("two");
