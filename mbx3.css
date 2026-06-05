@@ -362,15 +362,15 @@ svg,
   animation-timeline: view();
   animation-range: var(--animation-range);
 }
-[data-filter="viva"] {
-  color: var(--white-color);
-  text-shadow: var(--viva-shadow);
-}
 @keyframes mbx-viva {
   to {
     color: var(--white-color);
     text-shadow: var(--viva-shadow);
   }
+}
+[data-filter="viva"] {
+  color: var(--white-color);
+  text-shadow: var(--viva-shadow);
 }
 /* #endregion */
 
@@ -709,7 +709,8 @@ svg,
 }
 /* #endregion */
 
-/* #region FRAK ANIMATION */
+/* #region FRAK */
+[data-frak],
 [data-frak-anim] {
   position: relative;
   display: inline-flex;
@@ -722,10 +723,11 @@ svg,
   align-items: center;
   justify-items: center;
   line-height: 1;
-
-  --mbx-trans-y: -25%;
+  --mbx-frak-trans-y: -35%;
+}
+[data-frak-anim] {
   font-size: 1em;
-  will-change: font-size, transform; 
+  will-change: transform, margin, font-size;
   --ani-start: 0.2;
   animation: mbx-frak-anim linear both;
   animation-timeline: view();
@@ -734,29 +736,38 @@ svg,
 @keyframes mbx-frak-anim {
   from {
     transform: translateY(0);
+    margin-left: -0.25em;
+    margin-right: -0.25em;
     font-size: 1em;
   }
   to {
-    transform: translateY(var(--mbx-trans-y));
+    transform: translateY(var(--mbx-frak-trans-y));
+    margin-left: 0em;
+    margin-right: 0em;
     font-size: 0.6em;
   }
 }
-[data-frak-anim] > [data-numerator],
+[data-frak] {
+  transform: translateY(var(--mbx-frak-trans-y));
+  margin-left: 0em;
+  margin-right: 0em;
+  font-size: 0.6em;
+}
 [data-frak-anim] > [data-denominator] {
-  border: 0.2px solid blue;
-  transform-origin: center top;
+  transform-origin: 50% 0%;
 }
 [data-numerator] > svg {
   left: -0.25em;
   width: calc(100% + 0.5em);
   height: 100%;
-  filter: var(--viva-filter);
 }
-[data-frak-anim] [data-frak-anim-slash] {
-  fill: var(--white-color);
+[data-frak-anim] [data-frak-slash] {
   d: path("M50 100 L50 92 L 50 92 L 50 100 Z");
+  fill: var(--white-color);
+  filter: var(--viva-filter);
   transform: rotate(-2deg);
   transform-origin: 50% 100%;
+  will-change: d;
   --ani-start: 0;
   --ani-end: 0.35;
   animation: mbx-slash linear both;
@@ -771,8 +782,23 @@ svg,
     d: path("M0 100 L5 92 L 100 92 L 97 100 Z");
   }
 }
+[data-frak] [data-frak-slash] {
+  d: path("M0 100 L5 92 L 100 92 L 97 100 Z");
+  fill: var(--main-color);
+}
+[data-frak] [data-frak-slash][data-filter="viva"] {
+  will-change: fill, filter;
+  animation: mbx-frak-slash-viva linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-frak-slash-viva {
+  to {
+    fill: var(--white-color);
+    filter: var(--viva-filter);
+  }
+}
 [data-frak-anim] > [data-denominator] {
-  border: 0.2px solid pink;
   opacity: 0;
   transform: scale(0);
   will-change: tranform, opacity;
@@ -790,40 +816,6 @@ svg,
     opacity: 1;
   }
 }
-
-/* #endregion */
-
-/* #region FRAK */
-/*
-[data-frak] {
-  position: relative;
-  display: inline-grid;
-  padding: 0 0.5ch;
-  margin-left: -0.25em;
-  margin-right: -0.125em;
-  grid-template-rows: auto auto;
-  align-items: center;
-  justify-items: center;
-  line-height: 1;
-
-  vertical-align: var(--vertical-align, 55%);
-  transform-origin: calc(50% + 0.25em) 55%;
-  font-size: 0.6em;
-}
-[data-frak] > [data-numerator],
-[data-frak] > [data-denominator] {
-  display: flex;
-  justify-content: center;
-  gap: 0.25em;
-  width: calc(100% + 0.25em);
-}
-[data-frak] > [data-numerator] {
-  border-bottom: 2px solid;
-}
-[data-frak] > [data-denominator] {
-  padding-top: 0.12ch;
-}
-  */
 /* #endregion */
 
 /* #region ROOT ANIMATION */
@@ -1056,7 +1048,10 @@ svg,
 /* #region CIRK */
 [data-cirk] {
   --cirk-00: path(
-    "M50 0A50 50 0 0 0 0 50A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0ZM 20 20A33 30 330 0 0 82 80A33 30 330 0 0 20 20Z"
+    "M0 50A50 50 0 0 0 100 50A50 50 0 0 0 0 50ZM5 50A40 42 30 0 1 95 50A40 42 30 0 1 5 50Z"
+  );
+  --XXX-cirk-00: path(
+    "M50 0A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0ZM 20 20A33 30 330 0 0 82 80A33 30 330 0 0 20 20Z"
   );
   --cirk-01: path(
     "M25 20A25 30 0 0 0 0 50A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0C-8 2 10 45 15 45C5 20 20 8 50 8A45 42 0 0 1 95 50A45 40 0 0 1 50 90A48 45 0 0 1 2 48A28 28 0 0 1 30 20Z"
@@ -1081,7 +1076,7 @@ svg,
 }
 [data-cirk] > svg > path {
   d: var(--cirk-path);
-  fill-rule: evenodd;
+  fill-rule: nonzero;
   fill: var(--white-color);
 }
 [data-cirk] clipPath > path {
@@ -1118,5 +1113,3 @@ svg,
   justify-content: center;
 }
 /* #endregion */
-
-

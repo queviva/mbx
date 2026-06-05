@@ -389,21 +389,22 @@
         alter: (html) => {
           for (const bat of this.#batties) {
             bat.replaceChildren(this.#strip(html));
-            this.#measureElements(bat);
           }
+          this.#measureElements(...this.#batties);
           return api;
         },
         hide: () => {
           for (const bat of this.#batties) {
             bat.style.display = "none";
           }
+          this.#measureElements(...this.#batties);
           return api;
         },
         show: () => {
           for (const bat of this.#batties) {
             bat.style.display = "revert";
           }
-          this.#measureElements(this.#batties);
+          this.#measureElements(...this.#batties);
           return api;
         },
         during: (start, end = null) => {
@@ -635,7 +636,7 @@
            <b id="${frakID}" data-frak-anim>
             <b data-numerator id="${frakID}-num">
              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              <path data-frak-anim-slash />
+              <path id="${frakID}-slash" data-frak-slash />
              </svg>
             </b>
             <b data-denominator id="${frakID}-den"></b>

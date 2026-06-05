@@ -3,8 +3,8 @@
   <head>
     <title>mbx3.0 beta</title>
     <meta charset="UTF-8" />
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
-    <!-- <link rel="stylesheet" href="rat.css" /> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <link rel="stylesheet" href="mbx3.css" /> -->
     <script
       src="mbx3.js"
       data-mbx='{"tag":"rat-batix","css":"mbx3.css"}'
@@ -15,7 +15,6 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding-top: 50vh;
         padding-bottom: 100vh;
         background-color: #888;
       }
@@ -23,6 +22,8 @@
         min-width: 70%;
         font-size: 3rem;
         background-color: #111;
+      }
+      @media screen and (orientation: portrait) {
       }
     </style>
   </head>
@@ -186,11 +187,7 @@
           {
             note: `
               <b>are you ready solve for x?</b>
-              <b data-rant>
-                we ought to be able
-                to solve this rather simple equation
-                for its only unknown variable
-              </b>
+              <b>let's make it a bit more interesting...</b>
             `,
             acts: (S) => {
               S.spot("T2").hide();
@@ -199,20 +196,15 @@
           },
           {
             note: `
-              <b>oop, there's a little more to it</b>
-              <b>I think that's done now, let's start</b>
+              <b>there, now we're ready to start</b>
             `,
             acts: (S) => {
-              S.spot("T2").show();
-              S.spot("T2").materialize();
-              S.spot("T2").grow();
-                
-            }
-
+              S.spot("T2").show().materialize().grow();
+            },
           },
           {
             note: `
-              first, try on the flip~flops!
+              first, try on your flip~flops!
               <b data-rant>
                 we know there's a technique that allows us
                 to take a term, <i>flip</i> its sign, then
@@ -236,7 +228,7 @@
             `,
             acts: (S) => {
               S.spot("T5", "G1").group("G2").cirk();
-            }
+            },
           },
           {
             note: `
@@ -257,14 +249,15 @@
               S.spot("T2x").frak("T2a");
               S.mount("T2b", "2");
               S.spot("T4").frak("T2b");
-            }
+            },
           },
           {
             note: "there are common faktors on the left",
             acts: (S) => {
-              S.spot("T2a").cank(0, "90deg");
-            }
-          }
+              S.spot("T2x-frak").viva();
+              S.spot("T2x-frak-slash").filter("viva");
+            },
+          },
         ],
       };
       const two = document.getElementById("two");
