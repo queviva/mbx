@@ -31,7 +31,7 @@
     <rat-batix id="two" data-mbx='{"XXX_color":300}'></rat-batix>
 
     <script id="ROUTINES">
-      const routineTwo = {
+      const routineTwoXXX = {
         intro: `
           <b data-logo>MATHROBATIX</b>
           illuminated acrobatic gestural mathematics
@@ -62,15 +62,16 @@
            + 
            <b id="T1">1</b>
           <b id="P2" data-parens-rite>)</b>
-          = 
+          <b id="EQ">=</b>
           <b id="T5">5</b>
         `,
         steps: [
           {
             note: "",
             acts: (S) => {
-              S.spotStage().spin().viva();
-              // S.spot("DOT").materialize().grow();
+              // S.spotStage().viva();
+              S.spot("DOT") //.materialize()
+                .grow();
             },
           },
           {
@@ -78,7 +79,6 @@
             acts: (S) => {
               S.spot("DOT").shrink().during(0, 0.3);
               S.spot("Tx", "T1").dist("T7");
-              // S.spot("T5").cank(2,"45deg");
             },
           },
           {
@@ -134,10 +134,10 @@
           },
           {
             note: "what's preverved from wink?",
-            acts: (S) => { 
-              S.spot("T4").alter("12345").cank(1,"70deg");
-            }
-          }
+            acts: (S) => {
+              S.spot("T4").alter("12345").cank(1, "70deg");
+            },
+          },
           /*
           {
             note: "divide both sides by seven",
@@ -164,6 +164,107 @@
           }
        
           */
+        ],
+      };
+
+      const routineTwo = {
+        intro: `
+          <b data-logo>MATHROBATIX</b>
+          illuminated acrobatic gestural mathematics
+        `,
+        stage: `
+          <b id="T2x" data-tite>
+            <b id="T2">2</b>
+            <b id="Tx">x</b>
+          </b>
+          <b id="T+">+</b>
+          <b id="T1">1</b>
+          <b id="EQ">=</b>
+          <b id="T5">5</b>
+        `,
+        steps: [
+          {
+            note: `
+              <b>are you ready solve for x?</b>
+              <b data-rant>
+                we ought to be able
+                to solve this rather simple equation
+                for its only unknown variable
+              </b>
+            `,
+            acts: (S) => {
+              S.spot("T2").hide();
+              S.spot("T+", "T1", "EQ", "T5").unfurl();
+            },
+          },
+          {
+            note: `
+              <b>oop, there's a little more to it</b>
+              <b>I think that's done now, let's start</b>
+            `,
+            acts: (S) => {
+              S.spot("T2").show();
+              S.spot("T2").materialize();
+              S.spot("T2").grow();
+                
+            }
+
+          },
+          {
+            note: `
+              first, try on the flip~flops!
+              <b data-rant>
+                we know there's a technique that allows us
+                to take a term, <i>flip</i> its sign, then
+                <i>flop it</i> to the other side
+              </b>
+            `,
+            acts: (S) => {
+              S.spot("T+", "T1")
+                .group("G1")
+                .viva()
+                .spin()
+                .vault()
+                .moveAfter("T5");
+              S.mount("T-", "-").spot("T+").xfade("T-");
+            },
+          },
+          {
+            note: `
+              look at that right hand side ...
+              <b>we could simplify that</b>
+            `,
+            acts: (S) => {
+              S.spot("T5", "G1").group("G2").cirk();
+            }
+          },
+          {
+            note: `
+              what is five minus one?
+              <b>it's pretty easy, wink-wink</b>
+            `,
+            acts: (S) => {
+              S.mount("T4", "4").spot("G2").xfade("T4").spin();
+              S.spot("T4").wink(500);
+            },
+          },
+          {
+            note: `
+              divide both sides by two
+            `,
+            acts: (S) => {
+              S.mount("T2a", "2");
+              S.spot("T2x").frak("T2a");
+              S.mount("T2b", "2");
+              S.spot("T4").frak("T2b");
+            }
+          },
+          {
+            note: "there are common faktors on the left",
+            acts: (S) => {
+              S.spot("T2a").cank(0, "90deg");
+            }
+          }
         ],
       };
       const two = document.getElementById("two");

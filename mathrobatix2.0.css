@@ -864,7 +864,7 @@ svg {
   fill: var(--white-color);
 }
 [data-cirk] clipPath > path {
-  d: var(--cirk-clip-A);
+  d: path("M50 50 L -10 -10 L -10 -10 L -10 -10 L -10 -10 L -10 -10 Z");
   animation: mbx-cirk linear both;
   animation-timeline: view();
   animation-range: var(--animation-range);

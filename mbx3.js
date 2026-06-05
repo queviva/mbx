@@ -88,8 +88,8 @@
       "move",
       "cank",
       "cirk",
-      "term",
       "original",
+      "term",
       "salute",
     ];
     #allowed = new Set(["id"]);
@@ -394,15 +394,16 @@
           return api;
         },
         hide: () => {
-          for (const bat of api.#batties) {
+          for (const bat of this.#batties) {
             bat.style.display = "none";
           }
           return api;
         },
         show: () => {
-          for (const bat of api.#batties) {
+          for (const bat of this.#batties) {
             bat.style.display = "revert";
           }
+          this.#measureElements(this.#batties);
           return api;
         },
         during: (start, end = null) => {
@@ -445,9 +446,9 @@
         // #endregion
 
         // #region GROWTH
-        grow: () => wrap("grow"),
-        shrink: () => wrap("shrink"),
         salute: () => wrap("salute"),
+        grow: (v) => wrap("grow", v ? { "transform-origin": v } : null),
+        shrink: (v) => wrap("shrink", v ? { "transform-origin": v } : null),
         vault: (v) => wrap("vault", v ? { "--vault-height": v } : null),
         tuck: (v) => wrap("tuck", v ? { "--tuck-depth": v } : null),
         spin: (v) => wrap("spin", v ? { "--spin-angle": v } : null),
@@ -459,7 +460,6 @@
         cirk: (v) => svgWrap("cirk", v || null),
         wink: (v = 1000) => {
           const batties = this.#batties;
-          log(batties,'batties in wink');
           for (const bat of this.#batties) {
             api.spot(bat.id);
             wrap("wink");
@@ -496,6 +496,22 @@
             this.#measureElements(...bat.querySelectorAll("*"));
           }
           return api;
+        },
+        group: (id) => {
+          const batties = this.#batties;
+          const bat0 = batties[0];
+          const groupID = CSS.escape(id);
+
+          api.mount(groupID, "");
+          api.insertBefore(bat0.id);
+
+          const groupEl = api.pick(groupID);
+
+          for (const bat of batties) groupEl.appendChild(bat);
+
+          this.#measureElements(groupEl, ...groupEl.children);
+
+          return api.spot(groupID);
         },
         unfurl: () => {
           const batties = this.#batties;
@@ -576,12 +592,10 @@
                 "grow-term",
               )
               .insertBefore(bat.id)
-              // .viva()
               .materialize()
               .during(0.5)
-              .grow()
-              // .during(0.6 + (i / total) * 0.4);
-              .during(0.6);
+              .grow("100% 50%")
+              .during(0.6); // .during(0.6 + (i / total) * 0.4);
             bat.innerHTML = `
              <b data-term>
               <b data-vaporize style="--ani-start:${0.25 + (i / total) * 0.4};--ani-end:${0.85 + (i / total) * 0.2}">${bat.innerText}</b>
@@ -612,6 +626,7 @@
           return api.spot(id);
         },
         frak: (...ids) => {
+
           const bat0 = this.#batties[0];
           const frakID = `${bat0.id}-frak`;
 
@@ -629,7 +644,7 @@
           bat0.parentNode.insertBefore(frakEl, bat0);
           const numer = frakEl.querySelector("[data-numerator]");
           const denom = frakEl.querySelector("[data-denominator]");
-          for (const el of this.#batties) numer.append(el);
+          for (const bat of this.#batties) numer.append(bat);
           for (const id of new Set(ids)) denom.append(api.pick(id));
           return api;
         },
@@ -764,7 +779,7 @@
       this.#stageObj = nextStep.children[0];
 
       // remove IDs [or make #namespaceIDs()]
-      this.#removeIDs(stepTag.children[0]);
+      // this.#removeIDs(stepTag.children[0]);
 
       // the tag is done with measurements
       stepTag.removeAttribute("data-measure");
