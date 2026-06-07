@@ -25,7 +25,7 @@
 mathro-batix [data-holder] {
   --animation-start: 50%;
   --animation-end: 80%;
-  --font-size: 3rem;
+  --font-size: 2.5em;
   --back-color: #111;
   --mbx-h: 35;
   --mbx-s: 80%;
@@ -39,8 +39,10 @@ mathro-batix [data-holder] {
   display: inline-flex;
   flex-direction: column;
   overflow: visible;
+  padding: 0px 10px;
   background-color: var(--back-color);
   color: var(--main-color);
+  font-size: var(--font-size);
 }
 
 /* FONTS */
@@ -64,12 +66,12 @@ path {
   --ani-start: 0;
   --ani-end: 1;
 
-  --animation-range: cover
+  --animation-range: contain
     calc(
       var(--animation-start) + (var(--animation-end) - var(--animation-start)) *
         var(--ani-start)
     )
-    cover
+    contain
     calc(
       var(--animation-start) + (var(--animation-end) - var(--animation-start)) *
         var(--ani-end)
@@ -83,7 +85,7 @@ b {
   display: inline-flex;
   flex-direction: row;
   gap: 0.25em;
-  align-items: baseline;
+  /* align-items: baseline; */
   justify-content: center;
   font-weight: normal;
   text-wrap: nowrap;
@@ -115,21 +117,27 @@ svg {
   font-style: italic;
   font-size: 0.5em;
   text-align: center;
+  text-wrap: wrap;
 }
 /* #endregion */
 
 /* #region LOGO */
 [data-logo] {
-  width: 70%;
+  width: 100%;
   padding-top: 5vh;
   font-family: "Luckiest Guy";
-  font-size: 50px;
+  font-size: 2.25em;
   font-style: normal;
   line-height: 50px;
   text-align: center;
   color: hsl(var(--mbx-h), 100%, 85%);
   -webkit-text-stroke: 2px var(--main-color);
   background-color: #111;
+}
+@media screen and (orientation: portrait) {
+  [data-logo] {
+    font-size: 1.5em;
+  }
 }
 /* #endregion */
 
@@ -142,6 +150,7 @@ svg {
 }
 [data-step] > :nth-child(1) {
   display: flex;
+  flex-direction: row;
   gap: 0.25em;
   align-items: baseline;
   justify-content: center;
@@ -173,25 +182,25 @@ svg {
   font-style: italic;
   line-height: 0.5;
 }
-[data-sup] [data-frak],
-[data-sup] [data-frak-anim] {
-  --vertical-align: 90%;
-}
 /* #endregion */
 
 /* #region MOVE */
 [data-move] {
+  will-change: transform, font;
   animation: mbx-move linear both;
   animation-timeline: view();
   animation-range: var(--animation-range);
 }
-
 @keyframes mbx-move {
   from {
     transform: translate(var(--dx), var(--dy));
+    /* width: var(--mbx-old-wide); */
+    font-size: var(--mbx-old-font);
   }
   to {
     transform: translate(0, 0);
+    /* width: var(--mbx-new-wide); */
+    font-size: var(--mbx-new-font);
   }
 }
 /* #endregion */
@@ -357,9 +366,10 @@ svg,
     drop-shadow(var(--viva-f3));
 }
 [data-viva] {
+  view-timeline: --viva-timeline block;
   text-shadow: none;
   animation: mbx-viva linear both;
-  animation-timeline: view();
+  animation-timeline: --viva-timeline;
   animation-range: var(--animation-range);
 }
 @keyframes mbx-viva {
@@ -368,9 +378,22 @@ svg,
     text-shadow: var(--viva-shadow);
   }
 }
+[data-viva] path {
+  animation: mbx-viva-path linear both;
+  animation-timeline: --viva-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-viva-path {
+  to {
+    fill: var(--white-color);
+    filter: var(--viva-filter);
+  }
+}
 [data-filter="viva"] {
-  color: var(--white-color);
   text-shadow: var(--viva-shadow);
+}
+path[data-filter="viva"] {
+  filter: var(--viva-filter);
 }
 /* #endregion */
 
@@ -386,14 +409,11 @@ svg,
     drop-shadow(var(--ghost-f3));
 }
 [data-ghost] {
+  view-timeline: --ghost-timeline block;
   text-shadow: none;
   animation: mbx-ghost linear both;
-  animation-timeline: view();
+  animation-timeline: --ghost-timeline;
   animation-range: var(--animation-range);
-}
-[data-filter="ghost"] {
-  color: var(--back-color);
-  text-shadow: var(--ghost-shadow);
 }
 @keyframes mbx-ghost {
   to {
@@ -401,11 +421,28 @@ svg,
     text-shadow: var(--ghost-shadow);
   }
 }
+[data-ghost] path {
+  animation: mbx-ghost-path linear both;
+  animation-timeline: --ghost-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-ghost-path {
+  to {
+    fill: var(--back-color); 
+    filter: var(--ghost-filter);
+  }
+}
+[data-filter="ghost"] {
+  color: var(--back-color);
+  text-shadow: var(--ghost-shadow);
+}
 /* #endregion */
 
 /* #region VAPORIZE|MATERIALIZE */
+svg,
 [data-materialize],
-[data-vaporize] {
+[data-vaporize],
+[data-filter="vaporize"] {
   --ghost-f1: 0 0 2px var(--back-color);
   --ghost-f2: 0 0 6px hsl(var(--mbx-h), 100%, 80%);
   --ghost-f3: 0 0 12px hsl(var(--mbx-h), 100%, 98%);
@@ -421,8 +458,9 @@ svg,
     drop-shadow(var(--vapor-f3));
 }
 [data-vaporize] {
+  view-timeline: --vaporize-timeline block;
   animation: mbx-vaporize linear both;
-  animation-timeline: view();
+  animation-timeline: --vaporize-timeline;
   animation-range: var(--animation-range);
 }
 @keyframes mbx-vaporize {
@@ -442,6 +480,32 @@ svg,
   100% {
     color: transparent;
     text-shadow: var(--vapor-shadow);
+    opacity: 0;
+  }
+}
+[data-vaporize] path {
+  will-change: fill, filter, opacity;
+  animation: mbx-vaporize-path linear both;
+  animation-timeline: --vaporize-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-vaporize-path {
+  0% {
+    filter: none;
+  }
+  40% {
+    fill: var(--back-color);
+    filter: var(--ghost-filter);
+    opacity: 1;
+  }
+  75% {
+    fill: transparent;
+    filter: var(--vapor-filter);
+    opacity: 0.7;
+  }
+  100% {
+    fill: transparent;
+    filter: var(--vapor-filter);
     opacity: 0;
   }
 }
@@ -479,13 +543,24 @@ svg,
 
 /* #region COLORIZE */
 [data-colorize] {
+  view-timeline: --colorize-timeline block;
   animation: mbx-colorize linear both;
-  animation-timeline: view();
+  animation-timeline: --colorize-timeline;
   animation-range: var(--animation-range);
 }
 @keyframes mbx-colorize {
   to {
     color: hsl(var(--mbx-colorize-val, var(--mbx-h)), 80%, 60%);
+  }
+}
+[data-colorize] path {
+  animation: mbx-colorize-path linear both;
+  animation-timeline: --colorize-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-colorize-path {
+  to{
+    fill: hsl(var(--mbx-colorize-val, var(--mbx-h)), 80%, 60%);
   }
 }
 /* #endregion */
@@ -505,19 +580,25 @@ svg,
   }
 }
 .mbx-wink {
-  will-change: color, filter;
+  will-change: fill, color, filter;
+  animation: mbx-wink ease-in-out var(--mbx-wink-dur);
+}
+.mbx-wink [data-wink] path {
   animation: mbx-wink ease-in-out var(--mbx-wink-dur);
 }
 @keyframes mbx-wink {
   0% {
+    fill: currentColor;
     color: currentColor;
     filter: none;
   }
   50% {
+    fill: var(--white-color);
     color: var(--white-color);
     filter: var(--viva-filter);
   }
   100% {
+    fill: currentColor;
     color: currentColor;
     filter: none;
   }
@@ -681,6 +762,7 @@ svg,
   font-size: 0.5em;
   font-style: italic;
   text-align: center;
+  text-wrap: wrap;
   color: var(--grey-color);
 }
 [data-comm] > [data-rant] {
@@ -710,80 +792,130 @@ svg,
 /* #endregion */
 
 /* #region FRAK */
-[data-frak],
-[data-frak-anim] {
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  gap: 0;
-  padding: 0 0.5ch;
-  margin-left: -0.25em;
-  margin-right: -0.25em;
-  grid-template-rows: auto auto;
-  align-items: center;
-  justify-items: center;
-  line-height: 1;
-  --mbx-frak-trans-y: -35%;
+[data-frak-holder-anim] {
+  interpolate-size: allow-keywords;
+  display: inline-block;
+  will-change: margin, font-size;
+  --ani-start: 0.3;
+  animation: mbx-frak-holder-anim linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-frak-holder-anim {
+  from {
+    margin: 0 0;
+    font-size: 1em;
+    height: 1lh;
+  }
+  to {
+    margin: 0 0.25em;
+    font-size: 0.75em;
+    height: auto;
+  }
 }
 [data-frak-anim] {
-  font-size: 1em;
-  will-change: transform, margin, font-size;
-  --ani-start: 0.2;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.1em;
+  width: 100%;
+  vertical-align: 0%;
+  will-change: vertical-align;
+  --ani-start: 0.3;
   animation: mbx-frak-anim linear both;
   animation-timeline: view();
   animation-range: var(--animation-range);
 }
 @keyframes mbx-frak-anim {
   from {
-    transform: translateY(0);
-    margin-left: -0.25em;
-    margin-right: -0.25em;
-    font-size: 1em;
+    vertical-align: 0%;
   }
   to {
-    transform: translateY(var(--mbx-frak-trans-y));
-    margin-left: 0em;
-    margin-right: 0em;
-    font-size: 0.6em;
+    vertical-align: 55%;
   }
 }
-[data-frak] {
-  transform: translateY(var(--mbx-frak-trans-y));
-  margin-left: 0em;
-  margin-right: 0em;
-  font-size: 0.6em;
+[data-frak-anim] > [data-numerator] {
+  /* border: 1px solid pink; */
 }
-[data-frak-anim] > [data-denominator] {
-  transform-origin: 50% 0%;
-}
-[data-numerator] > svg {
+[data-frak-anim] > [data-numerator] > svg {
+  position: absolute;
+  top: 0;
   left: -0.25em;
   width: calc(100% + 0.5em);
   height: 100%;
+  overflow: visible;
 }
 [data-frak-anim] [data-frak-slash] {
-  d: path("M50 100 L50 92 L 50 92 L 50 100 Z");
+  d: path("M50 106 L50 100 L 50 100 L 50 106 Z");
   fill: var(--white-color);
   filter: var(--viva-filter);
-  transform: rotate(-2deg);
   transform-origin: 50% 100%;
+  transform: rotate(-2deg);
   will-change: d;
-  --ani-start: 0;
   --ani-end: 0.35;
-  animation: mbx-slash linear both;
+  animation: mbx-frak-slash linear both;
   animation-timeline: view();
   animation-range: var(--animation-range);
 }
-@keyframes mbx-slash {
+@keyframes mbx-frak-slash {
   from {
-    d: path("M50 100 L50 92 L 50 92 L 50 100 Z");
+    d: path("M50 106 L50 100 L 50 100 L 50 106 Z");
   }
   to {
-    d: path("M0 100 L5 92 L 100 92 L 97 100 Z");
+    fill: var(--white-color);
+    d: path("M0 106 L5 100 L 100 100 L 97 106 Z");
   }
 }
+[data-frak-anim] [data-denominator] {
+  /* border: 1px solid blue; */
+}
+[data-frak-anim] > [data-denominator] {
+  transform-origin: 50% 0%;
+  opacity: 0;
+  transform: scale(0);
+  will-change: tranform, opacity;
+  --ani-end: 0.9;
+  animation: mbx-frak-den linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-frak-den {
+  from {
+    transform: scale(0);
+    opacity: 0;
+    height: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+    height: auto;
+  }
+}
+
+[data-frak-holder] {
+  display: inline-block;
+  margin: 0 0.25em;
+}
+[data-frak] {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.1em;
+  vertical-align: 55%;
+  font-size: 0.75em;
+}
+[data-frak] [data-numerator] {
+  /* height: 1em; */
+}
+[data-frak] [data-denominator] {
+  /* height: 1em; */
+}
+[data-frak] [data-numerator] > svg {
+  left: -0.25em;
+  width: calc(100% + 0.5em);
+  height: 100%;
+  overflow: visible;
+}
 [data-frak] [data-frak-slash] {
-  d: path("M0 100 L5 92 L 100 92 L 97 100 Z");
+  d: path("M0 106 L5 100 L 100 100 L 97 106 Z");
   fill: var(--main-color);
 }
 [data-frak] [data-frak-slash][data-filter="viva"] {
@@ -798,24 +930,7 @@ svg,
     filter: var(--viva-filter);
   }
 }
-[data-frak-anim] > [data-denominator] {
-  opacity: 0;
-  transform: scale(0);
-  will-change: tranform, opacity;
-  animation: mbx-den linear both;
-  animation-timeline: view();
-  animation-range: var(--animation-range);
-}
-@keyframes mbx-den {
-  from {
-    transform: scale(0);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
+
 /* #endregion */
 
 /* #region ROOT ANIMATION */
@@ -1076,6 +1191,8 @@ svg,
 }
 [data-cirk] > svg > path {
   d: var(--cirk-path);
+  transform-origin: 50% 50%;
+  transform: rotate(var(--cirk-rotate, 0deg));
   fill-rule: nonzero;
   fill: var(--white-color);
 }
@@ -1109,7 +1226,50 @@ svg,
   display: inline-flex;
   flex-direction: row;
   gap: 0.1em;
-  align-items: baseline;
   justify-content: center;
 }
 /* #endregion */
+
+/* #region HUDDLE */
+
+[data-huddle] {
+  display: inline-grid;
+  grid-template: 1fr 1fr;
+}
+[data-huddle] * {
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+/* #endregion */
+
+/* #region LINE-DIV */
+[data-line-div] {
+
+  --line-div-00 : path("M48 48L48 48 L52 52 L52 52Z");
+
+  position: relative;
+}
+[data-line-div] [data-line-div-slash] {
+  d: path("M50 106 L50 100 L 50 100 L 50 106 Z");
+  fill: var(--white-color);
+  filter: var(--viva-filter);
+  transform-origin: 50% 100%;
+  transform: rotate(-2deg);
+  will-change: d;
+  --ani-end: 0.35;
+  animation: mbx-frak-slash linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-frak-slash {
+  from {
+    d: path("M50 106 L50 100 L 50 100 L 50 106 Z");
+  }
+  to {
+    fill: var(--white-color);
+    d: path("M0 106 L5 100 L 100 100 L 97 106 Z");
+  }
+}
+
+/* #endregion */
+

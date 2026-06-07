@@ -3,7 +3,7 @@
   <head>
     <title>mbx3.0 beta</title>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
     <!-- <link rel="stylesheet" href="mbx3.css" /> -->
     <script
       src="mbx3.js"
@@ -15,12 +15,14 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        margin: 0;
+        padding-top: 30vh;
         padding-bottom: 100vh;
-        background-color: #888;
+        background-color: #111;
       }
       rat-batix {
-        min-width: 70%;
-        font-size: 3rem;
+        width: 100%;
+        font-size: 1.25rem;
         background-color: #111;
       }
       @media screen and (orientation: portrait) {
@@ -168,7 +170,7 @@
         ],
       };
 
-      const routineTwo = {
+      const routineTwoYYY = {
         intro: `
           <b data-logo>MATHROBATIX</b>
           illuminated acrobatic gestural mathematics
@@ -176,7 +178,7 @@
         stage: `
           <b id="T2x" data-tite>
             <b id="T2">2</b>
-            <b id="Tx">x</b>
+            <b id="Tx" data-tite>x<b id="Pow2" data-sup>2</b></b>
           </b>
           <b id="T+">+</b>
           <b id="T1">1</b>
@@ -190,7 +192,7 @@
               <b>let's make it a bit more interesting...</b>
             `,
             acts: (S) => {
-              S.spot("T2").hide();
+              S.spot("T2", "Pow2").hide();
               S.spot("T+", "T1", "EQ", "T5").unfurl();
             },
           },
@@ -199,7 +201,7 @@
               <b>there, now we're ready to start</b>
             `,
             acts: (S) => {
-              S.spot("T2").show().materialize().grow();
+              S.spot("T2", "Pow2").show().materialize().grow();
             },
           },
           {
@@ -254,15 +256,88 @@
           {
             note: "there are common faktors on the left",
             acts: (S) => {
-              S.spot("T2x-frak").viva();
-              S.spot("T2x-frak-slash").filter("viva");
+              S.mount("Tnorm", "xgH").insertBefore("EQ");
+              S.spot("T4-frak").spin();
+              // S.spot("T2").cank(0,"90deg");
+              // S.spot("T2a").cank(0, "90deg");
+              // S.spot("T2x-frak-slash").filter("viva");
+            },
+          },
+          {
+            note: "what became of that?",
+          },
+        ],
+      };
+
+      const routineTwoZZZ = {
+        intro: `
+          <b data-logo>MATHROBATIX</b>
+          illuminated acrobatic gestural mathematics
+        `,
+        stage: `
+          <b id="TAring">&Aring;vg</b>
+          <b id="EQ">=</b>
+          <b id="T9">9</b>
+        `,
+        steps: [
+          {
+            note: `
+              <b style="padding-top:1lh;">
+                divide by sides by <b data-tite>7x^2</b>
+              </b>
+            `,
+            acts: (S) => {
+              S.mount("T7x-a", "7x");
+              S.mount("T7x-b", "7x");
+              S.spot("TAring").frak("T7x-a");
+              S.spot("T9").frak("T7x-b");
+            },
+          },
+          {
+            note: "should be some dopplers",
+            load: `
+              <b id="P1">(</b>
+              <b id="T4x">4x</b>
+              <b id="T+">+</b>
+              <b id="T2">2</b>
+              <b id="P2">)</b>
+              <b id="EQ">=</b>
+              <b id="TR" data-tite>Ry^3</b>
+            `,
+            acts: (X) => {
+              X.mount("R", "r");
+              X.spot("T2").lineDiv("R");
             },
           },
         ],
       };
+
+      const routineTwo = {
+        intro: `
+          <b data-logo>MATHROBATIX</b>
+          illuminated acrobatic gestural mathematics
+        `,
+        stage: `
+          <b id="Power1">
+            3x^2
+          </b>
+          <b id="T5"> + 5</b>
+          <b id="EQ">=</b>
+          <b id="T7">7</b>
+        `,
+        steps: [
+          {
+            note: "powerful rule",
+            acts: (S) => {
+              S.spot("Power1").powerRule();
+            },
+          },
+        ],
+      };
+
       const two = document.getElementById("two");
       two.addEventListener("mbx-ready", (e) => {
-        two.loadRoutine(routineTwo);
+        two.loadRoutine(routineTwoZZZ);
       });
     </script>
 

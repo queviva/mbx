@@ -175,7 +175,8 @@
     }
 
     #saniTag(tag, html, ...attrs) {
-      return this.#makeTag(tag, this.#strip(html), ...attrs);
+      // return this.#makeTag(tag, this.#strip(html), ...attrs);
+      return this.#makeTag(tag, html, ...attrs);
     }
 
     #makeStepTag(load, note) {
@@ -241,10 +242,10 @@
     }
 
     #resetFraks(step) {
-      for (const frak of step.querySelectorAll("[data-frak-anim]")) {
-        frak.removeAttribute("data-frak-anim");
-        frak.innerHTML = `<b data-frak>${frak.innerHTML}</b>`;
-        // frak.innerHTML = frak.innerHTML.replace("-amin","");
+      for (const frak of step.querySelectorAll("[data-frak-holder-anim]")) {
+        frak.removeAttribute("data-frak-holder-anim");
+        frak.setAttribute("data-frak-holder", "");
+        frak.innerHTML = frak.innerHTML.replaceAll("-anim", "");
       }
     }
 
@@ -261,6 +262,8 @@
 
     #makeAPI = () => {
       // #region API UTILS
+      const fix = this.#opts.fix;
+
       const move = (anchorId, direction) => {
         const anchor = api.pick(anchorId);
         if (!anchor) return api;
@@ -269,8 +272,9 @@
 
         const snapshots = new Map();
         for (const [i, bat] of allBats.entries()) {
-          bat.id ||= `${this.#opts.fix}-${i}`;
+          bat.id ||= `${fix}-${i}`;
           snapshots.set(bat.id, bat.getBoundingClientRect());
+          bat.oldFont = getComputedStyle(bat).fontSize;
         }
 
         const batsArray =
@@ -290,12 +294,16 @@
           const dx = oldRect.left - newRect.left;
           const dy = oldRect.top - newRect.top;
 
-          if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-            bat.innerHTML = `<b data-move>${bat.innerHTML}</b>`;
-            const wrapper = bat.children[0];
-            wrapper.style.setProperty("--dx", `${Math.round(dx)}px`);
-            wrapper.style.setProperty("--dy", `${Math.round(dy)}px`);
-          }
+          bat.newFont = getComputedStyle(bat).fontSize;
+
+          // if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+          bat.innerHTML = `<b data-move>${bat.innerHTML}</b>`;
+          const wrapper = bat.children[0];
+          wrapper.style.setProperty("--dx", `${Math.round(dx)}px`);
+          wrapper.style.setProperty("--dy", `${Math.round(dy)}px`);
+          wrapper.style.setProperty(`--${fix}-old-font`, bat.oldFont);
+          wrapper.style.setProperty(`--${fix}-new-font`, bat.newFont);
+          // }
         }
         return api;
       };
@@ -313,7 +321,7 @@
       };
 
       const svgWrap = (type, data, cssVars) => {
-        const id = `${this.#opts.fix}-${crypto.randomUUID()}`;
+        const id = `${fix}-${crypto.randomUUID()}`;
         for (const bat of this.#batties) {
           bat.innerHTML = `
             <b data-${type}="${data || null}">
@@ -436,11 +444,25 @@
           }
           return api;
         },
-        colorize: (v) =>
-          wrap("colorize", { [`--${this.#opts.fix}-colorize-val`]: v }),
+        colorize: (v) => {
+          const batties = this.#batties;
+          for (const bat of batties) {
+            if (bat.tagName === "path") {
+              bat.setAttribute("data-colorize", "");
+              bat.style.setProperty(`--${fix}-colorize-val`, v);
+            } else {
+              api.spot(bat.id);
+              wrap("colorize", { [`--${fix}-colorize-val`]: v });
+            }
+          }
+
+          this.#batties = batties;
+        },
         setColor: (v) => {
           for (const bat of this.#batties) {
-            bat.style.setProperty(`--${this.#opts.fix}-h`, v);
+            bat.style.setProperty(`--${fix}-h`, v);
+            bat.style.color = `var(--main-color)`;
+            bat.style.fill = `var(--main-color)`;
           }
           return api;
         },
@@ -458,19 +480,26 @@
         // #region ANIMATES
         cank: (v, rot) =>
           svgWrap("cank", v || null, rot ? { "--cank-rotate": rot } : null),
-        cirk: (v) => svgWrap("cirk", v || null),
+        cirk: (v, rot) =>
+          svgWrap("cirk", v || null, rot ? { "--cirk-rotate": rot } : null),
         wink: (v = 1000) => {
           const batties = this.#batties;
           for (const bat of this.#batties) {
-            api.spot(bat.id);
-            wrap("wink");
-            bat.style.setProperty("--mbx-wink-dur", `${v}ms`);
-            const wink = bat.children[0];
-            const anim = wink.getAnimations()?.[0];
+            let targ;
+            if (bat.tagName === "path") {
+              bat.parentNode.setAttribute("data-wink", "");
+              targ = bat.parentNode;
+            } else {
+              api.spot(bat.id);
+              wrap("wink");
+              targ = bat.children[0];
+            }
+            bat.style.setProperty(`--${fix}-wink-dur`, `${v}ms`);
+            const anim = targ.getAnimations()?.[0];
             if (!anim) break;
             anim.onfinish = (e) => {
-              bat.classList.add("mbx-wink");
-              setTimeout(() => bat.classList.remove("mbx-wink"), v);
+              bat.classList.add(`${fix}-wink`);
+              setTimeout(() => bat.classList.remove(`${fix}-wink`), v);
             };
           }
           this.#batties = batties;
@@ -491,8 +520,8 @@
             `;
             for (let i = 0; i < v; i++) {
               const bbb = this.#makeTag("b", `<b>${html}</b>`);
-              bbb.id = `${bat.id}-dopple${v > 1 ? i + 1 : ""}`;
-              bat.children[0].append(bbb);
+              bbb.id = `${bat.id}-dopple${v > 1 ? "-" + (i + 1) : ""}`;
+              bat.children[0].prepend(bbb);
             }
             this.#measureElements(...bat.querySelectorAll("*"));
           }
@@ -567,12 +596,12 @@
           this.#measureElements(fadeEl, ...fadeEl.children[0].children);
 
           fadeEl.children[0].style.setProperty(
-            `--${this.#opts.fix}-xfade-wide0`,
+            `--${fix}-xfade-wide0`,
             `${Math.round(org.getBoundingClientRect().width)}px`,
           );
 
           fadeEl.children[0].style.setProperty(
-            `--${this.#opts.fix}-xfade-wide1`,
+            `--${fix}-xfade-wide1`,
             `${Math.round(dop.getBoundingClientRect().width)}px`,
           );
 
@@ -608,7 +637,7 @@
         },
         root: (id) => {
           const bat0 = this.#batties[0];
-          id = id || `${this.#opts.fix}${crypto.randomUUID()}`;
+          id = id || `${fix}${crypto.randomUUID()}`;
           const rootEl = document.createElement("b");
           rootEl.id = CSS.escape(id);
           rootEl.setAttribute("data-root-anim", "");
@@ -627,27 +656,38 @@
           return api.spot(id);
         },
         frak: (...ids) => {
-
           const bat0 = this.#batties[0];
           const frakID = `${bat0.id}-frak`;
 
           const frakEl = document.createElement("b");
           frakEl.innerHTML = `
-           <b id="${frakID}" data-frak-anim>
-            <b data-numerator id="${frakID}-num">
-             <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              <path id="${frakID}-slash" data-frak-slash />
-             </svg>
+           <b data-frak-holder-anim>
+            <b data-frak-anim>
+             <b data-numerator id="${frakID}-numerator">
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+               <path id="${frakID}-slash" data-frak-slash />
+              </svg>
+             </b>
+             <b data-denominator id="${frakID}-denominator"></b>
             </b>
-            <b data-denominator id="${frakID}-den"></b>
            </b>
           `;
+          frakEl.id = frakID;
           bat0.parentNode.insertBefore(frakEl, bat0);
           const numer = frakEl.querySelector("[data-numerator]");
           const denom = frakEl.querySelector("[data-denominator]");
           for (const bat of this.#batties) numer.append(bat);
           for (const id of new Set(ids)) denom.append(api.pick(id));
-          return api;
+          // this.#measureElements(frakEl, ...frakEl.querySelectorAll("*"));
+          return api.spot(frakID);
+        },
+        lineDiv: (id) => {
+          const bat0 = this.#batties[0];
+          const slashID = `${bat0.id}-slash`;
+          api.spot(id);
+          svgWrap("line-div");
+          const lineEl = api.pick(id);
+          api.insertAfter(bat0.id);
         },
         // #endregion
 
@@ -659,14 +699,14 @@
             if (!sup) return api;
             sup.remove();
             bat.innerHTML = `
-              <b data-prx>
-                <b id="baseXXX" data-prx-base>${bat.innerText}</b>
-                <b data-sup data-prx-expo>
-                  <b data-prx-org>
+              <b data-XXX>
+                <b id="baseXXX" data-XXX-base>${bat.innerText}</b>
+                <b data-sup data-XXX-expo>
+                  <b id="org" data-XXX-org>
                     <b>${sup.innerText}</b>
                     <b data-grow>- 1</b>
                   </b>
-                  <b id="dop" data-prx-dop>
+                  <b id="dop" data-XXX-dop>
                     <b>${sup.innerText}</b>
                     <b data-grow>&middot;</b>
                   </b>
@@ -674,9 +714,9 @@
               </b>
             `;
             this.#measureElements(...bat.querySelectorAll("*"));
-            const base = bat.querySelector("[data-prx-base]");
-            const dop = bat.querySelector("[data-prx-dop]");
-            api.spot("dop").moveBefore("baseXXX");
+            const dop = bat.querySelector("[data-XXX-dop]");
+            // log(api.pick("dop"));
+            api.spot("org").spin();
           }
           this.#batties = batties;
           return api;
@@ -735,7 +775,8 @@
       // await new Promise((r) => setTimeout(r, 800));
 
       // load new stage if needed
-      step.load = step.load ? this.#strip(step.load) : this.#stageObj.innerHTML;
+      // step.load = step.load ? this.#strip(step.load) : this.#stageObj.innerHTML;
+      step.load ||= this.#stageObj.innerHTML;
 
       // make the step tags
       const stepTag = this.#makeStepTag(step.load, step.note || "");
