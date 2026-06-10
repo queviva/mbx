@@ -281,33 +281,37 @@
         `,
         steps: [
           {
-            note: `
-              <b style="padding-top:1lh;">
-                divide by sides by <b data-tite>7x^2</b>
-              </b>
-            `,
-            acts: (S) => {
-              S.mount("T7x-a", "7x");
-              S.mount("T7x-b", "7x");
-              S.spot("TAring").frak("T7x-a");
-              S.spot("T9").frak("T7x-b");
-            },
-          },
-          {
             note: "should be some dopplers",
             load: `
-              <b id="P1">(</b>
+              <b id="P1" data-parens-left>(</b>
               <b id="T4x">4x</b>
               <b id="T+">+</b>
               <b id="T2">2</b>
-              <b id="P2">)</b>
+              <b id="P2" data-parens-rite>)</b>
               <b id="EQ">=</b>
               <b id="TR" data-tite>Ry^3</b>
             `,
             acts: (X) => {
-              X.mount("R", "r");
-              X.spot("T2").lineDiv("R");
+              X.mount("Div-P1", "<b data-parens-left>(</b>")
+                .mount("Div-x", "x")
+                .mount("Div-Plus", "+")
+                .mount("Div-1", "1")
+                .mount("Div-P2", "<b data-parens-rite>)</b>");
+              X.spot("P2").inlineFrak(
+                "Div-P1",
+                "Div-x",
+                "Div-Plus",
+                "Div-1",
+                "Div-P2",
+              );
             },
+          },
+          {},
+          {
+            note: "re-load stage",
+            load: `
+            (4x + 2)///(x + 1) = <b data-tite>Ry^3</b>
+            `,
           },
         ],
       };

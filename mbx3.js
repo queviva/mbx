@@ -113,6 +113,18 @@
         .replace(
           /([^\s])\_(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g,
           "$1<b data-sub>$2</b>",
+        )
+        .replaceAll(
+          "///",
+          `
+            <b data-inline-frak-holder>
+             <b data-inline-frak>
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+               <path/>
+              </svg>
+             </b>
+            </b>
+          `
         );
     }
 
@@ -246,6 +258,12 @@
         frak.removeAttribute("data-frak-holder-anim");
         frak.setAttribute("data-frak-holder", "");
         frak.innerHTML = frak.innerHTML.replaceAll("-anim", "");
+      }
+    }
+
+    #resetInlineFraks(step) {
+      for (const frak of step.querySelectorAll("[data-inline-frak-holder]")) {
+        frak.setAttribute("data-inline-frak-holder", "");
       }
     }
 
@@ -549,7 +567,7 @@
           for (const [i, el] of batties.entries()) {
             api
               .spot(el.id)
-              .grow()
+              .grow("50% 50%")
               .during(i / total);
           }
           this.#batties = batties;
@@ -681,17 +699,30 @@
           // this.#measureElements(frakEl, ...frakEl.querySelectorAll("*"));
           return api.spot(frakID);
         },
-        lineDiv: (id) => {
-          const bat0 = this.#batties[0];
-          const slashID = `${bat0.id}-slash`;
-          api.spot(id);
-          svgWrap("line-div");
-          const lineEl = api.pick(id);
-          api.insertAfter(bat0.id);
-        },
         // #endregion
 
         // #region ATTEMPTS
+        inlineFrak: (...ids) => {
+          const batties = this.#batties;
+          const slashID = `${batties[0].id}-slash`;
+          const slash = this.#makeTag("b",`
+            <b data-inline-frak>
+             <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <path/>
+             </svg>
+            </b>
+          `,"inline-frak-holder");
+          slash.setAttribute("data-inline-frak-holder", "anim");
+          slash.id = slashID;
+          const el = batties.at(-1);
+          for (const id of ids.reverse()) {
+            el.parentNode.insertBefore(api.pick(id), el.nextSibling);
+          }
+          el.parentNode.insertBefore(slash, el.nextSibling);
+          api.spot(...ids.reverse()).unfurl();
+          return api;
+        },
+
         powerRule: () => {
           const batties = this.#batties;
           for (const bat of batties) {
@@ -813,6 +844,9 @@
 
       // reset the fraktions
       this.#resetFraks(nextStep);
+
+      // reset the inline fraktions
+      this.#resetInlineFraks(nextStep);
 
       // remove the API <b>'s
       this.#removeAPIs(nextStep);

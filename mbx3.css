@@ -428,7 +428,7 @@ svg,
 }
 @keyframes mbx-ghost-path {
   to {
-    fill: var(--back-color); 
+    fill: var(--back-color);
     filter: var(--ghost-filter);
   }
 }
@@ -559,7 +559,7 @@ svg,
   animation-range: var(--animation-range);
 }
 @keyframes mbx-colorize-path {
-  to{
+  to {
     fill: hsl(var(--mbx-colorize-val, var(--mbx-h)), 80%, 60%);
   }
 }
@@ -1242,34 +1242,65 @@ svg,
 
 /* #endregion */
 
-/* #region LINE-DIV */
-[data-line-div] {
-
-  --line-div-00 : path("M48 48L48 48 L52 52 L52 52Z");
-
-  position: relative;
+/* #region INLINE-FRAK*/
+[data-inline-frak-holder] {
+  display: inline-block;
+  margin: 0 0em;
 }
-[data-line-div] [data-line-div-slash] {
-  d: path("M50 106 L50 100 L 50 100 L 50 106 Z");
-  fill: var(--white-color);
-  filter: var(--viva-filter);
-  transform-origin: 50% 100%;
-  transform: rotate(-2deg);
-  will-change: d;
-  --ani-end: 0.35;
-  animation: mbx-frak-slash linear both;
+[data-inline-frak-holder="anim"] {
+  margin: 0 -0.125em;
+  --ani-start: 0.5;
+  animation: mbx-inline-frak-holder linear both;
   animation-timeline: view();
   animation-range: var(--animation-range);
 }
-@keyframes mbx-frak-slash {
+@keyframes mbx-inline-frak-holder {
   from {
-    d: path("M50 106 L50 100 L 50 100 L 50 106 Z");
+    margin: 0 -0.125em;
+  }
+  to {
+    margin: 0 0em;
+  }
+}
+[data-inline-frak] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.23em;
+  width: 0;
+  vertical-align: -0.35em;
+}
+[data-inline-frak] svg {
+  position: relative;
+  height: 100%;
+  width: 0.5em;
+  overflow: visible;
+}
+[data-inline-frak-holder] path {
+  d: path("M0 95L5 100L100 5L95 0Z");
+  fill: var(--main-color);
+  stroke: var(--main-color);
+  stroke-width: 0.1em; 
+}
+[data-inline-frak-holder="anim"] path {
+  fill: var(--white-color);
+  filter: var(--viva-filter);
+  stroke: none;
+  stroke-width: 0;
+  transform-origin: 50% 50%;
+  will-change: d;
+  --ani-end: 0.4;
+  animation: mbx-inline-frak-slash linear both;
+  animation-timeline: view();
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-inline-frak-slash {
+  from {
+    d: path("M47 47L53 53L53 53L47 47Z");
   }
   to {
     fill: var(--white-color);
-    d: path("M0 106 L5 100 L 100 100 L 97 106 Z");
+    d: path("M0 95L5 100L100 5L95 0Z");
   }
 }
-
 /* #endregion */
-
