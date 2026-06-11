@@ -281,7 +281,9 @@
         `,
         steps: [
           {
-            note: "the inline frakization unfurls",
+            note: `
+              <b><br>the inline version unfurls</b>
+            `,
             load: `
               <b id="P1" data-parens-left>(</b>
               <b id="T4x">4x</b>
@@ -307,14 +309,23 @@
           {
             note: `<b style="padding-top:1lh;">reformatted undo-stage</b>`,
             acts: (X) => {
-              X.spot("G1").spin("-720deg").moveAfter("TR");
+              X.spot("G2-frak").flipFlop();
             },
+          },
+          {
+            acts: (X) => {
+              X.spot("G2-frak-denominator").viva();
+            }
           },
           {
             note: "new .load stage with triple / markup",
             load: `
             (4x + 2)///(x + 1) = <b>Ry^3</b>
             `,
+            acts: (X) => {
+              X.spotStage()
+              .salute();
+            }
           },
         ],
       };

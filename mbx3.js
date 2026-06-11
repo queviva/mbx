@@ -47,6 +47,19 @@
       clearTimeout(timerId);
     });
   };
+
+  const swapElements = (a, b) => {
+    if (!a || !b || a === b) return;
+    const pa = a.parentNode;
+    const pb = b.parentNode;
+    if (!pa || !pb) return;
+
+    const placeholder = document.createTextNode("");
+    pa.replaceChild(placeholder, a);
+    pb.replaceChild(a, b);
+    pa.replaceChild(b, placeholder);
+  };
+
   // #endregion
 
   // #region OPTS
@@ -120,11 +133,11 @@
             <b data-inline-frak-holder>
              <b data-inline-frak>
               <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-               <path/>
+               <path data-frak-slash />
               </svg>
              </b>
             </b>
-          `
+          `,
         );
     }
 
@@ -254,16 +267,33 @@
     }
 
     #resetFraks(step) {
-      for (const frak of step.querySelectorAll("[data-frak-holder-anim]")) {
-        frak.removeAttribute("data-frak-holder-anim");
-        frak.setAttribute("data-frak-holder", "");
-        frak.innerHTML = frak.innerHTML.replaceAll("-anim", "");
+      for (const frak of step.querySelectorAll("[data-frak]")) {
+        frak.setAttribute("data-frak", "");
       }
     }
 
     #resetInlineFraks(step) {
       for (const frak of step.querySelectorAll("[data-inline-frak-holder]")) {
         frak.setAttribute("data-inline-frak-holder", "");
+      }
+    }
+
+    #resetFlipFlops(step) {
+      for (const frak of step.querySelectorAll("[data-flip-flop]")) {
+        frak.removeAttribute("data-flip-flop");
+       
+        const num = frak.querySelector("[data-numerator]");
+        const den = frak.querySelector("[data-denominator]");
+
+        num.removeAttribute("data-numerator");
+        num.setAttribute("data-denominator", "");
+        num.id = `${frak.id}-denominator`;
+
+        den.removeAttribute("data-denominator");
+        den.setAttribute("data-numerator", "");
+        den.id = `${frak.id}-numerator`;
+
+        swapElements(num, den);
       }
     }
 
@@ -328,14 +358,17 @@
 
       const wrap = (type, cssVars) => {
         for (const bat of this.#batties) {
+          let targ;
           if (bat.tagName === "path") {
+            targ = bat;
             bat.setAttribute(`data-${type}`, "");
           } else {
             bat.innerHTML = `<b data-${type}>${bat.innerHTML}</b>`;
+            targ = bat.children[0];
           }
           if (cssVars) {
             for (const [key, value] of Object.entries(cssVars)) {
-              bat.children[0].style.setProperty(key, value);
+              targ.style.setProperty(key, value);
             }
           }
         }
@@ -466,20 +499,7 @@
           }
           return api;
         },
-        colorize: (v) => {
-          const batties = this.#batties;
-          for (const bat of batties) {
-            if (bat.tagName === "path") {
-              bat.setAttribute("data-colorize", "");
-              bat.style.setProperty(`--${fix}-colorize-val`, v);
-            } else {
-              api.spot(bat.id);
-              wrap("colorize", { [`--${fix}-colorize-val`]: v });
-            }
-          }
-
-          this.#batties = batties;
-        },
+        colorize: (v) => wrap("colorize", { [`--${fix}-colorize-val`]: v }),
         setColor: (v) => {
           for (const bat of this.#batties) {
             bat.style.setProperty(`--${fix}-h`, v);
@@ -554,10 +574,10 @@
           const bat0 = batties[0];
           const groupID = CSS.escape(id);
 
-          api.mount(groupID, "");
+          api.mount(groupID, "<b data-group></b>");
           api.insertBefore(bat0.id);
 
-          const groupEl = api.pick(groupID);
+          const groupEl = api.pick(groupID).children[0];
 
           for (const bat of batties) groupEl.appendChild(bat);
 
@@ -683,11 +703,12 @@
 
           const frakEl = document.createElement("b");
           frakEl.innerHTML = `
-           <b data-frak-holder-anim>
-            <b data-frak-anim>
-             <b data-numerator id="${frakID}-numerator">
-              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-               <path id="${frakID}-slash" data-frak-slash />
+           <b data-frak-holder>
+            <b data-frak="anim">
+             <b data-numerator id="${frakID}-numerator"></b>
+             <b data-slash id="${frakID}-slash">
+              <svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
+               <path/>
               </svg>
              </b>
              <b data-denominator id="${frakID}-denominator"></b>
@@ -703,19 +724,20 @@
           // this.#measureElements(frakEl, ...frakEl.querySelectorAll("*"));
           return api.spot(frakID);
         },
-        // #endregion
-
-        // #region ATTEMPTS
         inlineFrak: (...ids) => {
           const batties = this.#batties;
           const slashID = `${batties[0].id}-slash`;
-          const slash = this.#makeTag("b",`
+          const slash = this.#makeTag(
+            "b",
+            `
             <b data-inline-frak>
              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               <path/>
              </svg>
             </b>
-          `,"inline-frak-holder");
+          `,
+            "inline-frak-holder",
+          );
           slash.setAttribute("data-inline-frak-holder", "anim");
           slash.id = slashID;
           const el = batties.at(-1);
@@ -726,7 +748,25 @@
           api.spot(...ids.reverse()).unfurl();
           return api;
         },
+        // #endregion
 
+        // #region ATTEMPTS
+
+        flipFlop: (...ids) => {
+          const batties = this.#batties;
+          for (const bat of batties) {
+            const frak = bat.children[0];
+            if (!frak.hasAttribute("data-frak-holder") || !bat.id) return;
+            bat.setAttribute("data-flip-flop", "");
+            api.spot(bat.id).spin("180deg").during(0, 0.5);
+            api
+              .spot(`${bat.id}-numerator`, `${bat.id}-denominator`)
+              .spin("180deg")
+              .during(0.5);
+          }
+          this.#batties = batties;
+          return api;
+        },
         powerRule: () => {
           const batties = this.#batties;
           for (const bat of batties) {
@@ -851,6 +891,9 @@
 
       // reset the inline fraktions
       this.#resetInlineFraks(nextStep);
+
+      // flip the flopped fraktions
+      this.#resetFlipFlops(nextStep);
 
       // remove the API <b>'s
       this.#removeAPIs(nextStep);
