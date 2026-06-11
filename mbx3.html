@@ -71,7 +71,7 @@
         steps: [
           {
             note: "",
-            acts: (S) => {
+            acts: (X) => {
               // S.spotStage().viva();
               S.spot("DOT") //.materialize()
                 .grow();
@@ -79,14 +79,14 @@
           },
           {
             note: "this is it you see?",
-            acts: (S) => {
+            acts: (X) => {
               S.spot("DOT").shrink().during(0, 0.3);
               S.spot("Tx", "T1").dist("T7");
             },
           },
           {
             note: "preservation of popin-all?",
-            acts: (S) => {
+            acts: (X) => {
               S.spot("DOT").dismount();
               S.mount("T7x", "7x").mount("T77", "7");
               S.spot("T7-Tx", "Tx").absorb("T7x");
@@ -102,7 +102,7 @@
             <b id="P2">)</b>
             = 5
             `,
-            acts: (S) => {
+            acts: (X) => {
               S.spot("P1", "P2").vaporize().shrink().during(0.7);
             },
           },
@@ -120,7 +120,7 @@
             <b id="T5">5</b>
               <b id="T-">-</b>
             `,
-            acts: (S) => {
+            acts: (X) => {
               S.spot("T+").xfade("T-");
               S.spot("T+1").viva().spin().vault().moveAfter("T5");
             },
@@ -131,13 +131,13 @@
             7x = <b id="T5-1">5 - 1</b>
             <b id="T4">4</b>
             `,
-            acts: (S) => {
+            acts: (X) => {
               S.spot("T5-1").xfade("T4").spin().wink(500);
             },
           },
           {
             note: "what's preverved from wink?",
-            acts: (S) => {
+            acts: (X) => {
               S.spot("T4").alter("12345").cank(1, "70deg");
             },
           },
@@ -153,14 +153,14 @@
             <b id="T4">4</b>
             <b id="T7a">7</b><b id="T7b">7</b>
             `,
-            acts: (S) => {
+            acts: (X) => {
               S.spot("T7x").frak("T7a").spot("T4").frak("T7b");
             },
           },
           {
             note: "new fractions",
 
-            acts: (S) => {
+            acts: (X) => {
               S.spot("T7").cank(1,"90deg").during(0.74);
               S.spot("T7a").cank(1,"90deg").during(0, 0.7);
             }
@@ -176,9 +176,9 @@
           illuminated acrobatic gestural mathematics
         `,
         stage: `
-          <b id="T2x" data-tite>
+          <b id="T2x">
             <b id="T2">2</b>
-            <b id="Tx" data-tite>x<b id="Pow2" data-sup>2</b></b>
+            <b id="Tx">x<b id="Pow2" data-sup>2</b></b>
           </b>
           <b id="T+">+</b>
           <b id="T1">1</b>
@@ -191,7 +191,7 @@
               <b>are you ready solve for x?</b>
               <b>let's make it a bit more interesting...</b>
             `,
-            acts: (S) => {
+            acts: (X) => {
               S.spot("T2", "Pow2").hide();
               S.spot("T+", "T1", "EQ", "T5").unfurl();
             },
@@ -200,7 +200,7 @@
             note: `
               <b>there, now we're ready to start</b>
             `,
-            acts: (S) => {
+            acts: (X) => {
               S.spot("T2", "Pow2").show().materialize().grow();
             },
           },
@@ -213,7 +213,7 @@
                 <i>flop it</i> to the other side
               </b>
             `,
-            acts: (S) => {
+            acts: (X) => {
               S.spot("T+", "T1")
                 .group("G1")
                 .viva()
@@ -228,7 +228,7 @@
               look at that right hand side ...
               <b>we could simplify that</b>
             `,
-            acts: (S) => {
+            acts: (X) => {
               S.spot("T5", "G1").group("G2").cirk();
             },
           },
@@ -237,7 +237,7 @@
               what is five minus one?
               <b>it's pretty easy, wink-wink</b>
             `,
-            acts: (S) => {
+            acts: (X) => {
               S.mount("T4", "4").spot("G2").xfade("T4").spin();
               S.spot("T4").wink(500);
             },
@@ -246,7 +246,7 @@
             note: `
               divide both sides by two
             `,
-            acts: (S) => {
+            acts: (X) => {
               S.mount("T2a", "2");
               S.spot("T2x").frak("T2a");
               S.mount("T2b", "2");
@@ -255,7 +255,7 @@
           },
           {
             note: "there are common faktors on the left",
-            acts: (S) => {
+            acts: (X) => {
               S.mount("Tnorm", "xgH").insertBefore("EQ");
               S.spot("T4-frak").spin();
               // S.spot("T2").cank(0,"90deg");
@@ -281,7 +281,7 @@
         `,
         steps: [
           {
-            note: "should be some dopplers",
+            note: "the inline frakization unfurls",
             load: `
               <b id="P1" data-parens-left>(</b>
               <b id="T4x">4x</b>
@@ -289,7 +289,7 @@
               <b id="T2">2</b>
               <b id="P2" data-parens-rite>)</b>
               <b id="EQ">=</b>
-              <b id="TR" data-tite>Ry^3</b>
+              <b id="TR">Ry^3</b>
             `,
             acts: (X) => {
               X.mount("Div-P1", "<b data-parens-left>(</b>")
@@ -297,20 +297,23 @@
                 .mount("Div-Plus", "+")
                 .mount("Div-1", "1")
                 .mount("Div-P2", "<b data-parens-rite>)</b>");
-              X.spot("P2").inlineFrak(
-                "Div-P1",
-                "Div-x",
-                "Div-Plus",
-                "Div-1",
-                "Div-P2",
+              X.spot("Div-P1", "Div-x", "Div-Plus", "Div-1", "Div-P2").group(
+                "G1",
               );
+              X.spot("P1", "T4x", "T+", "T2", "P2").group("G2");
+              X.spot("G2").frak("G1");
             },
           },
-          {},
           {
-            note: "re-load stage",
+            note: `<b style="padding-top:1lh;">reformatted undo-stage</b>`,
+            acts: (X) => {
+              X.spot("G1").spin("-720deg").moveAfter("TR");
+            },
+          },
+          {
+            note: "new .load stage with triple / markup",
             load: `
-            (4x + 2)///(x + 1) = <b data-tite>Ry^3</b>
+            (4x + 2)///(x + 1) = <b>Ry^3</b>
             `,
           },
         ],
@@ -332,7 +335,7 @@
         steps: [
           {
             note: "powerful rule",
-            acts: (S) => {
+            acts: (X) => {
               S.spot("Power1").powerRule();
             },
           },

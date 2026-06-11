@@ -328,7 +328,11 @@
 
       const wrap = (type, cssVars) => {
         for (const bat of this.#batties) {
-          bat.innerHTML = `<b data-${type}>${bat.innerHTML}</b>`;
+          if (bat.tagName === "path") {
+            bat.setAttribute(`data-${type}`, "");
+          } else {
+            bat.innerHTML = `<b data-${type}>${bat.innerHTML}</b>`;
+          }
           if (cssVars) {
             for (const [key, value] of Object.entries(cssVars)) {
               bat.children[0].style.setProperty(key, value);

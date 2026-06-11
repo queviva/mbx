@@ -63,8 +63,6 @@ path {
 
   --ani-start: 0;
   --ani-end: 1;
-  --ani-start: 0;
-  --ani-end: 1;
 
   --animation-range: contain
     calc(
@@ -85,7 +83,6 @@ b {
   display: inline-flex;
   flex-direction: row;
   gap: 0.25em;
-  /* align-items: baseline; */
   justify-content: center;
   font-weight: normal;
   text-wrap: nowrap;
@@ -157,6 +154,7 @@ svg {
   container-type: inline-size;
   contain: layout size style;
   font-family: "Times New Roman", Times, serif;
+  view-timeline: --anim-timeline block;
 }
 [data-step] > :nth-child(2) {
   margin-top: 3.5em;
@@ -166,15 +164,17 @@ svg {
 
 /* #region SUP|SUB */
 [data-sup] {
+  position: relative;
   display: inline-flex;
   flex-direction: row;
   gap: 0.25em;
   align-items: baseline;
   justify-content: center;
+  line-height: 1;
+  vertical-align: 70%;
   white-space: nowrap;
   font-size: 0.55em;
-  vertical-align: 70%;
-  line-height: 1;
+  margin-left: -0.35em;
 }
 [data-sub] {
   vertical-align: -0.6em;
@@ -297,7 +297,7 @@ b:has(> [data-grow]) {
 /* #region SPIN */
 [data-spin] {
   animation: mbx-spin linear both;
-  animation-timeline: view();
+  animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
 @keyframes mbx-spin {
@@ -366,10 +366,9 @@ svg,
     drop-shadow(var(--viva-f3));
 }
 [data-viva] {
-  view-timeline: --viva-timeline block;
   text-shadow: none;
   animation: mbx-viva linear both;
-  animation-timeline: --viva-timeline;
+  animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
 @keyframes mbx-viva {
@@ -378,9 +377,10 @@ svg,
     text-shadow: var(--viva-shadow);
   }
 }
-[data-viva] path {
+[data-viva] path,
+path[data-viva] {
   animation: mbx-viva-path linear both;
-  animation-timeline: --viva-timeline;
+  animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
 @keyframes mbx-viva-path {
@@ -421,7 +421,8 @@ svg,
     text-shadow: var(--ghost-shadow);
   }
 }
-[data-ghost] path {
+[data-ghost] path,
+path[data-ghost] {
   animation: mbx-ghost-path linear both;
   animation-timeline: --ghost-timeline;
   animation-range: var(--animation-range);
@@ -483,7 +484,8 @@ svg,
     opacity: 0;
   }
 }
-[data-vaporize] path {
+[data-vaporize] path,
+path[data-vaporize] {
   will-change: fill, filter, opacity;
   animation: mbx-vaporize-path linear both;
   animation-timeline: --vaporize-timeline;
@@ -542,24 +544,15 @@ svg,
 /* #endregion */
 
 /* #region COLORIZE */
-[data-colorize] {
-  view-timeline: --colorize-timeline block;
+[data-colorize],
+[data-colorize] path {
   animation: mbx-colorize linear both;
-  animation-timeline: --colorize-timeline;
+  animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
 @keyframes mbx-colorize {
   to {
     color: hsl(var(--mbx-colorize-val, var(--mbx-h)), 80%, 60%);
-  }
-}
-[data-colorize] path {
-  animation: mbx-colorize-path linear both;
-  animation-timeline: --colorize-timeline;
-  animation-range: var(--animation-range);
-}
-@keyframes mbx-colorize-path {
-  to {
     fill: hsl(var(--mbx-colorize-val, var(--mbx-h)), 80%, 60%);
   }
 }
@@ -1280,7 +1273,7 @@ svg,
   d: path("M0 95L5 100L100 5L95 0Z");
   fill: var(--main-color);
   stroke: var(--main-color);
-  stroke-width: 0.1em; 
+  stroke-width: 0.1em;
 }
 [data-inline-frak-holder="anim"] path {
   fill: var(--white-color);
