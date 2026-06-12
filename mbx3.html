@@ -31,323 +31,28 @@
   </head>
 
   <body>
-    <rat-batix id="two" data-mbx='{"XXX_color":300}'></rat-batix>
+    <rat-batix id="two" data-mbx='{"xxx_color":300}'></rat-batix>
 
     <script id="ROUTINES">
-      const routineTwoXXX = {
-        intro: `
-          <b data-logo>MATHROBATIX</b>
-          illuminated acrobatic gestural mathematics
-        `,
-        xxx_stage: `
-          <b id="T7x">7x +</b>
-          <b id="T3x2">
-            <b data-prx>
-              3x
-              <b data-sup>
-                2
-                <b data-grow>
-                  <b data-viva>- 1</b>
-                </b>
-              </b>
-            </b>
-          </b>
-          <b id="T+2">+</b>
-          <b id="T1">1</b>
-          <b id="EQ">=</b>
-          <b id="T5">5</b>
-        `,
-        stage: `
-          <b id="T7">7</b>
-          <b id="DOT">&middot</b>
-          <b id="P1" data-parens-left>(</b>
-          <b id="Tx">x</b>
-           + 
-           <b id="T1">1</b>
-          <b id="P2" data-parens-rite>)</b>
-          <b id="EQ">=</b>
-          <b id="T5">5</b>
-        `,
-        steps: [
-          {
-            note: "",
-            acts: (X) => {
-              // S.spotStage().viva();
-              S.spot("DOT") //.materialize()
-                .grow();
-            },
-          },
-          {
-            note: "this is it you see?",
-            acts: (X) => {
-              S.spot("DOT").shrink().during(0, 0.3);
-              S.spot("Tx", "T1").dist("T7");
-            },
-          },
-          {
-            note: "preservation of popin-all?",
-            acts: (X) => {
-              S.spot("DOT").dismount();
-              S.mount("T7x", "7x").mount("T77", "7");
-              S.spot("T7-Tx", "Tx").absorb("T7x");
-              S.spot("T7-T1", "T1").absorb("T77");
-              S.spot("T7x", "T77").viva();
-            },
-          },
-          {
-            note: "drop the parenthesis",
-            load: `
-            <b id="P1">(</b>
-            7x + 1
-            <b id="P2">)</b>
-            = 5
-            `,
-            acts: (X) => {
-              S.spot("P1", "P2").vaporize().shrink().during(0.7);
-            },
-          },
-          {
-            note: "flip flop for fun",
-            load: `
-            <b>7x</b>
-            <b id="T+1">
-              <b data-group>
-              <b id="T+">+</b>
-              <b>1</b>
-              </b>
-            </b>
-            <b id="EQ">=</b>
-            <b id="T5">5</b>
-              <b id="T-">-</b>
-            `,
-            acts: (X) => {
-              S.spot("T+").xfade("T-");
-              S.spot("T+1").viva().spin().vault().moveAfter("T5");
-            },
-          },
-          {
-            note: "don't add numbers -- wink",
-            load: `
-            7x = <b id="T5-1">5 - 1</b>
-            <b id="T4">4</b>
-            `,
-            acts: (X) => {
-              S.spot("T5-1").xfade("T4").spin().wink(500);
-            },
-          },
-          {
-            note: "what's preverved from wink?",
-            acts: (X) => {
-              S.spot("T4").alter("12345").cank(1, "70deg");
-            },
-          },
-          /*
-          {
-            note: "divide both sides by seven",
-            load: `
-            <b id="T7x">
-              <b id="T7">7</b>
-              <b id="Tx">x</b>
-            </b>
-            =
-            <b id="T4">4</b>
-            <b id="T7a">7</b><b id="T7b">7</b>
-            `,
-            acts: (X) => {
-              S.spot("T7x").frak("T7a").spot("T4").frak("T7b");
-            },
-          },
-          {
-            note: "new fractions",
-
-            acts: (X) => {
-              S.spot("T7").cank(1,"90deg").during(0.74);
-              S.spot("T7a").cank(1,"90deg").during(0, 0.7);
-            }
-          }
-       
-          */
-        ],
-      };
-
-      const routineTwoYYY = {
-        intro: `
-          <b data-logo>MATHROBATIX</b>
-          illuminated acrobatic gestural mathematics
-        `,
-        stage: `
-          <b id="T2x">
-            <b id="T2">2</b>
-            <b id="Tx">x<b id="Pow2" data-sup>2</b></b>
-          </b>
-          <b id="T+">+</b>
-          <b id="T1">1</b>
-          <b id="EQ">=</b>
-          <b id="T5">5</b>
-        `,
-        steps: [
-          {
-            note: `
-              <b>are you ready solve for x?</b>
-              <b>let's make it a bit more interesting...</b>
-            `,
-            acts: (X) => {
-              S.spot("T2", "Pow2").hide();
-              S.spot("T+", "T1", "EQ", "T5").unfurl();
-            },
-          },
-          {
-            note: `
-              <b>there, now we're ready to start</b>
-            `,
-            acts: (X) => {
-              S.spot("T2", "Pow2").show().materialize().grow();
-            },
-          },
-          {
-            note: `
-              first, try on your flip~flops!
-              <b data-rant>
-                we know there's a technique that allows us
-                to take a term, <i>flip</i> its sign, then
-                <i>flop it</i> to the other side
-              </b>
-            `,
-            acts: (X) => {
-              S.spot("T+", "T1")
-                .group("G1")
-                .viva()
-                .spin()
-                .vault()
-                .moveAfter("T5");
-              S.mount("T-", "-").spot("T+").xfade("T-");
-            },
-          },
-          {
-            note: `
-              look at that right hand side ...
-              <b>we could simplify that</b>
-            `,
-            acts: (X) => {
-              S.spot("T5", "G1").group("G2").cirk();
-            },
-          },
-          {
-            note: `
-              what is five minus one?
-              <b>it's pretty easy, wink-wink</b>
-            `,
-            acts: (X) => {
-              S.mount("T4", "4").spot("G2").xfade("T4").spin();
-              S.spot("T4").wink(500);
-            },
-          },
-          {
-            note: `
-              divide both sides by two
-            `,
-            acts: (X) => {
-              S.mount("T2a", "2");
-              S.spot("T2x").frak("T2a");
-              S.mount("T2b", "2");
-              S.spot("T4").frak("T2b");
-            },
-          },
-          {
-            note: "there are common faktors on the left",
-            acts: (X) => {
-              S.mount("Tnorm", "xgH").insertBefore("EQ");
-              S.spot("T4-frak").spin();
-              // S.spot("T2").cank(0,"90deg");
-              // S.spot("T2a").cank(0, "90deg");
-              // S.spot("T2x-frak-slash").filter("viva");
-            },
-          },
-          {
-            note: "what became of that?",
-          },
-        ],
-      };
-
-      const routineTwoZZZ = {
-        intro: `
-          <b data-logo>MATHROBATIX</b>
-          illuminated acrobatic gestural mathematics
-        `,
-        stage: `
-          <b id="TAring">&Aring;vg</b>
-          <b id="EQ">=</b>
-          <b id="T9">9</b>
-        `,
-        steps: [
-          {
-            note: `
-              <b><br>the inline version unfurls</b>
-            `,
-            load: `
-              <b id="P1" data-parens-left>(</b>
-              <b id="T4x">4x</b>
-              <b id="T+">+</b>
-              <b id="T2">2</b>
-              <b id="P2" data-parens-rite>)</b>
-              <b id="EQ">=</b>
-              <b id="TR">Ry^3</b>
-            `,
-            acts: (X) => {
-              X.mount("Div-P1", "<b data-parens-left>(</b>")
-                .mount("Div-x", "x")
-                .mount("Div-Plus", "+")
-                .mount("Div-1", "1")
-                .mount("Div-P2", "<b data-parens-rite>)</b>");
-              X.spot("Div-P1", "Div-x", "Div-Plus", "Div-1", "Div-P2").group(
-                "G1",
-              );
-              X.spot("P1", "T4x", "T+", "T2", "P2").group("G2");
-              X.spot("G2").frak("G1");
-            },
-          },
-          {
-            note: `<b style="padding-top:1lh;">reformatted undo-stage</b>`,
-            acts: (X) => {
-              X.spot("G2-frak").flipFlop();
-            },
-          },
-          {
-            acts: (X) => {
-              X.spot("G2-frak-denominator").viva();
-            }
-          },
-          {
-            note: "new .load stage with triple / markup",
-            load: `
-            (4x + 2)///(x + 1) = <b>Ry^3</b>
-            `,
-            acts: (X) => {
-              X.spotStage()
-              .salute();
-            }
-          },
-        ],
-      };
-
       const routineTwo = {
         intro: `
           <b data-logo>MATHROBATIX</b>
           illuminated acrobatic gestural mathematics
         `,
         stage: `
-          <b id="Power1">
-            3x^2
-          </b>
-          <b id="T5"> + 5</b>
-          <b id="EQ">=</b>
-          <b id="T7">7</b>
+          <mbx-frak id="99-frak">
+            <x id="Tone">one</x>
+            <x>two</x>
+          </mbx-frak>
+          <x id="EQ">=</x>
+          <x id="T1">1^2</x> /// <x id="T2">2</x>
         `,
         steps: [
           {
-            note: "powerful rule",
+            note: "short and sweet tags",
             acts: (X) => {
-              S.spot("Power1").powerRule();
+              X.mount("T11", "11");
+              X.spot("Tone").frak("T11");
             },
           },
         ],
@@ -355,7 +60,7 @@
 
       const two = document.getElementById("two");
       two.addEventListener("mbx-ready", (e) => {
-        two.loadRoutine(routineTwoZZZ);
+        two.loadRoutine(routineTwo);
       });
     </script>
 

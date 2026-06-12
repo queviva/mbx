@@ -82,7 +82,7 @@
     #isLoading = false;
     #routine = {};
     #routineNum = 0;
-    #currentStep = 0;
+    #stepNum = 0;
     #stageObj = null;
     #batties = [];
     #apis = [
@@ -109,8 +109,8 @@
     // #endregion
 
     constructor(holder, opts) {
-      this.#holder = holder;
       this.#opts = opts;
+      this.#holder = holder;
     }
 
     // #region SPOT UTILS
@@ -121,22 +121,22 @@
         .replace(/>\s+</g, "> <")
         .replace(
           /([^\s])\^(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g,
-          "$1<b data-sup>$2</b>",
+          "$1<x data-sup>$2</x>",
         )
         .replace(
           /([^\s])\_(\(.+?\)|\<.+?\>.+?\<.+?\>|[^\s]+)/g,
-          "$1<b data-sub>$2</b>",
+          "$1<x data-sub>$2</x>",
         )
         .replaceAll(
           "///",
           `
-            <b data-inline-frak-holder>
-             <b data-inline-frak>
+            <x data-inline-frak-holder>
+             <x data-inline-frak>
               <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                <path data-frak-slash />
               </svg>
-             </b>
-            </b>
+             </x>
+            </x>
           `,
         );
     }
@@ -164,7 +164,7 @@
         } else if (node.nodeType === Node.ELEMENT_NODE) {
           const tag = node.tagName.toLowerCase();
 
-          if (tag !== "b") {
+          if (tag !== "x") {
             const parent = node.parentNode;
             if (parent) {
               while (node.firstChild) {
@@ -185,9 +185,9 @@
         node = nextNode;
       }
 
-      const tmpB = document.createElement("b");
-      tmpB.appendChild(tpl.content.cloneNode(true));
-      return tmpB.innerHTML;
+      const tmpX = document.createElement("x");
+      tmpX.appendChild(tpl.content.cloneNode(true));
+      return tmpX.innerHTML;
     }
 
     #makeTag(tag, html, ...attrs) {
@@ -205,9 +205,9 @@
     }
 
     #makeStepTag(load, note) {
-      const stepTag = this.#makeTag("b", "", "step");
-      const stage = this.#makeTag("b", load, "stage");
-      const comm = this.#makeTag("b", note, "comm");
+      const stepTag = this.#makeTag("x", "", "step");
+      const stage = this.#makeTag("x", load, "stage");
+      const comm = this.#makeTag("x", note, "comm");
       stepTag.setAttribute("data-measure", "");
       stepTag.append(stage, comm);
       return stepTag;
@@ -227,17 +227,17 @@
       }
     }
 
-    #namespaceIDs(stage, stepNum) {
-      for (const el of stage.querySelectorAll("[id]")) {
-        el.id = `${this.#opts.fix}-step-${stepNum}-${el.id}`;
+    #namespaceIDs(stage, fix, stepNum) {
+      for (const bat of stage.querySelectorAll("[id]")) {
+        bat.id = `${fix}-step-${stepNum}-${el.id}`;
       }
     }
     // #endregion
 
     // #region REMOVE METHS
     #removeIDs(stage) {
-      for (const el of stage.querySelectorAll("b[id]")) {
-        el.removeAttribute("id");
+      for (const bat of stage.querySelectorAll("[id]")) {
+        bat.removeAttribute("id");
       }
     }
 
@@ -281,19 +281,12 @@
     #resetFlipFlops(step) {
       for (const frak of step.querySelectorAll("[data-flip-flop]")) {
         frak.removeAttribute("data-flip-flop");
-       
         const num = frak.querySelector("[data-numerator]");
         const den = frak.querySelector("[data-denominator]");
-
-        num.removeAttribute("data-numerator");
-        num.setAttribute("data-denominator", "");
-        num.id = `${frak.id}-denominator`;
-
-        den.removeAttribute("data-denominator");
-        den.setAttribute("data-numerator", "");
-        den.id = `${frak.id}-numerator`;
-
-        swapElements(num, den);
+        const numHTML = num.innerHTML;
+        const denHTML = den.innerHTML;
+        num.innerHTML = denHTML;
+        den.innerHTML = numHTML;
       }
     }
 
@@ -306,6 +299,40 @@
       }
     }
 
+    // #endregion
+
+    // #region TAG SUBS
+    #tagMap = {
+      "mbx-frak": (bat) => {
+        if (bat.children.length < 2) return;
+        const [num, den] = bat.children;
+        const frak = this.#makeTag("x",`
+         <x data-frak-holder>
+          <x data-frak>
+           <x data-slash ${bat.id ? `id="${bat.id}-slash"` : ""}>
+            <svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
+             <path/>
+            </svg>
+           </x>
+          </x>
+         </x>
+        `);
+        frak.children[0].children[0].prepend(num);
+        frak.children[0].children[0].append(den);
+        if (bat.id) frak.id = bat.id;
+        log(frak);
+        return frak;
+      }
+    };
+
+    #substitueTags = (stage, map) => {
+      for (const [short, makeSweet] of Object.entries(map)) {
+        for (const bat of stage.querySelectorAll(short)) {
+          log('try',short,'on',bat);
+          bat.replaceWith(makeSweet(bat));
+        }
+      }
+    };
     // #endregion
 
     #makeAPI = () => {
@@ -345,7 +372,7 @@
           bat.newFont = getComputedStyle(bat).fontSize;
 
           // if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-          bat.innerHTML = `<b data-move>${bat.innerHTML}</b>`;
+          bat.innerHTML = `<x data-move>${bat.innerHTML}</x>`;
           const wrapper = bat.children[0];
           wrapper.style.setProperty("--dx", `${Math.round(dx)}px`);
           wrapper.style.setProperty("--dy", `${Math.round(dy)}px`);
@@ -363,7 +390,7 @@
             targ = bat;
             bat.setAttribute(`data-${type}`, "");
           } else {
-            bat.innerHTML = `<b data-${type}>${bat.innerHTML}</b>`;
+            bat.innerHTML = `<x data-${type}>${bat.innerHTML}</x>`;
             targ = bat.children[0];
           }
           if (cssVars) {
@@ -379,13 +406,13 @@
         const id = `${fix}-${crypto.randomUUID()}`;
         for (const bat of this.#batties) {
           bat.innerHTML = `
-            <b data-${type}="${data || null}">
-              <b>${bat.innerHTML}</b>
+            <x data-${type}="${data || null}">
+              <x>${bat.innerHTML}</x>
               <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                 <clipPath id="${id}"><path/></clipPath>
                 <path clip-path="url(#${id})"/>
               </svg>
-            </b>
+            </x>
           `;
           if (cssVars) {
             for (const [key, value] of Object.entries(cssVars)) {
@@ -421,7 +448,7 @@
           return api;
         },
         mount: (id, html, ...attrs) => {
-          const bat = this.#makeTag("b", html, ...attrs);
+          const bat = this.#makeTag("x", html, ...attrs);
           bat.id = CSS.escape(id);
           this.#stageObj?.append(bat);
           this.#measureElements(bat);
@@ -556,12 +583,12 @@
           for (const bat of this.#batties) {
             const html = bat.innerHTML;
             bat.innerHTML = `
-              <b data-dopple>
-                <b id="${bat.id}-original">${html}</b>
-              </b>
+              <x data-dopple>
+                <x id="${bat.id}-original">${html}</x>
+              </x>
             `;
             for (let i = 0; i < v; i++) {
-              const bbb = this.#makeTag("b", `<b>${html}</b>`);
+              const bbb = this.#makeTag("x", `<x>${html}</x>`);
               bbb.id = `${bat.id}-dopple${v > 1 ? "-" + (i + 1) : ""}`;
               bat.children[0].prepend(bbb);
             }
@@ -574,7 +601,7 @@
           const bat0 = batties[0];
           const groupID = CSS.escape(id);
 
-          api.mount(groupID, "<b data-group></b>");
+          api.mount(groupID, "<x data-group></x>");
           api.insertBefore(bat0.id);
 
           const groupEl = api.pick(groupID).children[0];
@@ -602,7 +629,7 @@
           const bat0 = batties[0];
           const absID = `${ids[0]}-absorb`;
 
-          api.mount(absID, "<b></b><b></b>", "original");
+          api.mount(absID, "<x></x><x></x>", "original");
           wrap("absorb");
 
           const absEl = api.pick(absID);
@@ -623,7 +650,7 @@
           const bat0 = batties[0];
           const fadeID = `${ids[0]}-xfade`;
 
-          api.mount(fadeID, "<b></b><b></b>", "original");
+          api.mount(fadeID, "<x></x><x></x>", "original");
           wrap("xfade");
 
           const fadeEl = api.pick(fadeID);
@@ -660,7 +687,7 @@
             api
               .mount(
                 `${coeff.id}-${bat.id}`,
-                co_html + " <b data-middot></b>",
+                co_html + " <x data-middot></x>",
                 "grow-term",
               )
               .insertBefore(bat.id)
@@ -669,10 +696,10 @@
               .grow("100% 50%")
               .during(0.6); // .during(0.6 + (i / total) * 0.4);
             bat.innerHTML = `
-             <b data-term>
-              <b data-vaporize style="--ani-start:${0.25 + (i / total) * 0.4};--ani-end:${0.85 + (i / total) * 0.2}">${bat.innerText}</b>
-              <b data-original>${bat.innerHTML}</b>
-             </b>
+             <x data-term>
+              <x data-vaporize style="--ani-start:${0.25 + (i / total) * 0.4};--ani-end:${0.85 + (i / total) * 0.2}">${bat.innerText}</x>
+              <x data-original>${bat.innerHTML}</x>
+             </x>
             `;
           }
           return api.spot(id);
@@ -680,11 +707,11 @@
         root: (id) => {
           const bat0 = this.#batties[0];
           id = id || `${fix}${crypto.randomUUID()}`;
-          const rootEl = document.createElement("b");
+          const rootEl = document.createElement("x");
           rootEl.id = CSS.escape(id);
           rootEl.setAttribute("data-root-anim", "");
           rootEl.innerHTML = `
-           <b id="${CSS.escape(id)}" data-root-terms></b>
+           <x id="${CSS.escape(id)}" data-root-terms></x>
            <svg data-front-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             <path/>
            </svg>
@@ -701,19 +728,19 @@
           const bat0 = this.#batties[0];
           const frakID = `${bat0.id}-frak`;
 
-          const frakEl = document.createElement("b");
+          const frakEl = document.createElement("x");
           frakEl.innerHTML = `
-           <b data-frak-holder>
-            <b data-frak="anim">
-             <b data-numerator id="${frakID}-numerator"></b>
-             <b data-slash id="${frakID}-slash">
+           <x data-frak-holder>
+            <x data-frak="anim">
+             <x data-numerator id="${frakID}-numerator"></x>
+             <x data-slash id="${frakID}-slash">
               <svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
                <path/>
               </svg>
-             </b>
-             <b data-denominator id="${frakID}-denominator"></b>
-            </b>
-           </b>
+             </x>
+             <x data-denominator id="${frakID}-denominator"></x>
+            </x>
+           </x>
           `;
           frakEl.id = frakID;
           bat0.parentNode.insertBefore(frakEl, bat0);
@@ -728,13 +755,13 @@
           const batties = this.#batties;
           const slashID = `${batties[0].id}-slash`;
           const slash = this.#makeTag(
-            "b",
+            "x",
             `
-            <b data-inline-frak>
+            <x data-inline-frak>
              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               <path/>
              </svg>
-            </b>
+            </x>
           `,
             "inline-frak-holder",
           );
@@ -758,10 +785,10 @@
             const frak = bat.children[0];
             if (!frak.hasAttribute("data-frak-holder") || !bat.id) return;
             bat.setAttribute("data-flip-flop", "");
-            api.spot(bat.id).spin("180deg").during(0, 0.5);
+            api.spot(bat.id).spin("180deg").during(0, 0.4);
             api
               .spot(`${bat.id}-numerator`, `${bat.id}-denominator`)
-              .spin("180deg")
+              .spin("-180deg")
               .during(0.5);
           }
           this.#batties = batties;
@@ -774,19 +801,19 @@
             if (!sup) return api;
             sup.remove();
             bat.innerHTML = `
-              <b data-XXX>
-                <b id="baseXXX" data-XXX-base>${bat.innerText}</b>
-                <b data-sup data-XXX-expo>
-                  <b id="org" data-XXX-org>
-                    <b>${sup.innerText}</b>
-                    <b data-grow>- 1</b>
-                  </b>
-                  <b id="dop" data-XXX-dop>
-                    <b>${sup.innerText}</b>
-                    <b data-grow>&middot;</b>
-                  </b>
-                </b>
-              </b>
+              <x data-XXX>
+                <x id="baseXXX" data-XXX-base>${bat.innerText}</x>
+                <x data-sup data-XXX-expo>
+                  <x id="org" data-XXX-org>
+                    <x>${sup.innerText}</x>
+                    <x data-grow>- 1</x>
+                  </x>
+                  <x id="dop" data-XXX-dop>
+                    <x>${sup.innerText}</x>
+                    <x data-grow>&middot;</x>
+                  </x>
+                </x>
+              </x>
             `;
             this.#measureElements(...bat.querySelectorAll("*"));
             const dop = bat.querySelector("[data-XXX-dop]");
@@ -850,7 +877,6 @@
       // await new Promise((r) => setTimeout(r, 800));
 
       // load new stage if needed
-      // step.load = step.load ? this.#strip(step.load) : this.#stageObj.innerHTML;
       step.load ||= this.#stageObj.innerHTML;
 
       // make the step tags
@@ -858,6 +884,9 @@
 
       // set the stage object
       this.#stageObj = stepTag.children[0];
+
+      // replace shorthand tags
+      this.#substitueTags(this.#stageObj, this.#tagMap);
 
       // append the steptags
       this.#holder.append(stepTag);
@@ -875,7 +904,7 @@
       if (!acted) return { ok: false, reason: acted };
 
       // copy the step tags for next time
-      const nextStep = this.#makeTag("b", stepTag.innerHTML, "step");
+      const nextStep = this.#makeTag("x", stepTag.innerHTML, "step");
 
       // remove absorbs from stage
       this.#removeAbsorbs(nextStep);
@@ -895,20 +924,21 @@
       // flip the flopped fraktions
       this.#resetFlipFlops(nextStep);
 
-      // remove the API <b>'s
+      // remove the API <x>'s
       this.#removeAPIs(nextStep);
 
       // reset the stage to the cleaned version
       this.#stageObj = nextStep.children[0];
 
       // remove IDs [or make #namespaceIDs()]
-      // this.#removeIDs(stepTag.children[0]);
+      this.#removeIDs(stepTag.children[0]);
+      // this.#namespaceIDs(stepTag.children[0], this.#opts.fix, this.#stepNum);
 
       // the tag is done with measurements
       stepTag.removeAttribute("data-measure");
 
       // let em know you're rockin
-      dispatch(this.#holder, `${this.#opts.fix}-#${this.#currentStep}-ready`);
+      dispatch(this.#holder, `${this.#opts.fix}-#${this.#stepNum}-ready`);
 
       // let the rez know
       return { ok: true };
@@ -921,20 +951,20 @@
       this.#holder.replaceChildren();
       this.#routine = routine;
       const routineNum = ++this.#routineNum;
-      this.#currentStep = 0;
+      this.#stepNum = 0;
 
       if (routine.intro) {
-        this.#holder.append(this.#saniTag("b", routine.intro, "intro"));
+        this.#holder.append(this.#saniTag("x", routine.intro, "intro"));
       }
 
-      this.#stageObj = this.#saniTag("b", routine.stage, "stage");
+      this.#stageObj = this.#saniTag("x", routine.stage, "stage");
 
       dispatch(this.#holder, `${this.#opts.fix}-routine-start`);
 
       for (const step of routine.steps || []) {
         if (routineNum !== this.#routineNum) break;
 
-        const stepIndex = this.#currentStep++;
+        const stepIndex = this.#stepNum++;
         const result = await this.#processStep(step);
 
         if (!result?.ok) {
@@ -970,7 +1000,7 @@
     connectedCallback() {
       this.#opts = sieve(devOpts, parseData(this.dataset[devOpts.fix]));
 
-      this.innerHTML = `<b data-holder style="--${devOpts.fix}-h:${this.#opts.color}"></b>`;
+      this.innerHTML = `<x data-holder style="--${devOpts.fix}-h:${this.#opts.color}"></x>`;
 
       this.#spotter = new Spotter(this.children[0], this.#opts);
 

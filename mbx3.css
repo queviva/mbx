@@ -1,25 +1,3 @@
-/* #region DEBGG */
-[data-at-fifty] {
-  animation: mbx-at-fifty linear both;
-  animation-timeline: --anim-timeline;
-  animation-range: var(--animation-range);
-}
-@keyframes mbx-at-fifty {
-  0% {
-    color: white;
-  }
-  49% {
-    color: white;
-  }
-  50% {
-    color: green;
-  }
-  100% {
-    color: green;
-  }
-}
-/* #endregion */
-
 /* #region MATHRO HOLDER */
 /* CONFIG */
 mathro-batix [data-holder] {
@@ -32,7 +10,7 @@ mathro-batix [data-holder] {
   --mbx-l: 40%;
   --mbx-a: 1;
 
-  --frak-font-size: 0.75em; 
+  --frak-font-size: 0.75em;
   --frak-vertical-align: 65%;
 }
 
@@ -57,7 +35,7 @@ mathro-batix [data-holder] {
 
 /* #region BATIX */
 /* CONFIG */
-b,
+x,
 path {
   --main-color: hsl(var(--mbx-h), 80%, 50%);
   --white-color: hsl(var(--mbx-h), 100%, 98%);
@@ -80,7 +58,7 @@ path {
 }
 
 /* LAYOUT */
-b {
+x {
   box-sizing: border-box;
   position: relative;
   display: inline-flex;
@@ -89,17 +67,6 @@ b {
   justify-content: center;
   font-weight: normal;
   text-wrap: nowrap;
-}
-/* #endregion */
-
-/* #region SVG */
-svg {
-  position: absolute;
-  left: 0;
-  top: 0;
-  pointer-events: none;
-  z-index: 2;
-  overflow: visible;
 }
 /* #endregion */
 
@@ -131,7 +98,7 @@ svg {
   line-height: 50px;
   text-align: center;
   color: hsl(var(--mbx-h), 100%, 85%);
-  -webkit-text-stroke: 2px var(--main-color);
+  -webkit-text-stroke: 0.01em var(--main-color);
   background-color: #111;
 }
 @media screen and (orientation: portrait) {
@@ -166,24 +133,26 @@ svg {
 /* #endregion */
 
 /* #region SUP|SUB */
-[data-sup] {
+[data-sup], [data-sub] {
   position: relative;
   display: inline-flex;
   flex-direction: row;
   gap: 0.25em;
   align-items: baseline;
   justify-content: center;
-  line-height: 1;
-  vertical-align: 70%;
   white-space: nowrap;
   font-size: 0.55em;
   margin-left: -0.35em;
 }
+[data-sup] {
+  line-height: 1;
+  vertical-align: 70%;
+}
 [data-sub] {
+  border: 2px dashed green;
+  line-height: 1.5;
   vertical-align: -0.6em;
-  font-size: 0.55em;
   font-style: italic;
-  line-height: 0.5;
 }
 /* #endregion */
 
@@ -213,13 +182,13 @@ svg {
   display: inline-grid;
   grid-template: 1fr 1fr;
 }
-[data-dopple] > b {
+[data-dopple] > x {
   grid-area: 1 / 1 / 2 / 2;
 }
 /* #endregion */
 
 /* #region GROW */
-b:has(> [data-grow]) {
+x:has(> [data-grow]) {
   will-change: margin;
   animation: mbx-grow-margin linear both;
   animation-timeline: --anim-timeline;
@@ -259,7 +228,7 @@ b:has(> [data-grow]) {
 /* #endregion */
 
 /* #region SHRINK */
-[data-stage] > b:has([data-shrink]) {
+[data-stage] > x:has([data-shrink]) {
   animation: mbx-shrink-margin linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
@@ -727,7 +696,7 @@ path[data-materialize] {
     width: var(--mbx-xfade-wide1);
   }
 }
-[data-xfade] > b {
+[data-xfade] > x {
   grid-area: stack;
   position: relative;
   display: inline-flex;
@@ -826,6 +795,7 @@ path[data-materialize] {
   height: auto;
 }
 [data-frak-holder]:has(> [data-frak="anim"]) {
+  interpolate-size: allow-keywords;
   margin: 0 0;
   font-size: 1em;
   height: 1lh;
@@ -870,29 +840,32 @@ path[data-materialize] {
     vertical-align: var(--frak-vertical-align, 70%);
   }
 }
-[data-frak] [data-numerator] {
+[data-frak] > [data-numerator] {
+  z-index: 10;
 }
-[data-frak] [data-slash] {
+[data-frak] > [data-slash] {
   position: relative;
   height: 0.07lh;
+  width: 100%;
   overflow: visible;
 }
-[data-frak] [data-slash] b {
+[data-frak] > [data-slash] x {
   width: 100%;
 }
-[data-frak] [data-slash] svg {
+[data-frak] > [data-slash] svg {
   box-sizing: border-box;
+  position: absolute;
   top: 0;
   left: -0.25em;
   width: calc(100% + 0.5em);
   height: 100%;
   overflow: visible;
 }
-[data-frak] [data-slash] path {
+[data-frak] > [data-slash] path {
   d: path("M0 10 L5 0 L 100 0 L 94 10 Z");
   fill: var(--main-color);
 }
-[data-frak="anim"] [data-slash] path {
+[data-frak="anim"] > [data-slash] path {
   fill: var(--white-color);
   filter: var(--viva-filter);
   will-change: d;
@@ -909,13 +882,13 @@ path[data-materialize] {
     d: path("M0 10 L5 0 L 100 0 L 94 10 Z");
   }
 }
-[data-frak] [data-denominator] {
+[data-frak] > [data-denominator] {
 }
-[data-frak="anim"] [data-denominator] {
+[data-frak="anim"] > [data-denominator] {
   transform-origin: 50% 0%;
   opacity: 0;
   transform: scale(0);
-  will-change: tranform, opacity;
+  will-change: transform, opacity;
   --ani-end: 0.9;
   animation: mbx-frak-denominator linear both;
   animation-timeline: --anim-timeline;
@@ -925,12 +898,10 @@ path[data-materialize] {
   from {
     transform: scale(0);
     opacity: 0;
-    height: 0;
   }
   to {
     transform: scale(1);
     opacity: 1;
-    height: auto;
   }
 }
 /* #endregion */
@@ -1299,5 +1270,49 @@ path[data-materialize] {
     fill: var(--white-color);
     d: path("M0 95L5 100L100 5L95 0Z");
   }
+}
+/* #endregion */
+
+/* #region FLIPFLOP */
+
+[data-flip-flop] {
+
+
+}
+
+[data-XXX-flip-flop] [data-frak] x {
+
+  /* optional: make sure they inherit the parent's computed range */
+  --parent-start: var(--animation-start);
+  --parent-end:   var(--animation-end);
+  --parent-ani-start: var(--ani-start);
+  --parent-ani-end:   var(--ani-end);
+
+  /* Now the child's own local range (still 0–1) */
+  /* --ani-start: 0.5;  */
+  /* --ani-end:   1; */
+
+  /* === THE BIG NESTED CALC === */
+  --animation-range: contain
+    calc(
+      /* parent start */
+      var(--parent-start) 
+      + (var(--parent-end) - var(--parent-start))
+        * (var(--parent-ani-start) 
+           + (var(--parent-ani-end) - var(--parent-ani-start)) * 0.4)
+    )
+    contain
+    calc(
+      /* parent start + parent's full width * (0.4 + child's relative width) */
+      var(--parent-start) 
+      + (var(--parent-end) - var(--parent-start))
+        * (
+            var(--parent-ani-start) 
+            + (var(--parent-ani-end) - var(--parent-ani-start)) 
+              * (0.4 + (var(--ani-end) - var(--ani-start)))
+          )
+    );
+
+
 }
 /* #endregion */
