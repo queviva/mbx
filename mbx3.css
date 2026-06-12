@@ -789,6 +789,8 @@ path[data-materialize] {
 
 /* #region FRAK */
 [data-frak-holder] {
+  position: relative;
+  z-index: 10;
   display: inline-block;
   margin: 0 0.25em;
   font-size: var(--frak-font-size, 0.75em);
@@ -841,10 +843,8 @@ path[data-materialize] {
   }
 }
 [data-frak] > [data-numerator] {
-  z-index: 10;
 }
 [data-frak] > [data-slash] {
-  position: relative;
   height: 0.07lh;
   width: 100%;
   overflow: visible;
@@ -1107,6 +1107,7 @@ path[data-materialize] {
   --cank-path: var(--cank-02);
 }
 [data-cank] > svg {
+  position: absolute;
   width: 100%;
   height: 100%;
   filter: var(--viva-filter);
@@ -1156,6 +1157,7 @@ path[data-materialize] {
   --cirk-path: var(--cirk-02);
 }
 [data-cirk] > svg {
+  position: absolute;
   top: -10%;
   left: -10%;
   width: 120%;
@@ -1169,7 +1171,7 @@ path[data-materialize] {
   fill-rule: nonzero;
   fill: var(--white-color);
 }
-[data-cirk] clipPath > path {
+[data-cirk] > svg > clipPath > path {
   d: path("M50 50 L -10 -10 L -10 -10 L -10 -10 L -10 -10 L -10 -10 Z");
   animation: mbx-cirk linear both;
   animation-timeline: --anim-timeline;

@@ -40,21 +40,18 @@
           illuminated acrobatic gestural mathematics
         `,
         stage: `
-          <mbx-frak id="99-frak">
-            <x id="Tone">one</x>
-            <x>two</x>
-          </mbx-frak>
+          <x id="one">one</x>
           <x id="EQ">=</x>
-          <x id="T1">1^2</x> /// <x id="T2">2</x>
+          <x id="T12">12</x> /// <x id="T2">2</x>
         `,
         steps: [
           {
             note: "short and sweet tags",
             acts: (X) => {
-              X.mount("T11", "11");
-              X.spot("Tone").frak("T11");
+              X.spot("one").cirk(1)
             },
           },
+          {}
         ],
       };
 

@@ -236,7 +236,7 @@
 
     // #region REMOVE METHS
     #removeIDs(stage) {
-      for (const bat of stage.querySelectorAll("[id]")) {
+      for (const bat of stage.querySelectorAll("x[id]")) {
         bat.removeAttribute("id");
       }
     }
@@ -299,6 +299,12 @@
       }
     }
 
+    #removeSVGs(step) {
+      for (const svg of step.querySelectorAll("[data-drawn]")) {
+        svg.remove();
+      }
+    }
+
     // #endregion
 
     // #region TAG SUBS
@@ -309,7 +315,7 @@
         const frak = this.#makeTag("x",`
          <x data-frak-holder>
           <x data-frak>
-           <x data-slash ${bat.id ? `id="${bat.id}-slash"` : ""}>
+           <x data-slash ${bat.id ? `id="${bat.id}-slash"` : ""}>;
             <svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
              <path/>
             </svg>
@@ -322,6 +328,11 @@
         if (bat.id) frak.id = bat.id;
         log(frak);
         return frak;
+      },
+      "[data-vert]": (bat) => {
+        bat.style.transform = `translateY(${bat.dataset.vert || 0})`
+        bat.removeAttribute("data-vert");
+        return bat;
       }
     };
 
@@ -408,7 +419,7 @@
           bat.innerHTML = `
             <x data-${type}="${data || null}">
               <x>${bat.innerHTML}</x>
-              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <svg data-drawn viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                 <clipPath id="${id}"><path/></clipPath>
                 <path clip-path="url(#${id})"/>
               </svg>
@@ -926,6 +937,9 @@
 
       // remove the API <x>'s
       this.#removeAPIs(nextStep);
+
+      // remove svg drawings
+      this.#removeSVGs(nextStep);
 
       // reset the stage to the cleaned version
       this.#stageObj = nextStep.children[0];
