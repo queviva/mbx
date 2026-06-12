@@ -266,6 +266,12 @@
       }
     }
 
+    #resetRoots(step) {
+      for (const root of step.querySelectorAll("[data-root]")) {
+        root.setAttribute("data-root", "");
+      }
+    }
+
     #resetFraks(step) {
       for (const frak of step.querySelectorAll("[data-frak]")) {
         frak.setAttribute("data-frak", "");
@@ -290,6 +296,18 @@
       }
     }
 
+    #removeSVGs(step) {
+      for (const svg of step.querySelectorAll("[data-drawn]")) {
+        svg.remove();
+      }
+    }
+
+    #removeFilterClears(step) {
+      for (const bat of step.querySelectorAll("[data-filter-clear]")) {
+          bat.parentNode.removeAttribute("data-filter");
+      }
+    }
+
     #removeAPIs(step) {
       for (const api of this.#apis) {
         for (const el of step.querySelectorAll(`[data-${api}]`)) {
@@ -298,13 +316,6 @@
         }
       }
     }
-
-    #removeSVGs(step) {
-      for (const svg of step.querySelectorAll("[data-drawn]")) {
-        svg.remove();
-      }
-    }
-
     // #endregion
 
     // #region TAG SUBS
@@ -326,8 +337,21 @@
         frak.children[0].children[0].prepend(num);
         frak.children[0].children[0].append(den);
         if (bat.id) frak.id = bat.id;
-        log(frak);
         return frak;
+      },
+      "mbx-root": (bat) => {
+        const rootID = `${bat.id}-root`;
+        const root = this.#makeTag("x", `
+          <x>${bat.innerHTML}</x>
+          <svg data-front-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+           <path id="${rootID}-front"/>
+          </svg>
+          <svg data-top-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+           <path id="${rootID}-top"/>
+          </svg>
+        `,"root");
+        if (bat.id) root.id = bat.id;
+        return root;
       },
       "[data-vert]": (bat) => {
         bat.style.transform = `translateY(${bat.dataset.vert || 0})`
@@ -339,7 +363,6 @@
     #substitueTags = (stage, map) => {
       for (const [short, makeSweet] of Object.entries(map)) {
         for (const bat of stage.querySelectorAll(short)) {
-          log('try',short,'on',bat);
           bat.replaceWith(makeSweet(bat));
         }
       }
@@ -475,7 +498,7 @@
           const beef = api.pick(id);
           if (!beef) return api;
           for (const bat of this.#batties) {
-            bat.parentNode.insertBefore(bat, beef);
+            beef.parentNode.insertBefore(bat, beef);
           }
           return api;
         },
@@ -715,25 +738,23 @@
           }
           return api.spot(id);
         },
-        root: (id) => {
-          const bat0 = this.#batties[0];
-          id = id || `${fix}${crypto.randomUUID()}`;
-          const rootEl = document.createElement("x");
-          rootEl.id = CSS.escape(id);
-          rootEl.setAttribute("data-root-anim", "");
-          rootEl.innerHTML = `
-           <x id="${CSS.escape(id)}" data-root-terms></x>
-           <svg data-front-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <path/>
-           </svg>
-           <svg data-top-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <path/>
-           </svg>
-          `;
-          bat0.parentNode.insertBefore(rootEl, bat0);
-          const termB = rootEl.querySelector("[data-root-terms]");
-          for (const el of this.#batties) termB.append(el);
-          return api.spot(id);
+        root: () => {
+          for (const bat of this.#batties) {
+            const rootID = `${bat.id}-root`;
+            const rootEl = this.#makeTag("x", `
+             <svg data-front-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <path id="${rootID}-front"/>
+             </svg>
+             <svg data-top-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <path id="${rootID}-top"/>
+             </svg>
+            `);
+            rootEl.setAttribute("data-root", "anim");
+            rootEl.id = rootID;
+            bat.parentNode.insertBefore(rootEl, bat);
+            bat.setAttribute("data-root-terms", "");
+            rootEl.prepend(bat);
+          }
         },
         frak: (...ids) => {
           const bat0 = this.#batties[0];
@@ -843,8 +864,7 @@
           "redux - opposite of frak",
           "split - opposite of absorb",
           "faktor - opposite of distribute",
-          "colorize - better css layout of coloring/filters",
-          "cross-fade",
+          "unroot - vaporize square root",
         ],
         // #endregion
       };
@@ -926,6 +946,9 @@
       // remove distributions from stage
       this.#removeDists(nextStep);
 
+      // flatten animated rooting
+      this.#resetRoots(nextStep);
+
       // reset the fraktions
       this.#resetFraks(nextStep);
 
@@ -935,11 +958,14 @@
       // flip the flopped fraktions
       this.#resetFlipFlops(nextStep);
 
-      // remove the API <x>'s
-      this.#removeAPIs(nextStep);
+      // remove clear filters
+      this.#removeFilterClears(nextStep);
 
       // remove svg drawings
       this.#removeSVGs(nextStep);
+
+      // remove the API <x>'s
+      this.#removeAPIs(nextStep);
 
       // reset the stage to the cleaned version
       this.#stageObj = nextStep.children[0];

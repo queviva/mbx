@@ -133,7 +133,8 @@ x {
 /* #endregion */
 
 /* #region SUP|SUB */
-[data-sup], [data-sub] {
+[data-sup],
+[data-sub] {
   position: relative;
   display: inline-flex;
   flex-direction: row;
@@ -362,8 +363,10 @@ path[data-viva] {
   }
 }
 [data-filter="viva"] {
+  color: var(--white-color);
   text-shadow: var(--viva-shadow);
 }
+[data-filter="viva"] path,
 path[data-filter="viva"] {
   fill: var(--white-color);
   filter: var(--viva-filter);
@@ -456,6 +459,10 @@ svg,
     opacity: 0;
   }
 }
+[data-filter="vaporize"] {
+  color: var(--back-color);
+  text-shadow: var(--vapor-shadow);
+}
 [data-vaporize] path,
 path[data-vaporize] {
   will-change: fill, filter, opacity;
@@ -485,7 +492,11 @@ path[data-vaporize] {
     opacity: 0;
   }
 }
-
+[data-filter="vaporize"] path,
+path[data-filter="vaporize"] {
+  fill: var(--back-color);
+  filter: var(--vapor-filter);
+}
 [data-materialize] {
   animation: mbx-materialize linear both;
   animation-timeline: --anim-timeline;
@@ -907,8 +918,11 @@ path[data-materialize] {
 /* #endregion */
 
 /* #region ROOT ANIMATION */
-[data-root-anim] {
-  /* margin-left: 0.35em; */
+[data-root] {
+  margin-left: 0.35em;
+}
+[data-root="anim"] {
+  margin-left: 0em;
   --ani-end: 0.4;
   animation: mbx-root-margin linear both;
   animation-timeline: --anim-timeline;
@@ -922,18 +936,25 @@ path[data-materialize] {
     margin-left: 0.35em;
   }
 }
-[data-root-anim] [data-front-svg] {
+
+[data-root] [data-front-svg] {
   position: absolute;
   top: -5px;
   left: -0.5em;
   height: 100%;
-  filter: var(--viva-filter);
   overflow: visible;
 }
-[data-root-anim] [data-front-svg] path {
+[data-root="anim"] [data-front-svg] {
+  filter: var(--viva-filter);
+}
+[data-root] [data-front-svg] path {
+  d: path("M8 46L14 30L19 52L18 0L23 1L24 90L11 43Z");
+  fill: var(--main-color);
   transform: scale(1.5, 1.2);
-  fill: var(--white-color);
+}
+[data-root="anim"] [data-front-svg] path {
   d: path("M8 46L8 46 L8 46 L8 46L8 46L8 46 L8 46 Z");
+  fill: var(--white-color);
   will-change: d;
   --ani-end: 0.2;
   animation: mbx-root-front linear both;
@@ -945,20 +966,25 @@ path[data-materialize] {
     d: path("M8 46L14 30L19 52L18 0L23 1L24 90L11 43Z");
   }
 }
-[data-root-anim] [data-top-svg] {
+
+[data-root] [data-top-svg] {
   position: absolute;
   top: -6px;
   left: -0.18em;
   height: 45px;
   width: calc(100% + 0.25em);
-  filter: var(--viva-filter);
   overflow: visible;
 }
-[data-root-anim] [data-top-svg] path {
+[data-root] [data-top-svg] path {
+  d: path("M0 0H 100L98 3 L 2 7Z");
+  fill: var(--main-color);
   transform-origin: -5px -7px;
   transform: scale(1, 1.2);
-  fill: var(--white-color);
+}
+[data-root="anim"] [data-top-svg] path {
   d: path("M0 0H 0  L0 3  L 0 7Z");
+  fill: var(--white-color);
+  filter: var(--viva-filter);
   --ani-start: 0.325;
   animation: mbx-root-top linear both;
   animation-timeline: --anim-timeline;
@@ -972,6 +998,7 @@ path[data-materialize] {
 /* #endregion */
 
 /* #region ROOT */
+/*
 [data-root] {
   margin-left: 0.35em;
 }
@@ -1001,6 +1028,7 @@ path[data-materialize] {
   fill: var(--main-color);
   d: path("M0 0H 0  L0 3  L 0 7Z");
 }
+*/
 /* #endregion */
 
 /* #region SALUTE */
@@ -1278,17 +1306,14 @@ path[data-materialize] {
 /* #region FLIPFLOP */
 
 [data-flip-flop] {
-
-
 }
 
 [data-XXX-flip-flop] [data-frak] x {
-
   /* optional: make sure they inherit the parent's computed range */
   --parent-start: var(--animation-start);
-  --parent-end:   var(--animation-end);
+  --parent-end: var(--animation-end);
   --parent-ani-start: var(--ani-start);
-  --parent-ani-end:   var(--ani-end);
+  --parent-ani-end: var(--ani-end);
 
   /* Now the child's own local range (still 0–1) */
   /* --ani-start: 0.5;  */
@@ -1297,24 +1322,22 @@ path[data-materialize] {
   /* === THE BIG NESTED CALC === */
   --animation-range: contain
     calc(
-      /* parent start */
-      var(--parent-start) 
-      + (var(--parent-end) - var(--parent-start))
-        * (var(--parent-ani-start) 
-           + (var(--parent-ani-end) - var(--parent-ani-start)) * 0.4)
+      /* parent start */ var(--parent-start) +
+        (var(--parent-end) - var(--parent-start)) *
+        (
+          var(--parent-ani-start) +
+            (var(--parent-ani-end) - var(--parent-ani-start)) * 0.4
+        )
     )
     contain
     calc(
       /* parent start + parent's full width * (0.4 + child's relative width) */
-      var(--parent-start) 
-      + (var(--parent-end) - var(--parent-start))
-        * (
-            var(--parent-ani-start) 
-            + (var(--parent-ani-end) - var(--parent-ani-start)) 
-              * (0.4 + (var(--ani-end) - var(--ani-start)))
-          )
+      var(--parent-start) + (var(--parent-end) - var(--parent-start)) *
+        (
+          var(--parent-ani-start) +
+            (var(--parent-ani-end) - var(--parent-ani-start)) *
+            (0.4 + (var(--ani-end) - var(--ani-start)))
+        )
     );
-
-
 }
 /* #endregion */
