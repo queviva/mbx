@@ -40,51 +40,35 @@
           illuminated acrobatic gestural mathematics
         `,
         stage: `
-          <x id="G1" data-tite>
-           <x id="T5">5</x>
-           <x id="Tx2">x^2</x>
-          </x>
+          <mbx-frak id="frak-1">
+            <x id="Tx2">x^2</x>
+            <x id="T9">9</x>
+          </mbx-frak>
           <x id="EQ">=</x>
-          <x id="T45">45</x>
-          <x id="T5-a">5</x>
-          <x id="T5-b">5</x>
+          <x id="T25">25</x>
         `,
         steps: [
           {
-            note: "short and sweet tags",
+            note: `
+              <x><br>short and sweet tags</x>
+              <x data-rant>
+                this is a much more thorough description
+                of many other things that should be
+                considered about this manipulation of
+                the equation
+              </x>
+            `,
             acts: (X) => {
-              X.spot("G1").frak("T5-a");
-              X.spot("T45").inlineFrak("T5-b");
+              X.spot("frak-1").root("Root-1");
+              X.spot("T25").root();
             },
           },
           {
-            note: "after canking, this",
             acts: (X) => {
-              X.spot("T5").cank(0,"-22deg").during(0, 0.5);
-              X.spot("T5-a").cank(0,"-15deg").during(0.55);
+              X.spot("Root-1-rootlines").vaporize();
             }
           },
           {
-            acts: (X) => {
-              X.spot("T5").shrink("50% 50%").during(0,0.4);
-              X.spot("G1-frak").unFrak();
-              X.mount("T9", "9");
-              X.spot("T45", "T45-slash", "T5-b")
-                .group("G99")
-                .absorb("T9")
-                .spin();
-            }
-          },
-          {
-            load: `
-              <x id="Tx2">x^2</x>
-              <x id="EQ">=</x>
-              <x id="T9">9</x>
-            `,
-            note: ``,
-            acts: (X) => {
-              X.spot("Tx2", "T9").root();
-            }
           }
         ],
       };

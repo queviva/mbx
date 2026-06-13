@@ -351,16 +351,16 @@
         const frak = this.#makeTag(
           "x",
           `
-         <x data-frak-holder>
-          <x data-frak>
-           <x data-slash ${bat.id ? `id="${bat.id}-slash"` : ""}>;
-            <svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
-             <path/>
-            </svg>
+           <x data-frak-holder>
+            <x data-frak>
+             <x data-slash ${bat.id ? `id="${bat.id}-slash"` : ""}>
+              <svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
+               <path/>
+              </svg>
+             </x>
+            </x>
            </x>
-          </x>
-         </x>
-        `,
+          `,
         );
         frak.children[0].children[0].prepend(num);
         frak.children[0].children[0].append(den);
@@ -591,10 +591,14 @@
           }
           return api;
         },
-        colorize: (v) => wrap("colorize", { [`--${fix}-colorize-val`]: v }),
+        colorize: (v) => {
+          log(v);
+          return wrap("colorize", { [`--${fix}-colorize-val`]: v });
+        },
         setColor: (v) => {
           for (const bat of this.#batties) {
-            bat.style.setProperty(`--${fix}-h`, v);
+            // bat.style.setProperty(`--${fix}-h`, v);
+            bat.style.setProperty(`--main-color`, v);
             bat.style.color = `var(--main-color)`;
             bat.style.fill = `var(--main-color)`;
           }
@@ -793,25 +797,38 @@
           }
           return api.spot(id);
         },
-        root: () => {
+        root: (id) => {
+          const bat0 = this.#batties[0];
+          const root = this.#makeTag("x",`
+            <x data-root="fore">
+             <x data-rootlines>
+              <svg data-front-svg viewBox="0 0 24 100" preserveAspectRatio="none" aria-hidden="true">
+               <path />
+              </svg>
+              <svg data-top-svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
+               <path />
+              </svg>
+             </x>
+             <x data-radicand></x>
+            </x>
+          `);
+          const radicand = root.querySelector("[data-radicand]");
+          const rootlines = root.querySelector("[data-rootlines]");
+          const frontSVG = root.querySelector("[data-front-svg]");
+          const topSVG = root.querySelector("[data-top-svg]");
+          
+          if (id) {
+            root.id = id;
+            radicand.id = id + "-radicand";
+            rootlines.id = id + "-rootlines";
+            frontSVG.id = id + "-frontline";
+            topSVG.id = id + "-topline";
+          }
+
+          bat0.parentNode.insertBefore(root, bat0);
+
           for (const bat of this.#batties) {
-            const rootID = `${bat.id}-root`;
-            const rootEl = this.#makeTag(
-              "x",
-              `
-             <svg data-front-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              <path id="${rootID}-front"/>
-             </svg>
-             <svg data-top-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              <path id="${rootID}-top"/>
-             </svg>
-            `,
-            );
-            rootEl.setAttribute("data-root", "anim");
-            rootEl.id = rootID;
-            bat.parentNode.insertBefore(rootEl, bat);
-            bat.setAttribute("data-root-terms", "");
-            rootEl.prepend(bat);
+            radicand.prepend(bat);
           }
         },
         frak: (...ids) => {
@@ -838,7 +855,6 @@
           const denom = frakEl.querySelector("[data-denominator]");
           for (const bat of this.#batties) numer.append(bat);
           for (const id of new Set(ids)) denom.append(api.pick(id));
-          // this.#measureElements(frakEl, ...frakEl.querySelectorAll("*"));
           return api.spot(frakID);
         },
         unFrak: () => {
@@ -925,11 +941,11 @@
 
         // #region !!! MORE TO DO !!!
         moreToDo: [
+          "parens - sizing to height ()'s",
           "clone/dopple - copy immediately ontop of",
           "power rule - for derivate and integral",
-          "redux - opposite of frak",
           "split - opposite of absorb",
-          "faktor - opposite of distribute",
+          "faktorize - opposite of distribute",
         ],
         // #endregion
       };

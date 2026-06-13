@@ -539,8 +539,10 @@ path[data-materialize] {
 }
 @keyframes mbx-colorize {
   to {
-    color: hsl(var(--mbx-colorize-val, var(--mbx-h)), 80%, 60%);
-    fill: hsl(var(--mbx-colorize-val, var(--mbx-h)), 80%, 60%);
+    /* color: hsl(var(--mbx-colorize-val, var(--mbx-h)), 80%, 60%); */
+    /* fill: hsl(var(--mbx-colorize-val, var(--mbx-h)), 80%, 60%); */
+    color: var(--mbx-colorize-val);
+    fill: var(--mbx-colorize-val);
   }
 }
 /* #endregion */
@@ -747,7 +749,7 @@ path[data-materialize] {
   text-wrap: wrap;
   color: var(--grey-color);
 }
-[data-comm] > [data-rant] {
+[data-comm] [data-rant] {
   position: absolute;
   top: calc(100% + 5px);
   display: inline-block;
@@ -843,7 +845,6 @@ path[data-materialize] {
   }
 }
 
-
 [data-frak] > [data-numerator] {
 }
 
@@ -895,7 +896,6 @@ path[data-materialize] {
   }
 }
 
-
 [data-frak] > [data-denominator] {
 }
 [data-frak="fore"] > [data-denominator],
@@ -928,118 +928,96 @@ path[data-materialize] {
 }
 /* #endregion */
 
-/* #region ROOT ANIMATION */
+/* #region ROOT of ALL EVIL */
+x:has(> [data-root]) {
+  margin-left: 0.5em;
+  margin-right: 0.25em;
+}
 [data-root] {
-  margin-left: 0.35em;
+  box-sizing: border-box;
 }
-[data-root="anim"] {
-  margin-left: 0em;
-  --ani-end: 0.4;
-  animation: mbx-root-margin linear both;
-  animation-timeline: --anim-timeline;
-  animation-range: var(--animation-range);
-}
-@keyframes mbx-root-margin {
-  from {
-    margin-left: 0em;
-  }
-  to {
-    margin-left: 0.35em;
-  }
+[data-root] > [data-radicand] {
+  margin-left: 0.125em;
 }
 
-[data-root] [data-front-svg] {
+[data-root] > [data-rootlines],
+[data-root] > [data-rootlines] x {
   position: absolute;
-  top: -5px;
-  left: -0.5em;
-  height: 100%;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+[data-root] > [data-rootlines] [data-front-svg] {
+  position: absolute;
+  left: -0.45em;
+  top: -0.25em;
+  width: 0.45em;
+  height: calc(100% + 0.25em);
   overflow: visible;
 }
-[data-root="anim"] [data-front-svg] {
-  filter: var(--viva-filter);
+[data-root] > [data-rootlines] [data-top-svg] {
+  position: absolute;
+  left: 0;
+  top: -0.25em;
+  width: calc(100% + 0.125em);
+  height: 0.25em;
+  overflow: visible;
 }
-[data-root] [data-front-svg] path {
-  d: path("M8 46L14 30L19 52L18 0L23 1L24 90L11 43Z");
+[data-front-svg] > path {
+  d: path("M8 46L14 30L19 52L18 0L24 0L24 100L11 43Z");
   fill: var(--main-color);
-  transform: scale(1.5, 1.2);
+  overflow: visible;
 }
-[data-root="anim"] [data-front-svg] path {
-  d: path("M8 46L8 46 L8 46 L8 46L8 46L8 46 L8 46 Z");
+[data-root="fore"] [data-front-svg] > path {
+  d: path(" M 18 0 L 19 52 L 14 30 L 8 46 L 11 43 L 24 100 L 24 0 Z ");
   fill: var(--white-color);
+  filter: var(--viva-filter);
+  --ani-start: 0;
+  --ani-end: 0.4;
   will-change: d;
-  --ani-end: 0.2;
   animation: mbx-root-front linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
 @keyframes mbx-root-front {
-  to {
-    d: path("M8 46L14 30L19 52L18 0L23 1L24 90L11 43Z");
+  0% {
+    d: path(" M 14 30 L 14 30 L 14 30 L 8 46 L 8 46 L 8 46 L 8 46 Z ");
+  }
+  2% {
+    d: path(" M 14 30 L 14 30 L 14 30 L 8 46 L 11 43 L 11 43 L 11 43 Z ");
+  }
+  52% {
+    d: path(" M 19 52 L 19 52 L 14 30 L 8 46 L 11 43 L 24 100 L 24 100 Z ");
+  }
+  100% {
+    d: path(" M 18 0 L 19 52 L 14 30 L 8 46 L 11 43 L 24 100 L 24 0 Z ");
   }
 }
 
-[data-root] [data-top-svg] {
-  position: absolute;
-  top: -6px;
-  left: -0.18em;
-  height: 45px;
-  width: calc(100% + 0.25em);
-  overflow: visible;
-}
-[data-root] [data-top-svg] path {
-  d: path("M0 0H 100L98 3 L 2 7Z");
+[data-top-svg] > path {
+  d: path("M-10 0L 100 0L98 3 L 0 7Z");
   fill: var(--main-color);
-  transform-origin: -5px -7px;
-  transform: scale(1, 1.2);
 }
-[data-root="anim"] [data-top-svg] path {
-  d: path("M0 0H 0  L0 3  L 0 7Z");
+[data-root="fore"] [data-top-svg] > path {
   fill: var(--white-color);
   filter: var(--viva-filter);
-  --ani-start: 0.325;
+  --ani-start: 0.4;
+  --ani-end: 1;
+  will-change: d;
   animation: mbx-root-top linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
 @keyframes mbx-root-top {
+  from {
+    d: path("M-10 0L -10 0 L0 7  L 0 7Z");
+  }
   to {
-    d: path("M0 0H 100L98 3 L 2 7Z");
+    d: path("M-10 0L 100 0L98 3 L 0 7Z");
   }
 }
-/* #endregion */
-
-/* #region ROOT */
-/*
-[data-root] {
-  margin-left: 0.35em;
-}
-[data-root] [data-front-svg] {
-  position: absolute;
-  top: -5px;
-  left: -0.5em;
-  height: 100%;
-  overflow: visible;
-}
-[data-root] [data-front-svg] path {
-  transform: scale(1.5, 1.2);
-  fill: var(--main-color);
-  d: path("M8 46L8 46 L8 46 L8 46L8 46L8 46 L8 46 Z");
-}
-[data-root] [data-top-svg] {
-  position: absolute;
-  top: -6px;
-  left: -0.18em;
-  height: 45px;
-  width: calc(100% + 0.25em);
-  overflow: visible;
-}
-[data-root] [data-top-svg] path {
-  transform-origin: -5px -7px;
-  transform: scale(1, 1.2);
-  fill: var(--main-color);
-  d: path("M0 0H 0  L0 3  L 0 7Z");
-}
-*/
 /* #endregion */
 
 /* #region SALUTE */
