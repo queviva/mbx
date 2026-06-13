@@ -366,14 +366,17 @@
         return root;
       },
       "mbx-cank": (bat) => {
-        const cank = this.#makeTag("x", `
+        const cank = this.#makeTag(
+          "x",
+          `
              <x data-cank>
               <x>${bat.innerHTML}</x>
               <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                <path/>
               </svg>
              </x>
-        `);
+        `,
+        );
         if (bat.id) cank.id = bat.id;
         return cank;
       },
@@ -454,29 +457,6 @@
           if (cssVars) {
             for (const [key, value] of Object.entries(cssVars)) {
               targ.style.setProperty(key, value);
-            }
-          }
-        }
-        return api;
-      };
-
-      const svgWrap = (type, data, cssVars) => {
-        const id = `${fix}-${crypto.randomUUID()}`;
-        for (const bat of this.#batties) {
-          bat.innerHTML =
-            ` 
-            <x data-${type}="${data || null}">
-              <x>${bat.innerHTML}</x>
-              <svg data-drawn viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">` +
-            (type === "cirk"
-              ? `<clipPath id="${id}"><path/></clipPath><path clip-path="url(#${id})"/>`
-              : `<path/>`) +
-            `    </svg>
-            </x>
-          `;
-          if (cssVars) {
-            for (const [key, value] of Object.entries(cssVars)) {
-              bat.children[0].style.setProperty(key, value);
             }
           }
         }
@@ -621,6 +601,7 @@
               bat.style.setProperty("--cank-rotate", rot);
             }
           }
+          return api;
         },
         cirk: (v, rot) =>
           svgWrap("cirk", v || null, rot ? { "--cirk-rotate": rot } : null),

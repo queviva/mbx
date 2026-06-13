@@ -42,18 +42,21 @@ path {
   --grey-color: hsl(var(--mbx-h), 10%, 40%);
   --inverse-color: hsl(calc(var(--mbx-h) + 180), 80%, 50%);
 
-  --ani-start: 0;
-  --ani-end: 1;
+  /* 
+    these values set with .during(start, end) 
+    --ani-start: 0; 
+    --ani-end: 1;
+  */
 
   --animation-range: contain
     calc(
       var(--animation-start) + (var(--animation-end) - var(--animation-start)) *
-        var(--ani-start)
+        var(--ani-start, 0)
     )
     contain
     calc(
       var(--animation-start) + (var(--animation-end) - var(--animation-start)) *
-        var(--ani-end)
+        var(--ani-end, 1)
     );
 }
 
