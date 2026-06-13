@@ -68,8 +68,8 @@ x {
   flex-direction: row;
   gap: 0.25em;
   justify-content: center;
-  font-weight: normal;
   text-wrap: nowrap;
+  font-weight: normal;
 }
 /* #endregion */
 
@@ -191,81 +191,53 @@ x {
 }
 /* #endregion */
 
-/* #region GROW */
+/* #region GROW|SHRINK */
 x:has(> [data-grow]) {
   will-change: margin;
   animation: mbx-grow-margin linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
+x:has(> [data-grow="fore"]) {
+  animation-direction: normal;
+}
+x:has(> [data-grow="back"]) {
+  animation-direction: reverse;
+}
 @keyframes mbx-grow-margin {
   from {
-    margin-right: -0.25em;
-    /* margin-left: -0.25em; */
+    margin: 0 -0.25em;
   }
   to {
-    /* margin-left: 0em; */
-    margin-right: 0em;
+    margin: 0 0;
   }
 }
+
 [data-grow] {
-  transform-origin: var(--mbx-grow-origin, -100% 75%);
-  will-change: margin, transform, width, opacity;
+  transform-origin: var(--mbx-transform-origin, 50% 50%);
+  will-change: margin, width, transform, opacity;
   animation: mbx-grow linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
+[data-grow="fore"] {
+  animation-direction: normal;
+}
+[data-grow="back"] {
+  animation-direction: reverse;
+}
 @keyframes mbx-grow {
   from {
     margin-right: -0.25em;
+    width: 0;
     transform: scale(0);
-    width: 0px;
     opacity: 0;
   }
   to {
     margin-right: 0em;
-    transform: scale(1);
     width: var(--mbx-width);
-    opacity: 1;
-  }
-}
-/* #endregion */
-
-/* #region SHRINK */
-[data-stage] > x:has([data-shrink]) {
-  animation: mbx-shrink-margin linear both;
-  animation-timeline: --anim-timeline;
-  animation-range: var(--animation-range);
-}
-@keyframes mbx-shrink-margin {
-  from {
-    margin-right: 0em;
-  }
-  to {
-    margin-right: -0.25em;
-  }
-}
-[data-shrink] {
-  display: inline-block;
-  transform-origin: 0% 50%;
-  will-change: transform;
-  animation: mbx-shrink ease-in-out both;
-  animation-timeline: --anim-timeline;
-  animation-range: var(--animation-range);
-}
-
-@keyframes mbx-shrink {
-  from {
-    margin-right: 0em;
     transform: scale(1);
-    width: var(--mbx-width);
     opacity: 1;
-  }
-  to {
-    margin-right: -0.25em;
-    transform: scale(0);
-    width: 0px;
-    opacity: 0;
   }
 }
 /* #endregion */
@@ -674,7 +646,8 @@ path[data-materialize] {
 [data-absorb] > :nth-child(1) {
   display: inline-flex;
   gap: 0.25em;
-  animation: mbx-shrink ease-out both;
+  animation: mbx-grow ease-out both;
+  animation-direction: reverse;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
@@ -810,16 +783,22 @@ path[data-materialize] {
   font-size: var(--frak-font-size, 0.75em);
   height: auto;
 }
-[data-frak-holder]:has(> [data-frak="anim"]) {
+
+[data-frak-holder]:has(> [data-frak="fore"]),
+[data-frak-holder]:has(> [data-frak="back"]) {
   interpolate-size: allow-keywords;
-  margin: 0 0;
-  font-size: 1em;
-  height: 1lh;
   will-change: margin, font-size, height;
-  --ani-start: 0.3;
   animation: mbx-frak-holder linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
+}
+[data-frak-holder]:has(> [data-frak="fore"]) {
+  --ani-start: 0.45;
+  animation-direction: normal;
+}
+[data-frak-holder]:has(> [data-frak="back"]) {
+  --ani-start: 0.75;
+  animation-direction: reverse;
 }
 @keyframes mbx-frak-holder {
   from {
@@ -833,6 +812,7 @@ path[data-materialize] {
     height: auto;
   }
 }
+
 [data-frak] {
   display: inline-flex;
   flex-direction: column;
@@ -840,13 +820,19 @@ path[data-materialize] {
   width: 100%;
   vertical-align: var(--frak-vertical-align, 70%);
 }
-[data-frak="anim"] {
-  vertical-align: 0%;
+[data-frak="fore"],
+[data-frak="back"] {
   will-change: vertical-align;
   --ani-start: 0.3;
   animation: mbx-frak linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
+}
+[data-frak="fore"] {
+  animation-direction: normal;
+}
+[data-frak="back"] {
+  animation-direction: reverse;
 }
 @keyframes mbx-frak {
   from {
@@ -856,8 +842,11 @@ path[data-materialize] {
     vertical-align: var(--frak-vertical-align, 70%);
   }
 }
+
+
 [data-frak] > [data-numerator] {
 }
+
 [data-frak] > [data-slash] {
   height: 0.07lh;
   width: 100%;
@@ -879,14 +868,23 @@ path[data-materialize] {
   d: path("M0 10 L5 0 L 100 0 L 94 10 Z");
   fill: var(--main-color);
 }
-[data-frak="anim"] > [data-slash] path {
-  fill: var(--white-color);
-  filter: var(--viva-filter);
+[data-frak="fore"] > [data-slash] path,
+[data-frak="back"] > [data-slash] path {
   will-change: d;
-  --ani-end: 0.35;
   animation: mbx-frak-slash linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
+}
+[data-frak="fore"] > [data-slash] path {
+  fill: var(--white-color);
+  filter: var(--viva-filter);
+  --ani-start: 0;
+  --ani-end: 0.45;
+  animation-direction: normal;
+}
+[data-frak="back"] > [data-slash] path {
+  --ani-start: 0.75;
+  animation-direction: reverse;
 }
 @keyframes mbx-frak-slash {
   from {
@@ -896,17 +894,27 @@ path[data-materialize] {
     d: path("M0 10 L5 0 L 100 0 L 94 10 Z");
   }
 }
+
+
 [data-frak] > [data-denominator] {
 }
-[data-frak="anim"] > [data-denominator] {
+[data-frak="fore"] > [data-denominator],
+[data-frak="back"] > [data-denominator] {
   transform-origin: 50% 0%;
   opacity: 0;
   transform: scale(0);
   will-change: transform, opacity;
-  --ani-end: 0.9;
   animation: mbx-frak-denominator linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
+}
+[data-frak="fore"] > [data-denominator] {
+  --ani-start: 0.45;
+  --ani-end: 0.9;
+  animation-direction: normal;
+}
+[data-frak="back"] > [data-denominator] {
+  animation-direction: reverse;
 }
 @keyframes mbx-frak-denominator {
   from {
@@ -1240,14 +1248,15 @@ path[data-materialize] {
 
 /* #endregion */
 
-/* #region INLINE-FRAK*/
+/* #region INLINE FRAK*/
 [data-inline-frak-holder] {
   display: inline-block;
   margin: 0 0em;
 }
-[data-inline-frak-holder="anim"] {
+x:has(> [data-inline-frak-holder="anim"]) {
   margin: 0 -0.125em;
   --ani-start: 0.5;
+  --ani-end: 1;
   animation: mbx-inline-frak-holder linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
@@ -1282,6 +1291,7 @@ path[data-materialize] {
   fill: var(--white-color);
   filter: var(--viva-filter);
   will-change: d;
+  --ani-start: 0;
   --ani-end: 0.4;
   animation: mbx-inline-frak-slash linear both;
   animation-timeline: --anim-timeline;
@@ -1292,7 +1302,6 @@ path[data-materialize] {
     d: path("M47 47L53 53L53 53L47 47Z");
   }
   to {
-    fill: var(--white-color);
     d: path("M0 95L5 100L100 5L95 0Z");
   }
 }

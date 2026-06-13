@@ -93,8 +93,6 @@
       "colorize",
       "wink",
       "filter-clear",
-      "grow",
-      "shrink",
       "spin",
       "vault",
       "tuck",
@@ -278,8 +276,18 @@
     }
 
     #resetFraks(step) {
-      for (const frak of step.querySelectorAll("[data-frak]")) {
-        frak.setAttribute("data-frak", "");
+      for (const bat of step.querySelectorAll("[data-frak-holder]")) {
+        const frak = bat.children[0];
+        const val = frak.getAttribute("data-frak");
+        if (val === "fore") {
+          frak.setAttribute("data-frak", "");
+        } else if (val === "back") {
+          const top = bat.parentNode;
+          const num = frak.children[0];
+          while (num.firstChild)
+            top.parentNode.insertBefore(num.firstChild, top);
+          top.remove();
+        }
       }
     }
 
@@ -310,6 +318,18 @@
     #removeFilterClears(step) {
       for (const bat of step.querySelectorAll("[data-filter-clear]")) {
         bat.parentNode.removeAttribute("data-filter");
+      }
+    }
+
+    #resetGrows(step) {
+      for (const bat of step.querySelectorAll("[data-grow]")) {
+        const val = bat.getAttribute("data-grow");
+        if (val === "fore") {
+          while (bat.firstChild) bat.parentNode.insertBefore(bat.firstChild, bat);
+          bat.remove();
+        } else if (val === "back") {
+          bat.remove();
+        }
       }
     }
 
@@ -444,7 +464,7 @@
         return api;
       };
 
-      const wrap = (type, cssVars) => {
+      const wrap = (type, cssVars, dataVals) => {
         for (const bat of this.#batties) {
           let targ;
           if (bat.tagName === "path") {
@@ -457,6 +477,11 @@
           if (cssVars) {
             for (const [key, value] of Object.entries(cssVars)) {
               targ.style.setProperty(key, value);
+            }
+          }
+          if (dataVals) {
+            for (const [key, value] of Object.entries(dataVals)) {
+              targ.setAttribute(key, value);
             }
           }
         }
@@ -579,8 +604,18 @@
 
         // #region GROWTH
         salute: () => wrap("salute"),
-        grow: (v) => wrap("grow", v ? { "transform-origin": v } : null),
-        shrink: (v) => wrap("shrink", v ? { "transform-origin": v } : null),
+        grow: (v) => {
+          this.#measureElements(...this.#batties);
+          return wrap("grow", v ? { "--mbx-transform-origin": v } : null, {
+            "data-grow": "fore",
+          });
+        },
+        shrink: (v) => {
+          this.#measureElements(...this.#batties);
+          return wrap("grow", v ? { "--mbx-transform-origin": v } : null, {
+            "data-grow": "back"
+          });
+        },
         vault: (v) => wrap("vault", v ? { "--vault-height": v } : null),
         tuck: (v) => wrap("tuck", v ? { "--tuck-depth": v } : null),
         spin: (v) => wrap("spin", v ? { "--spin-angle": v } : null),
@@ -786,7 +821,7 @@
           const frakEl = document.createElement("x");
           frakEl.innerHTML = `
            <x data-frak-holder>
-            <x data-frak="anim">
+            <x data-frak="fore">
              <x data-numerator id="${frakID}-numerator"></x>
              <x data-slash id="${frakID}-slash">
               <svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
@@ -806,21 +841,29 @@
           // this.#measureElements(frakEl, ...frakEl.querySelectorAll("*"));
           return api.spot(frakID);
         },
+        unFrak: () => {
+          for (const bat of this.#batties) {
+            const frak = bat?.children[0]?.children[0];
+            if (!frak) continue;
+            frak.setAttribute("data-frak", "back");
+          }
+          return api;
+        },
         inlineFrak: (...ids) => {
           const batties = this.#batties;
           const slashID = `${batties[0].id}-slash`;
           const slash = this.#makeTag(
             "x",
             `
+            <x data-inline-frak-holder="anim">
             <x data-inline-frak>
              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               <path/>
              </svg>
             </x>
-          `,
-            "inline-frak-holder",
+            </x>
+            `
           );
-          slash.setAttribute("data-inline-frak-holder", "anim");
           slash.id = slashID;
           const el = batties.at(-1);
           for (const id of ids.reverse()) {
@@ -948,7 +991,7 @@
       await new Promise((r) => requestAnimationFrame(r));
 
       // set measurements
-      this.#measureElements(...this.#stageObj.querySelectorAll("*"));
+      // this.#measureElements(...this.#stageObj.querySelectorAll("*"));
 
       // try to run the acts
       const acted = await this.#runActs(step);
@@ -989,6 +1032,9 @@
       // remove svg drawings
       this.#removeSVGs(nextStep);
 
+      // reset grow|shrink
+      this.#resetGrows(nextStep);
+
       // remove the API <x>'s
       this.#removeAPIs(nextStep);
 
@@ -996,7 +1042,7 @@
       this.#stageObj = nextStep.children[0];
 
       // remove IDs [or make #namespaceIDs()]
-      this.#removeIDs(stepTag.children[0]);
+      // this.#removeIDs(stepTag.children[0]);
       // this.#namespaceIDs(stepTag.children[0], this.#opts.fix, this.#stepNum);
 
       // the tag is done with measurements

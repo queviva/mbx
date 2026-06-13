@@ -31,7 +31,7 @@
   </head>
 
   <body>
-    <rat-batix id="two" data-mbx='{"xxx_color":300}'></rat-batix>
+    <rat-batix id="two" data-mbx='{"color":300}'></rat-batix>
 
     <script id="ROUTINES">
       const routineTwo = {
@@ -54,18 +54,36 @@
             note: "short and sweet tags",
             acts: (X) => {
               X.spot("G1").frak("T5-a");
-              X.spot("T45").frak("T5-b");
+              X.spot("T45").inlineFrak("T5-b");
             },
           },
           {
             note: "after canking, this",
             acts: (X) => {
-              X.mount("T9", "9").insertAfter("T45")
-                .grow("50% 50%").during(0.6);
-              X.spot("T5").cank(0,"-13deg").during(0, 0.3);
-              X.spot("T5-a").cank(0,"-25deg").during(0.25, 0.55);
-              X.spot("T45").cank(0,"-10deg").during(0.5, 0.8);
-              X.spot("T5-b").cank(0,"-18deg").during(0.75);
+              X.spot("T5").cank(0,"-22deg").during(0, 0.5);
+              X.spot("T5-a").cank(0,"-15deg").during(0.55);
+            }
+          },
+          {
+            acts: (X) => {
+              X.spot("T5").shrink("50% 50%").during(0,0.4);
+              X.spot("G1-frak").unFrak();
+              X.mount("T9", "9");
+              X.spot("T45", "T45-slash", "T5-b")
+                .group("G99")
+                .absorb("T9")
+                .spin();
+            }
+          },
+          {
+            load: `
+              <x id="Tx2">x^2</x>
+              <x id="EQ">=</x>
+              <x id="T9">9</x>
+            `,
+            note: ``,
+            acts: (X) => {
+              X.spot("Tx2", "T9").root();
             }
           }
         ],
