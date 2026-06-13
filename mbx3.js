@@ -99,7 +99,6 @@
       "vault",
       "tuck",
       "move",
-      "cank",
       "cirk",
       "original",
       "term",
@@ -272,6 +271,12 @@
       }
     }
 
+    #resetCanks(step) {
+      for (const cank of step.querySelectorAll("[data-cank]")) {
+        cank.setAttribute("data-cank", "");
+      }
+    }
+
     #resetFraks(step) {
       for (const frak of step.querySelectorAll("[data-frak]")) {
         frak.setAttribute("data-frak", "");
@@ -304,7 +309,7 @@
 
     #removeFilterClears(step) {
       for (const bat of step.querySelectorAll("[data-filter-clear]")) {
-          bat.parentNode.removeAttribute("data-filter");
+        bat.parentNode.removeAttribute("data-filter");
       }
     }
 
@@ -323,7 +328,9 @@
       "mbx-frak": (bat) => {
         if (bat.children.length < 2) return;
         const [num, den] = bat.children;
-        const frak = this.#makeTag("x",`
+        const frak = this.#makeTag(
+          "x",
+          `
          <x data-frak-holder>
           <x data-frak>
            <x data-slash ${bat.id ? `id="${bat.id}-slash"` : ""}>;
@@ -333,7 +340,8 @@
            </x>
           </x>
          </x>
-        `);
+        `,
+        );
         frak.children[0].children[0].prepend(num);
         frak.children[0].children[0].append(den);
         if (bat.id) frak.id = bat.id;
@@ -341,7 +349,9 @@
       },
       "mbx-root": (bat) => {
         const rootID = `${bat.id}-root`;
-        const root = this.#makeTag("x", `
+        const root = this.#makeTag(
+          "x",
+          `
           <x>${bat.innerHTML}</x>
           <svg data-front-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
            <path id="${rootID}-front"/>
@@ -349,15 +359,29 @@
           <svg data-top-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
            <path id="${rootID}-top"/>
           </svg>
-        `,"root");
+        `,
+          "root",
+        );
         if (bat.id) root.id = bat.id;
         return root;
       },
+      "mbx-cank": (bat) => {
+        const cank = this.#makeTag("x", `
+             <x data-cank>
+              <x>${bat.innerHTML}</x>
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+               <path/>
+              </svg>
+             </x>
+        `);
+        if (bat.id) cank.id = bat.id;
+        return cank;
+      },
       "[data-vert]": (bat) => {
-        bat.style.transform = `translateY(${bat.dataset.vert || 0})`
+        bat.style.transform = `translateY(${bat.dataset.vert || 0})`;
         bat.removeAttribute("data-vert");
         return bat;
-      }
+      },
     };
 
     #substitueTags = (stage, map) => {
@@ -439,13 +463,15 @@
       const svgWrap = (type, data, cssVars) => {
         const id = `${fix}-${crypto.randomUUID()}`;
         for (const bat of this.#batties) {
-          bat.innerHTML = `
+          bat.innerHTML =
+            ` 
             <x data-${type}="${data || null}">
               <x>${bat.innerHTML}</x>
-              <svg data-drawn viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                <clipPath id="${id}"><path/></clipPath>
-                <path clip-path="url(#${id})"/>
-              </svg>
+              <svg data-drawn viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">` +
+            (type === "cirk"
+              ? `<clipPath id="${id}"><path/></clipPath><path clip-path="url(#${id})"/>`
+              : `<path/>`) +
+            `    </svg>
             </x>
           `;
           if (cssVars) {
@@ -581,8 +607,21 @@
         // #endregion
 
         // #region ANIMATES
-        cank: (v, rot) =>
-          svgWrap("cank", v || null, rot ? { "--cank-rotate": rot } : null),
+        cank: (v, rot) => {
+          for (const bat of this.#batties) {
+            bat.innerHTML = ` 
+             <x data-cank="anim">
+              <x>${bat.innerHTML}</x>
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+               <path/>
+              </svg>
+             </x>
+            `;
+            if (rot) {
+              bat.style.setProperty("--cank-rotate", rot);
+            }
+          }
+        },
         cirk: (v, rot) =>
           svgWrap("cirk", v || null, rot ? { "--cirk-rotate": rot } : null),
         wink: (v = 1000) => {
@@ -741,14 +780,17 @@
         root: () => {
           for (const bat of this.#batties) {
             const rootID = `${bat.id}-root`;
-            const rootEl = this.#makeTag("x", `
+            const rootEl = this.#makeTag(
+              "x",
+              `
              <svg data-front-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               <path id="${rootID}-front"/>
              </svg>
              <svg data-top-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               <path id="${rootID}-top"/>
              </svg>
-            `);
+            `,
+            );
             rootEl.setAttribute("data-root", "anim");
             rootEl.id = rootID;
             bat.parentNode.insertBefore(rootEl, bat);
@@ -864,7 +906,6 @@
           "redux - opposite of frak",
           "split - opposite of absorb",
           "faktor - opposite of distribute",
-          "unroot - vaporize square root",
         ],
         // #endregion
       };
@@ -948,6 +989,9 @@
 
       // flatten animated rooting
       this.#resetRoots(nextStep);
+
+      // flatted animated canks
+      this.#resetCanks(nextStep);
 
       // reset the fraktions
       this.#resetFraks(nextStep);

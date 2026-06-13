@@ -1118,46 +1118,38 @@ path[data-materialize] {
 
 /* #region CANK */
 [data-cank] {
-  --cank-00: path("M0 94Q30 40 95 0L100 10Q33 43 10 100Z");
-  --cank-01: path("M0 90Q55 55 90 0L100 8Q65 50 10 100Z");
-  --cank-02: path(
-    "M0 100Q30 75 55 30L55 50Q30 80 0 100ZM 100 0Q70 25 50 70L50 50Q70 20 100 0Z"
-  );
-  --cank-path: var(--cank-00);
-  --cank-clip-A: path("M-50 150V150H-50V150Z");
-  --cank-clip-B: path("M-50 150V-50H150V150Z");
-  --cank-rotate: 0deg;
-}
-[data-cank="1"] {
-  --cank-path: var(--cank-01);
-}
-[data-cank="2"] {
-  --cank-path: var(--cank-02);
 }
 [data-cank] > svg {
   position: absolute;
   width: 100%;
   height: 100%;
+  overflow: visible;
+}
+[data-cank="anim"] > svg {
   filter: var(--viva-filter);
 }
 [data-cank] > svg > path {
-  transform: rotate(var(--cank-rotate, 0deg));
+  d: path("M0 8 L 98 100 100 92 2 0Z");
+  fill: var(--main-color);
+  filter: drop-shadow(-2px 4px 0px var(--back-color));
   transform-origin: 50% 50%;
-  fill: var(--white-color);
-  d: var(--cank-path);
+  transform: rotate(var(--cank-rotate, 0deg));
 }
-[data-cank] clipPath > path {
-  d: var(--cank-clip-A);
+[data-cank="anim"] > svg > path {
+  d: path("M0 8 L 0 8 L 2 0 L 2 0 Z");
+  fill: var(--white-color);
+  filter: none;
+  will-change: d;
   animation: mbx-cank linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
 @keyframes mbx-cank {
   from {
-    d: var(--cank-clip-A);
+    d: path("M0 8 L 0 8 L 2 0 L 2 0 Z");
   }
   to {
-    d: var(--cank-clip-B);
+    d: path("M0 8 L 98 100 100 92 2 0Z");
   }
 }
 /* #endregion */
