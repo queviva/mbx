@@ -6,7 +6,7 @@
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0" /> -->
     <!-- <link rel="stylesheet" href="mbx3.css" /> -->
     <script
-      src="mbx3.js"
+      src="mbx4.js"
       data-mbx='{"tag":"rat-batix","css":"mbx3.css"}'
     ></script>
     <style>
@@ -31,7 +31,7 @@
   </head>
 
   <body>
-    <rat-batix id="two" data-mbx='{"color":300}'></rat-batix>
+    <rat-batix id="two" data-mbx='{"xxx_color":300}'></rat-batix>
 
     <script id="ROUTINES">
       const routineTwo = {
@@ -41,13 +41,14 @@
         `,
         stage: `
           <mbx-frak id="frak-1">
-            <x id="Tx2">x^2</x>
-            <x id="T9">9</x>
+           <x id="T2x2">2x^2</x>
+           <x>7</x>
           </mbx-frak>
+          <x data-parens-left>(</x>
+          <x id="Tx-3">x /// 3</x>
+          <x data-parens-rite>)</x>
           <x id="EQ">=</x>
-          <mbx-root id="un-root">
           <x id="T25">25</x>
-          </mbx-root>
         `,
         steps: [
           {
@@ -55,18 +56,15 @@
               <x><br>short and sweet tags</x>
             `,
             acts: (X) => {
-              X.spot("frak-1").root("Root-1");
-              X.spot("un-root").unRoot();
+              X.spot("Tx-3").frak("T25");
             },
           },
           {
-            note: "who was up-rooted?",
             acts: (X) => {
-              X.spot("Root-1-rootlines").vaporize();
+              X.spot("frak-1-slash").vaporize();
             }
           },
-          {
-          }
+          {},
         ],
       };
 

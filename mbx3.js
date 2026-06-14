@@ -74,6 +74,29 @@
   const devOpts = sieve(defOpts, parseData(script.dataset[defOpts.fix]));
   // #endregion
 
+  // #region FEATURES
+  const LoggFeature = {
+    name: "logg",
+    shorthand: {
+      match: "mbx-logg",
+      convert: (stageObj) => {},
+    },
+    api: (context) => {
+      return {
+        logg: () => {
+          return context.api;
+        },
+        unLogg: () => {
+          return context.api;
+        },
+      };
+    },
+    cleanUp: (nextStep) => {
+      // clean it up
+    }
+  };
+  // #endregion
+
   // #region SPOTTER
   class Spotter {
     // #region PRIVATE FIELDS
@@ -270,8 +293,9 @@
           root.setAttribute("data-root", "");
         } else if (val === "back") {
           const radicand = root.querySelector("[data-radicand]");
-          const top = root.parentNode 
-          while(radicand.firstChild) top.parentNode.insertBefore(radicand.firstChild, top);
+          const top = root.parentNode;
+          while (radicand.firstChild)
+            top.parentNode.insertBefore(radicand.firstChild, top);
           top.remove();
         }
       }
@@ -397,7 +421,7 @@
         const rootlines = root.querySelector("[data-rootlines]");
         const frontSVG = root.querySelector("[data-front-svg]");
         const topSVG = root.querySelector("[data-top-svg]");
-        while(bat.firstChild) radicand.append(bat.firstChild);
+        while (bat.firstChild) radicand.append(bat.firstChild);
         if (bat.id) {
           root.id = bat.id;
           radicand.id = bat.id + "-radicand";
@@ -856,7 +880,7 @@
             radicand.prepend(bat);
           }
         },
-        unRoot : () => {
+        unRoot: () => {
           for (const bat of this.#batties) {
             log(bat);
             const root = bat?.children[0];
