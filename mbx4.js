@@ -85,21 +85,8 @@
     #stepNum = 0;
     #stageObj = null;
     #batties = [];
-    #wraps = [
-      "viva",
-      "ghost",
-      "vaporize",
-      "materialize",
-      "colorize",
-      "wink",
-      "filter-clear",
-      "spin",
-      "vault",
-      "tuck",
-      "move",
-      "salute",
-    ];
     #allowed = new Set(["id"]);
+    #API;
     // #endregion
 
     constructor(holder, opts) {
@@ -233,7 +220,6 @@
         bat.id = `${fix}-step-${stepNum}-${el.id}`;
       }
     }
-    // #endregion
 
     #wrap(type, vals) {
       for (const bat of this.#batties) {
@@ -268,27 +254,96 @@
       }
     }
 
+    #move(anchorId, direction) {
+      const anchor = api.pick(anchorId);
+      if (!anchor) return api;
+
+      const allBats = Array.from(this.#stageObj.querySelectorAll("*"));
+
+      const snapshots = new Map();
+      for (const [i, bat] of allBats.entries()) {
+        bat.id ||= `${fix}-${i}`;
+        snapshots.set(bat.id, bat.getBoundingClientRect());
+        bat.oldFont = getComputedStyle(bat).fontSize;
+      }
+
+      const batsArray =
+        direction === "after"
+          ? Array.from(this.#batties).reverse()
+          : Array.from(this.#batties);
+
+      for (const bat of batsArray) {
+        const ref = direction === "before" ? anchor : anchor.nextSibling;
+        anchor.parentNode.insertBefore(bat, ref);
+      }
+
+      for (const bat of allBats) {
+        const oldRect = snapshots.get(bat.id);
+        const newRect = bat.getBoundingClientRect();
+
+        const dx = oldRect.left - newRect.left;
+        const dy = oldRect.top - newRect.top;
+
+        bat.newFont = getComputedStyle(bat).fontSize;
+
+        // if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+        bat.innerHTML = `<x data-move>${bat.innerHTML}</x>`;
+        const wrapper = bat.children[0];
+        wrapper.style.setProperty("--dx", `${Math.round(dx)}px`);
+        wrapper.style.setProperty("--dy", `${Math.round(dy)}px`);
+        wrapper.style.setProperty(`--${fix}-old-font`, bat.oldFont);
+        wrapper.style.setProperty(`--${fix}-new-font`, bat.newFont);
+        // }
+      }
+      return api;
+    }
+    // #endregion
+
     #SKILLS = [
+      // #region WRAPS
+      // viva
       {
-        // viva
         api: () => ({ viva: () => this.#wrap("viva") }),
         cleanup: (stage) => this.#unWrap("viva", stage),
       },
+      // ghost
       {
-        // ghost
         api: () => ({ ghost: () => this.#wrap("ghost") }),
         cleanup: (stage) => this.#unWrap("ghost", stage),
       },
+      // vaporize
       {
-        // vaporize
         api: () => ({ vaporize: () => this.#wrap("vaporize") }),
         cleanup: (stage) => this.#unWrap("vaporize", stage),
       },
+      // materialize
+      {
+        api: () => ({ materialize: () => this.#wrap("materialize") }),
+        cleanup: (stage) => this.#unWrap("materialize", stage),
+      },
+      // tuck
+      {
+        api: () => ({ tuck: () => this.#wrap("tuck") }),
+        cleanup: (stage) => this.#unWrap("tuck", stage),
+      },
+      // vault
+      {
+        api: () => ({ vault: () => this.#wrap("vault") }),
+        cleanup: (stage) => this.#unWrap("vault", stage),
+      },
+      // spin
+      {
+        api: () => ({ spin: () => this.#wrap("spin") }),
+        cleanup: (stage) => this.#unWrap("spin", stage),
+      },
+      // #endregion
+
+      // #region GESTURES
+      // frak
       (() => {
-        // frak
         const frakHTML = (id) => `
          <x data-frak-holder>
-          <x data-frak="fore">
+          <x data-frak>
            <x data-numerator ${id ? `id="${id}-numerator"` : ""}></x>
            <x data-slash ${id ? `id="${id}-slash"` : ""}>
             <svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
@@ -307,9 +362,8 @@
               const [orgNum, orgDen] = bat.children;
               const top = this.#makeTag("x", frakHTML(bat?.id));
               const frak = top.querySelector("[data-frak]");
-              const [num, slash, den] = frak.children;
-              while (orgNum.firstChild) num.append(orgNum.firstChild);
-              while (orgDen.firstChild) den.append(orgDen.firstChild);
+              frak.children[0].append(orgNum);
+              frak.children[2].append(orgDen);
               if (bat.id) top.id = bat.id;
               return top;
             },
@@ -319,14 +373,13 @@
               const bat0 = this.#batties[0];
               const frakID = `${bat0.id}-frak`;
 
-              const frakEl = document.createElement("x");
-              frakEl.innerHTML = frakHTML(frakID);
-              frakEl.id = frakID;
-              bat0.parentNode.insertBefore(frakEl, bat0);
-              const numer = frakEl.querySelector("[data-numerator]");
-              const denom = frakEl.querySelector("[data-denominator]");
-              for (const bat of this.#batties) numer.append(bat);
-              for (const id of new Set(ids)) denom.append(this.#API.pick(id));
+              const top = this.#makeTag("x", frakHTML(frakID));
+              const frak = top.querySelector("[data-frak]");
+              const [num, slash, den] = frak.children;
+              top.id = frakID;
+              bat0.parentNode.insertBefore(top, bat0);
+              for (const bat of this.#batties) num.append(bat);
+              for (const id of new Set(ids)) den.append(this.#API.pick(id));
               return this.#API.spot(frakID);
             },
             unFrak: () => {
@@ -355,6 +408,62 @@
           },
         };
       })(),
+      // cank
+      (() => {
+        const cankHTML = (html) => `
+          <x>${html}</x>
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+           <path/>
+          </svg>
+        `;
+        return {
+          shorthand: [
+            "mbx-cank",
+            (bat) => {
+              const cank = this.#makeTag("x", cankHTML(bat.innerHTML), "cank");
+              const rot = bat.getAttribute("rot");
+              if (rot) {
+                cank.style.setProperty("--cank-rotate", rot);
+              }
+              if (bat.id) cank.id = bat.id;
+              return cank;
+            },
+          ],
+          api: () => ({
+            cank: (rot) => {
+              for (const bat of this.#batties) {
+                bat.innerHTML = cankHTML(bat.innerHTML);
+                bat.setAttribute("data-cank", "fore");
+                if (rot) {
+                  bat.style.setProperty("--cank-rotate", rot);
+                }
+              }
+            },
+            unCank: () => {
+              for (const bat of this.#batties) {
+                if (!bat.hasAttribute("data-cank")) return;
+                bat.setAttribute("data-cank", "back");
+              }
+            },
+          }),
+          cleanup: (stage) => {
+            for (const bat of stage.querySelectorAll("[data-cank]")) {
+              const val = bat.getAttribute("data-cank");
+              if (val === "fore") {
+                bat.setAttribute("data-cank", "");
+              } else if (val === "back") {
+                const targ = bat.children[0];
+                while(targ.firstChild) bat.parentNode.insertBefore(targ.firstChild, bat);
+                bat.remove();
+              }
+            }
+          },
+        };
+      })(),
+      // #endregion
+
+      // #region SHORTHAND
+      // data-vert
       {
         shorthand: [
           "[data-vert]",
@@ -365,59 +474,10 @@
           },
         ],
       },
+      // #endregion
     ];
 
-    #API;
     #makeAPI = () => {
-      // #region API UTILS
-      const fix = this.#opts.fix;
-
-      const move = (anchorId, direction) => {
-        const anchor = api.pick(anchorId);
-        if (!anchor) return api;
-
-        const allBats = Array.from(this.#stageObj.querySelectorAll("*"));
-
-        const snapshots = new Map();
-        for (const [i, bat] of allBats.entries()) {
-          bat.id ||= `${fix}-${i}`;
-          snapshots.set(bat.id, bat.getBoundingClientRect());
-          bat.oldFont = getComputedStyle(bat).fontSize;
-        }
-
-        const batsArray =
-          direction === "after"
-            ? Array.from(this.#batties).reverse()
-            : Array.from(this.#batties);
-
-        for (const bat of batsArray) {
-          const ref = direction === "before" ? anchor : anchor.nextSibling;
-          anchor.parentNode.insertBefore(bat, ref);
-        }
-
-        for (const bat of allBats) {
-          const oldRect = snapshots.get(bat.id);
-          const newRect = bat.getBoundingClientRect();
-
-          const dx = oldRect.left - newRect.left;
-          const dy = oldRect.top - newRect.top;
-
-          bat.newFont = getComputedStyle(bat).fontSize;
-
-          // if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-          bat.innerHTML = `<x data-move>${bat.innerHTML}</x>`;
-          const wrapper = bat.children[0];
-          wrapper.style.setProperty("--dx", `${Math.round(dx)}px`);
-          wrapper.style.setProperty("--dy", `${Math.round(dy)}px`);
-          wrapper.style.setProperty(`--${fix}-old-font`, bat.oldFont);
-          wrapper.style.setProperty(`--${fix}-new-font`, bat.newFont);
-          // }
-        }
-        return api;
-      };
-
-      // #endregion
-
       const api = {
         pick: (id) => {
           return (
@@ -431,12 +491,6 @@
             .filter((bat) => bat !== null);
           return api;
         },
-        /*
-        viva: () => wrap("viva"),
-        ghost: () => wrap("ghost"),
-        vaporize: () => wrap("vaporize"),
-        materialize: () => wrap("materialize"),
-        */
       };
 
       for (const skill of this.#SKILLS) {
@@ -467,16 +521,6 @@
           for (const bat of stage.querySelectorAll(short)) {
             bat.replaceWith(sweet(bat));
           }
-        }
-      }
-    }
-
-    #removeWraps(stage) {
-      for (const wrap of this.#wraps) {
-        for (const bat of stage.querySelectorAll(`[data-${wrap}]`)) {
-          while (bat.firstChild)
-            bat.parentNode.insertBefore(bat.firstChild, bat);
-          bat.remove();
         }
       }
     }
@@ -523,9 +567,9 @@
 
       // !!! layout HAKC - must be here for measuring !!!
       // await new Promise((r) => requestAnimationFrame(r));
-      // set measurements
+      //
+      // set measurements - requires HAKC
       // this.#measureElements(...this.#stageObj.querySelectorAll("*"));
-      // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
       // try to run the acts
       const acted = await this.#runActs(step);

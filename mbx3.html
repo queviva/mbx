@@ -42,13 +42,10 @@
         stage: `
           <mbx-frak id="frak-1">
            <x id="T2x2">2x^2</x>
-           <x>7</x>
+           <x id="T2">2</x>
           </mbx-frak>
-          <x data-parens-left>(</x>
-          <x id="Tx-3">x /// 3</x>
-          <x data-parens-rite>)</x>
           <x id="EQ">=</x>
-          <x id="T25">25</x>
+          <x id="T9">9</x>
         `,
         steps: [
           {
@@ -56,12 +53,12 @@
               <x><br>short and sweet tags</x>
             `,
             acts: (X) => {
-              X.spot("Tx-3").frak("T25");
+              X.spot("frak-1").unFrak();
+              // X.spot("frak-1").cank("5deg");
             },
           },
           {
             acts: (X) => {
-              X.spot("frak-1-slash").vaporize();
             }
           },
           {},

@@ -1158,8 +1158,9 @@ x:has(> [data-root="back"]) {
   width: 100%;
   height: 100%;
   overflow: visible;
+  z-index: 10;
 }
-[data-cank="anim"] > svg {
+[data-cank="fore"] > svg {
   filter: var(--viva-filter);
 }
 [data-cank] > svg > path {
@@ -1169,14 +1170,20 @@ x:has(> [data-root="back"]) {
   transform-origin: 50% 50%;
   transform: rotate(var(--cank-rotate, 0deg));
 }
-[data-cank="anim"] > svg > path {
-  d: path("M0 8 L 0 8 L 2 0 L 2 0 Z");
-  fill: var(--white-color);
-  filter: none;
+[data-cank="fore"] > svg > path,
+[data-cank="back"] > svg > path {
   will-change: d;
   animation: mbx-cank linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
+}
+[data-cank="fore"] > svg > path {
+  fill: var(--white-color);
+  filter: none;
+  animation-direction: normal;
+}
+[data-cank="back"] > svg > path {
+  animation-direction: reverse;
 }
 @keyframes mbx-cank {
   from {
