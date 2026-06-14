@@ -45,25 +45,22 @@
             <x id="T9">9</x>
           </mbx-frak>
           <x id="EQ">=</x>
+          <mbx-root id="un-root">
           <x id="T25">25</x>
+          </mbx-root>
         `,
         steps: [
           {
             note: `
               <x><br>short and sweet tags</x>
-              <x data-rant>
-                this is a much more thorough description
-                of many other things that should be
-                considered about this manipulation of
-                the equation
-              </x>
             `,
             acts: (X) => {
               X.spot("frak-1").root("Root-1");
-              X.spot("T25").root();
+              X.spot("un-root").unRoot();
             },
           },
           {
+            note: "who was up-rooted?",
             acts: (X) => {
               X.spot("Root-1-rootlines").vaporize();
             }

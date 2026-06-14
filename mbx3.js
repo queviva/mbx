@@ -265,7 +265,15 @@
 
     #resetRoots(step) {
       for (const root of step.querySelectorAll("[data-root]")) {
-        root.setAttribute("data-root", "");
+        const val = root.getAttribute("data-root");
+        if (val === "fore") {
+          root.setAttribute("data-root", "");
+        } else if (val === "back") {
+          const radicand = root.querySelector("[data-radicand]");
+          const top = root.parentNode 
+          while(radicand.firstChild) top.parentNode.insertBefore(radicand.firstChild, top);
+          top.remove();
+        }
       }
     }
 
@@ -325,7 +333,8 @@
       for (const bat of step.querySelectorAll("[data-grow]")) {
         const val = bat.getAttribute("data-grow");
         if (val === "fore") {
-          while (bat.firstChild) bat.parentNode.insertBefore(bat.firstChild, bat);
+          while (bat.firstChild)
+            bat.parentNode.insertBefore(bat.firstChild, bat);
           bat.remove();
         } else if (val === "back") {
           bat.remove();
@@ -368,21 +377,34 @@
         return frak;
       },
       "mbx-root": (bat) => {
-        const rootID = `${bat.id}-root`;
         const root = this.#makeTag(
           "x",
           `
-          <x>${bat.innerHTML}</x>
-          <svg data-front-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-           <path id="${rootID}-front"/>
-          </svg>
-          <svg data-top-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-           <path id="${rootID}-top"/>
-          </svg>
-        `,
-          "root",
+            <x data-root>
+             <x data-rootlines>
+              <svg data-front-svg viewBox="0 0 24 100" preserveAspectRatio="none" aria-hidden="true">
+               <path />
+              </svg>
+              <svg data-top-svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
+               <path />
+              </svg>
+             </x>
+             <x data-radicand></x>
+            </x>
+          `,
         );
-        if (bat.id) root.id = bat.id;
+        const radicand = root.querySelector("[data-radicand]");
+        const rootlines = root.querySelector("[data-rootlines]");
+        const frontSVG = root.querySelector("[data-front-svg]");
+        const topSVG = root.querySelector("[data-top-svg]");
+        while(bat.firstChild) radicand.append(bat.firstChild);
+        if (bat.id) {
+          root.id = bat.id;
+          radicand.id = bat.id + "-radicand";
+          rootlines.id = bat.id + "-rootlines";
+          frontSVG.id = bat.id + "-frontline";
+          topSVG.id = bat.id + "-topline";
+        }
         return root;
       },
       "mbx-cank": (bat) => {
@@ -617,7 +639,7 @@
         shrink: (v) => {
           this.#measureElements(...this.#batties);
           return wrap("grow", v ? { "--mbx-transform-origin": v } : null, {
-            "data-grow": "back"
+            "data-grow": "back",
           });
         },
         vault: (v) => wrap("vault", v ? { "--vault-height": v } : null),
@@ -799,7 +821,9 @@
         },
         root: (id) => {
           const bat0 = this.#batties[0];
-          const root = this.#makeTag("x",`
+          const root = this.#makeTag(
+            "x",
+            `
             <x data-root="fore">
              <x data-rootlines>
               <svg data-front-svg viewBox="0 0 24 100" preserveAspectRatio="none" aria-hidden="true">
@@ -811,12 +835,13 @@
              </x>
              <x data-radicand></x>
             </x>
-          `);
+          `,
+          );
           const radicand = root.querySelector("[data-radicand]");
           const rootlines = root.querySelector("[data-rootlines]");
           const frontSVG = root.querySelector("[data-front-svg]");
           const topSVG = root.querySelector("[data-top-svg]");
-          
+
           if (id) {
             root.id = id;
             radicand.id = id + "-radicand";
@@ -830,6 +855,15 @@
           for (const bat of this.#batties) {
             radicand.prepend(bat);
           }
+        },
+        unRoot : () => {
+          for (const bat of this.#batties) {
+            log(bat);
+            const root = bat?.children[0];
+            if (!root) continue;
+            root.setAttribute("data-root", "back");
+          }
+          return api;
         },
         frak: (...ids) => {
           const bat0 = this.#batties[0];
@@ -878,7 +912,7 @@
              </svg>
             </x>
             </x>
-            `
+            `,
           );
           slash.id = slashID;
           const el = batties.at(-1);

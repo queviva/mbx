@@ -933,6 +933,34 @@ x:has(> [data-root]) {
   margin-left: 0.5em;
   margin-right: 0.25em;
 }
+x:has(> [data-root="fore"]),
+x:has(> [data-root="back"]) {
+  will-change: margin;
+  animation: mbx-root-margin linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+x:has(> [data-root="fore"]) {
+  --ani-start: 0.5;
+  --ani-end: 1; 
+  animation-direction: normal;
+}
+x:has(> [data-root="back"]) {
+  --ani-start: 0.5;
+  --ani-end: 1;
+  animation-direction: reverse;
+}
+@keyframes mbx-root-margin {
+  from {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  to {
+    margin-left: 0.5em;
+    margin-right: 0.25em;
+  }
+}
+
 [data-root] {
   box-sizing: border-box;
 }
@@ -970,16 +998,24 @@ x:has(> [data-root]) {
   fill: var(--main-color);
   overflow: visible;
 }
-[data-root="fore"] [data-front-svg] > path {
-  d: path(" M 18 0 L 19 52 L 14 30 L 8 46 L 11 43 L 24 100 L 24 0 Z ");
-  fill: var(--white-color);
-  filter: var(--viva-filter);
-  --ani-start: 0;
-  --ani-end: 0.4;
+[data-root="fore"] [data-front-svg] > path,
+[data-root="back"] [data-front-svg] > path {
   will-change: d;
   animation: mbx-root-front linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
+}
+[data-root="fore"] [data-front-svg] > path {
+  fill: var(--white-color);
+  filter: var(--viva-filter);
+  --ani-start: 0;
+  --ani-end: 0.4;
+  animation-direction: normal;
+}
+[data-root="back"] [data-front-svg] > path {
+  --ani-start: 0.6;
+  --ani-end: 1;
+  animation-direction: reverse;
 }
 @keyframes mbx-root-front {
   0% {
@@ -992,7 +1028,7 @@ x:has(> [data-root]) {
     d: path(" M 19 52 L 19 52 L 14 30 L 8 46 L 11 43 L 24 100 L 24 100 Z ");
   }
   100% {
-    d: path(" M 18 0 L 19 52 L 14 30 L 8 46 L 11 43 L 24 100 L 24 0 Z ");
+    d: path("M 18 0 L 19 52 L 14 30 L 8 46 L 11 43 L 24 100 L 24 5 Z ");
   }
 }
 
@@ -1000,15 +1036,24 @@ x:has(> [data-root]) {
   d: path("M-10 0L 100 0L98 3 L 0 7Z");
   fill: var(--main-color);
 }
+[data-root="fore"] [data-top-svg] > path,
+[data-root="back"] [data-top-svg] > path {
+  will-change: d;
+  animation: mbx-root-top linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
 [data-root="fore"] [data-top-svg] > path {
   fill: var(--white-color);
   filter: var(--viva-filter);
   --ani-start: 0.4;
   --ani-end: 1;
-  will-change: d;
-  animation: mbx-root-top linear both;
-  animation-timeline: --anim-timeline;
-  animation-range: var(--animation-range);
+  animation-direction: normal;
+}
+[data-root="back"] [data-top-svg] > path {
+  --ani-start: 0;
+  --ani-end: 0.6;
+  animation-direction: reverse;
 }
 @keyframes mbx-root-top {
   from {
