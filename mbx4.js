@@ -66,7 +66,7 @@
   const defOpts = {
     tag: "mathro-batix",
     fix: "mbx",
-    css: "mbx3.css",
+    css: "mbx4.css",
     color: 33,
     timeout: 5000,
   };
@@ -129,43 +129,7 @@
       const tpl = document.createElement("template");
       tpl.innerHTML = markup;
 
-      const walker = document.createTreeWalker(
-        tpl.content,
-        NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
-        null,
-      );
-
-      let node = walker.nextNode();
-      while (node) {
-        const nextNode = walker.nextNode();
-
-        if (node.nodeType === Node.TEXT_NODE) {
-          if (!node.textContent.trim()) {
-            node.parentNode?.removeChild(node);
-          }
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          const tag = node.tagName.toLowerCase();
-
-          if (tag !== "x") {
-            const parent = node.parentNode;
-            if (parent) {
-              while (node.firstChild) {
-                parent.insertBefore(node.firstChild, node);
-              }
-              parent.removeChild(node);
-            }
-          } else {
-            for (const attr of Array.from(node.attributes)) {
-              const name = attr.name.toLowerCase();
-              if (!this.#allowed.has(name) && !name.startsWith("data-")) {
-                node.removeAttribute(attr.name);
-              }
-            }
-          }
-        }
-
-        node = nextNode;
-      }
+      // strip any non x tags
 
       const tmpX = document.createElement("x");
       tmpX.appendChild(tpl.content.cloneNode(true));
@@ -182,8 +146,7 @@
     }
 
     #saniTag(tag, html, ...attrs) {
-      // return this.#makeTag(tag, this.#strip(html), ...attrs);
-      return this.#makeTag(tag, html, ...attrs);
+      return this.#makeTag(tag, this.#strip(html), ...attrs);
     }
 
     #makeStepTag(load, note) {
@@ -247,16 +210,14 @@
         if (bat.tagName === "path") {
           bat.removeAttribute(`data-${type}`);
         } else {
-          while (bat.firstChild)
-            bat.parentNode.insertBefore(bat.firstChild, bat);
-          bat.remove();
+          bat.replaceWith(...[...bat.childNodes]);
         }
       }
     }
 
     #move(anchorId, direction) {
-      const anchor = api.pick(anchorId);
-      if (!anchor) return api;
+      const anchor = this.#API.pick(anchorId);
+      if (!anchor) return this.#API;
 
       const allBats = Array.from(this.#stageObj.querySelectorAll("*"));
 
@@ -295,10 +256,11 @@
         wrapper.style.setProperty(`--${fix}-new-font`, bat.newFont);
         // }
       }
-      return api;
+      return this.#API;
     }
     // #endregion
 
+    // #region SKILLS API
     #SKILLS = [
       // #region WRAPS
       // viva
@@ -339,6 +301,107 @@
       // #endregion
 
       // #region GESTURES
+      // cank
+      (() => {
+        const cankHTML = (html) => `
+          <x>${html}</x>
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+           <path/>
+          </svg>
+        `;
+        return {
+          shorthand: [
+            "mbx-cank",
+            (bat) => {
+              const cank = this.#makeTag("x", cankHTML(bat.innerHTML), "cank");
+              const rot = bat.getAttribute("rot");
+              if (rot) {
+                cank.style.setProperty("--cank-rotate", rot);
+              }
+              if (bat.id) cank.id = bat.id;
+              return cank;
+            },
+          ],
+          api: () => ({
+            cank: (rot) => {
+              for (const bat of this.#batties) {
+                bat.innerHTML = cankHTML(bat.innerHTML);
+                bat.setAttribute("data-cank", "fore");
+                if (rot) {
+                  bat.style.setProperty("--cank-rotate", rot);
+                }
+              }
+            },
+            unCank: () => {
+              for (const bat of this.#batties) {
+                if (!bat.hasAttribute("data-cank")) return;
+                bat.setAttribute("data-cank", "back");
+              }
+            },
+          }),
+          cleanup: (stage) => {
+            for (const bat of stage.querySelectorAll("[data-cank]")) {
+              const val = bat.getAttribute("data-cank");
+              if (val === "fore") {
+                bat.setAttribute("data-cank", "");
+              } else if (val === "back") {
+                const targ = bat.children[0];
+                bat.replaceWith(...[...targ.childNodes]);
+              }
+            }
+          },
+        };
+      })(),
+      // cirk
+      (() => {
+        const cirkHTML = (html) => {
+          const clipID = `${this.#opts.fix}-${crypto.randomUUID()}`;
+          return `
+           <x>${html}</x>
+           <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <clipPath id="${clipID}"><path/></clipPath>
+            <path clip-path="url(#${clipID})" />
+           </svg>
+          `;
+        };
+        return {
+          shorthand: [
+            "mbx-cirk",
+            (bat) => {
+              const cirk = this.#makeTag("x", cirkHTML(bat.innerHTML), "cirk");
+              if (bat.id) cirk.id = bat.id;
+              return cirk;
+            },
+          ],
+          api: () => ({
+            cirk: (rot) => {
+              for (const bat of this.#batties) {
+                bat.innerHTML = cirkHTML(bat.innerHTML);
+                bat.setAttribute("data-cirk", "fore");
+                if (rot) {
+                  bat.style.setProperty("--cirk-rotate", rot);
+                }
+              }
+            },
+            unCirk: () => {
+              for (const bat of this.#batties) {
+                if (!bat.hasAttribute("data-cirk")) return;
+                bat.setAttribute("data-cirk", "back");
+                log("uncirk got here");
+              }
+            },
+          }),
+          cleanup: (stage) => {
+            for (const bat of stage.querySelectorAll("[data-cirk]")) {
+              const val = bat.getAttribute("data-cirk");
+              if (val === "fore" || val === "back") {
+                const targ = bat.children[0];
+                bat.replaceWith(...[...targ.childNodes]);
+              }
+            }
+          },
+        };
+      })(),
       // frak
       (() => {
         const frakHTML = (id) => `
@@ -388,7 +451,7 @@
                 if (!frak) continue;
                 frak.setAttribute("data-frak", "back");
               }
-              return api;
+              return this.#API;
             },
           }),
           cleanup: (stage) => {
@@ -400,67 +463,47 @@
               } else if (val === "back") {
                 const top = bat.parentNode;
                 const num = frak.children[0];
-                while (num.firstChild)
-                  top.parentNode.insertBefore(num.firstChild, top);
-                top.remove();
-              }
-            }
-          },
-        };
-      })(),
-      // cank
-      (() => {
-        const cankHTML = (html) => `
-          <x>${html}</x>
-          <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-           <path/>
-          </svg>
-        `;
-        return {
-          shorthand: [
-            "mbx-cank",
-            (bat) => {
-              const cank = this.#makeTag("x", cankHTML(bat.innerHTML), "cank");
-              const rot = bat.getAttribute("rot");
-              if (rot) {
-                cank.style.setProperty("--cank-rotate", rot);
-              }
-              if (bat.id) cank.id = bat.id;
-              return cank;
-            },
-          ],
-          api: () => ({
-            cank: (rot) => {
-              for (const bat of this.#batties) {
-                bat.innerHTML = cankHTML(bat.innerHTML);
-                bat.setAttribute("data-cank", "fore");
-                if (rot) {
-                  bat.style.setProperty("--cank-rotate", rot);
-                }
-              }
-            },
-            unCank: () => {
-              for (const bat of this.#batties) {
-                if (!bat.hasAttribute("data-cank")) return;
-                bat.setAttribute("data-cank", "back");
-              }
-            },
-          }),
-          cleanup: (stage) => {
-            for (const bat of stage.querySelectorAll("[data-cank]")) {
-              const val = bat.getAttribute("data-cank");
-              if (val === "fore") {
-                bat.setAttribute("data-cank", "");
-              } else if (val === "back") {
-                const targ = bat.children[0];
-                while(targ.firstChild) bat.parentNode.insertBefore(targ.firstChild, bat);
-                bat.remove();
+                top.replaceWith(...[...num.childNodes]);
               }
             }
           },
         };
       })(),
       // #endregion
+
+      // wink
+      {
+        api: () => ({
+          wink: (v = 1000) => {
+            const batties = this.#batties;
+            for (const bat of this.#batties) {
+              let targ;
+              if (bat.tagName === "path") {
+                bat.parentNode.setAttribute("data-wink", "");
+                targ = bat.parentNode;
+              } else {
+                this.#API.spot(bat.id);
+                this.#wrap("wink");
+                log("wrapped up in a wink", bat);
+                targ = bat.children[0];
+              }
+              bat.style.setProperty(`--${this.#opts.fix}-wink-dur`, `${v}ms`);
+              const anim = targ.getAnimations()?.[0];
+              if (!anim) continue;
+              anim.onfinish = (e) => {
+                log("wink finishing");
+                bat.classList.add(`${this.#opts.fix}-wink`);
+                setTimeout(
+                  () => bat.classList.remove(`${this.#opts.fix}-wink`),
+                  v,
+                );
+              };
+            }
+            this.#batties = batties;
+            return this.#API;
+          },
+        }),
+      },
 
       // #region SHORTHAND
       // data-vert
@@ -530,7 +573,9 @@
         skill.cleanup?.(stage);
       }
     }
+    // #endregion
 
+    // #region ROUTINE METHS
     async #runActs(step) {
       if (typeof step.acts !== "function") return { ok: true };
 
@@ -634,6 +679,7 @@
       dispatch(this.#holder, `${this.#opts.fix}-routine-complete`);
       return { ok: true };
     }
+    // #endregion
 
     disconnect() {
       ++this.#routineNum;
