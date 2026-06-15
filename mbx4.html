@@ -7,7 +7,7 @@
     <!-- <link rel="stylesheet" href="mbx3.css" /> -->
     <script
       src="mbx4.js"
-      data-mbx='{"tag":"rat-batix","xxx_css":"mbx4.css"}'
+      data-mbx='{"tag":"rat-batix","css":"mbx4.css"}'
     ></script>
     <style>
       body {
@@ -40,27 +40,33 @@
           illuminated acrobatic gestural mathematics
         `,
         stage: `
-          <mbx-frak id="frak-1">
-           <x id="T2x2">2x^2</x>
-           <x id="T2">2</x>
-          </mbx-frak>
+          <x id="T5">5 +</x>
+           <x id="T2x2" data-tite>
+            <x id="T2-a">2</x>
+            <x id="Tx2">x<x id="pow2" data-sup>2</x></x>
+           </x>
+           <x id="T2-b">2</x>
           <x id="EQ">=</x>
-          <mbx-cank id="cank-9">
-           <x id="T9">9</x>
-          </mbx-cank>
+          <x id="T9">9</x>
         `,
         steps: [
           {
             note: `
-              <x><br>short and sweet tags</x>
+              <x>short and sweet tags</x>
             `,
             acts: (X) => {
-              X.spot("frak-1").unFrak();
-              X.spot("cank-9").unCank();
+              X.spot("T2x2").frak("T2-b").during(0.5);
+              X.spot("pow2").materialize();
             },
           },
           {
+            note: "move is extremely destructive",
             acts: (X) => {
+              // X.spot("T2-a").cank("-15deg").during(0, 0.5);
+              // X.spot("T2-b").cank("-25deg").during(0.5);
+              // X.spot("T9").viva().during(0.8);
+              // X.spot("T9").moveBefore("EQ");
+              // X.spot("T2x2-frak").spin().moveBefore("T5");
             }
           },
           {},

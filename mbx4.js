@@ -165,7 +165,7 @@
         const style = el.style;
         for (const prop of props) {
           style.setProperty(
-            `--${devOpts.fix}-${prop}`,
+            `--${this.#opts.fix}-${prop}`,
             Math.round(rect[prop]) + "px",
           );
         }
@@ -214,18 +214,29 @@
         }
       }
     }
-
-    #move(anchorId, direction) {
-      const anchor = this.#API.pick(anchorId);
+    // #endregion
+    #xxx_move(anchorID, direction) {
+      const anchor = this.#API.pick(anchorID);
       if (!anchor) return this.#API;
-
       const allBats = Array.from(this.#stageObj.querySelectorAll("*"));
 
       const snapshots = new Map();
       for (const [i, bat] of allBats.entries()) {
-        bat.id ||= `${fix}-${i}`;
+        bat.id ||= `${this.#opts.fix}-${i}`;
         snapshots.set(bat.id, bat.getBoundingClientRect());
         bat.oldFont = getComputedStyle(bat).fontSize;
+      }
+
+      const blanks = [];
+      for (const bat of allBats) {
+        const rect = snapshots.get(bat.id);
+        const blank = bat.cloneNode(false);
+        // blank.setAttribute("data-blank", "");
+        blank.style.setProperty("--blank-w", Math.round(rect.width) + "px");
+        blank.style.setProperty("--blank-h", Math.round(rect.height) + "px");
+        blank.removeAttribute("id");
+        // bat.parentNode.insertBefore(blank, bat.nextSibling);
+        blanks.push(blank);
       }
 
       const batsArray =
@@ -234,7 +245,7 @@
           : Array.from(this.#batties);
 
       for (const bat of batsArray) {
-        const ref = direction === "before" ? anchor : anchor.nextSibling;
+        const ref = direction === "after" ? anchor.nextSibling : anchor;
         anchor.parentNode.insertBefore(bat, ref);
       }
 
@@ -247,18 +258,72 @@
 
         bat.newFont = getComputedStyle(bat).fontSize;
 
-        // if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
         bat.innerHTML = `<x data-move>${bat.innerHTML}</x>`;
         const wrapper = bat.children[0];
-        wrapper.style.setProperty("--dx", `${Math.round(dx)}px`);
-        wrapper.style.setProperty("--dy", `${Math.round(dy)}px`);
-        wrapper.style.setProperty(`--${fix}-old-font`, bat.oldFont);
-        wrapper.style.setProperty(`--${fix}-new-font`, bat.newFont);
-        // }
+        wrapper.style.setProperty(`--${this.#opts.fix}-dx`, `${Math.round(dx)}px`);
+        wrapper.style.setProperty(`--${this.#opts.fix}-dy`, `${Math.round(dy)}px`);
+        wrapper.style.setProperty(`--${this.#opts.fix}-old-font`, bat.oldFont);
+        wrapper.style.setProperty(`--${this.#opts.fix}-new-font`, bat.newFont);
       }
       return this.#API;
     }
-    // #endregion
+
+    #move(anchorID, direction) {
+      const anchor = this.#API.pick(anchorID);
+      if (!anchor) return this.#API;
+
+      const batsArray = new Set(
+        direction === "after"
+          ? Array.from(this.#batties).reverse()
+          : Array.from(this.#batties)
+      );
+
+      const allBats = Array.from(this.#stageObj.querySelectorAll("*"))
+        ;//.filter(el => !batsArray.has(el));
+
+      const snapshots = new Map();
+      for (const [i, bat] of allBats.entries()) {
+        bat.id ||= `${this.#opts.fix}-${i}`;
+        snapshots.set(bat.id, bat.getBoundingClientRect());
+        bat.oldFont = getComputedStyle(bat).fontSize;
+      }
+
+      const blanks = [];
+      for (const bat of allBats) {
+        const rect = snapshots.get(bat.id);
+        const blank = bat.cloneNode(false);
+        // blank.setAttribute("data-blank", "");
+        blank.style.setProperty("--blank-w", Math.round(rect.width) + "px");
+        blank.style.setProperty("--blank-h", Math.round(rect.height) + "px");
+        blank.removeAttribute("id");
+        // bat.parentNode.insertBefore(blank, bat.nextSibling);
+        blanks.push(blank);
+      }
+
+      for (const bat of batsArray) {
+        const ref = direction === "after" ? anchor.nextSibling : anchor;
+        anchor.parentNode.insertBefore(bat, ref);
+      }
+
+      for (const bat of allBats) {
+        const oldRect = snapshots.get(bat.id);
+        const newRect = bat.getBoundingClientRect();
+
+        const dx = oldRect.left - newRect.left;
+        const dy = oldRect.top - newRect.top;
+
+        bat.newFont = getComputedStyle(bat).fontSize;
+
+        bat.innerHTML = `<x data-move>${bat.innerHTML}</x>`;
+        const wrapper = bat.children[0];
+        wrapper.style.setProperty(`--${this.#opts.fix}-dx`, `${Math.round(dx)}px`);
+        wrapper.style.setProperty(`--${this.#opts.fix}-dy`, `${Math.round(dy)}px`);
+        wrapper.style.setProperty(`--${this.#opts.fix}-old-font`, bat.oldFont);
+        wrapper.style.setProperty(`--${this.#opts.fix}-new-font`, bat.newFont);
+      }
+      return this.#API;
+    }
+
 
     // #region SKILLS API
     #SKILLS = [
@@ -331,12 +396,14 @@
                   bat.style.setProperty("--cank-rotate", rot);
                 }
               }
+              return this.#API;
             },
             unCank: () => {
               for (const bat of this.#batties) {
                 if (!bat.hasAttribute("data-cank")) return;
                 bat.setAttribute("data-cank", "back");
               }
+              return this.#API
             },
           }),
           cleanup: (stage) => {
@@ -352,6 +419,7 @@
           },
         };
       })(),
+
       // cirk
       (() => {
         const cirkHTML = (html) => {
@@ -382,6 +450,7 @@
                   bat.style.setProperty("--cirk-rotate", rot);
                 }
               }
+              return this.#API;
             },
             unCirk: () => {
               for (const bat of this.#batties) {
@@ -389,6 +458,7 @@
                 bat.setAttribute("data-cirk", "back");
                 log("uncirk got here");
               }
+              return this.#API;
             },
           }),
           cleanup: (stage) => {
@@ -402,6 +472,7 @@
           },
         };
       })(),
+
       // frak
       (() => {
         const frakHTML = (id) => `
@@ -438,6 +509,7 @@
 
               const top = this.#makeTag("x", frakHTML(frakID));
               const frak = top.querySelector("[data-frak]");
+              frak.setAttribute("data-frak", "fore");
               const [num, slash, den] = frak.children;
               top.id = frakID;
               bat0.parentNode.insertBefore(top, bat0);
@@ -455,14 +527,14 @@
             },
           }),
           cleanup: (stage) => {
-            for (const bat of stage.querySelectorAll("[data-frak-holder]")) {
-              const frak = bat.children[0];
-              const val = frak.getAttribute("data-frak");
+            for (const bat of stage.querySelectorAll(`[data-frak="fore"], [data-frak="back"]`)) {
+              const val = bat.getAttribute("data-frak");
               if (val === "fore") {
-                frak.setAttribute("data-frak", "");
+                bat.setAttribute("data-frak", "");
               } else if (val === "back") {
-                const top = bat.parentNode;
-                const num = frak.children[0];
+                const top = bat?.parentNode?.parentNode;
+                const num = bat?.children?.[0];
+                if (!top || !num) continue;
                 top.replaceWith(...[...num.childNodes]);
               }
             }
@@ -470,6 +542,16 @@
         };
       })(),
       // #endregion
+
+      // move !
+      {
+        cleanup: (stage) => {
+          for (const bat of stage.querySelectorAll("[data-blank]")) {
+            bat.remove();
+          }
+          this.#unWrap("move", stage);
+        }
+      },
 
       // wink
       {
@@ -484,14 +566,12 @@
               } else {
                 this.#API.spot(bat.id);
                 this.#wrap("wink");
-                log("wrapped up in a wink", bat);
                 targ = bat.children[0];
               }
               bat.style.setProperty(`--${this.#opts.fix}-wink-dur`, `${v}ms`);
               const anim = targ.getAnimations()?.[0];
               if (!anim) continue;
               anim.onfinish = (e) => {
-                log("wink finishing");
                 bat.classList.add(`${this.#opts.fix}-wink`);
                 setTimeout(
                   () => bat.classList.remove(`${this.#opts.fix}-wink`),
@@ -534,6 +614,78 @@
             .filter((bat) => bat !== null);
           return api;
         },
+        spotAll: () => {
+          this.#batties = [...this.#stageObj.querySelectorAll("*")];
+          return api;
+        },
+        spotStage: () => {
+          this.#batties = [this.#stageObj];
+          return api;
+        },
+        mount: (id, html, ...attrs) => {
+          const bat = this.#makeTag("x", html, ...attrs);
+          bat.id = CSS.escape(id);
+          this.#stageObj?.append(bat);
+          this.#measureElements(bat);
+          return api.spot(bat.id);
+        },
+        dismount: () => {
+          for (const bat of this.#batties) {
+            bat.remove();
+          }
+          return api;
+        },
+        insertBefore: (id) => {
+          const beef = api.pick(id);
+          if (!beef) return api;
+          for (const bat of this.#batties) {
+            beef.parentNode.insertBefore(bat, beef);
+          }
+          return api;
+        },
+        insertAfter: (id) => {
+          const beef = api.pick(id);
+          if (!beef) return api;
+          for (const bat of this.#batties) {
+            beef.parentNode.insertBefore(bat, beef.nextSibling);
+          }
+          return api;
+        },
+        alter: (html) => {
+          for (const bat of this.#batties) {
+            bat.replaceChildren(this.#strip(html));
+          }
+          this.#measureElements(...this.#batties);
+          return api;
+        },
+        hide: () => {
+          for (const bat of this.#batties) {
+            bat.style.display = "none";
+          }
+          this.#measureElements(...this.#batties);
+          return api;
+        },
+        show: () => {
+          for (const bat of this.#batties) {
+            bat.style.display = "revert";
+          }
+          this.#measureElements(...this.#batties);
+          return api;
+        },
+        during: (start, end = null) => {
+          const s = start != null ? Math.max(0, Math.min(1, start)) : null;
+          const e = end != null ? Math.max(0, Math.min(1, end)) : null;
+
+          for (const bat of this.#batties) {
+            const fc = bat.children[0];
+            if (start != null) fc.style.setProperty("--ani-start", start);
+            if (end != null) fc.style.setProperty("--ani-end", end);
+          }
+
+          return this.#API;
+        },
+        moveBefore: (id) => this.#move(id, "before"),
+        moveAfter: (id) => this.#move(id, "after"),
       };
 
       for (const skill of this.#SKILLS) {
