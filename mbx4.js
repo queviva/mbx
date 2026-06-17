@@ -136,30 +136,34 @@
       return tmpX.innerHTML;
     }
 
-    #makeTag(tag, html, ...attrs) {
-      const el = document.createElement(tag);
-      el.innerHTML = this.#markup(html);
-      for (const attr of new Set((attrs || []).filter((a) => a != null))) {
-        el.setAttribute(`data-${attr}`, "");
+    #makeTag(type, html, vals) {
+      const tag = document.createElement(type);
+      tag.innerHTML = this.#markup(html);
+      if (vals) {
+        for (const [key, value] of Object.entries(vals)) {
+          /^--/.test(key)
+            ? tag.style.setProperty(key, value)
+            : tag.setAttribute(`data-${key}`, value);
+        }
       }
-      return el;
+      return tag;
     }
 
-    #saniTag(tag, html, ...attrs) {
-      return this.#makeTag(tag, this.#strip(html), ...attrs);
+    #saniTag(tag, html, vals) {
+      return this.#makeTag(tag, this.#strip(html), vals);
     }
 
     #makeStepTag(load, note) {
-      const stepTag = this.#makeTag("x", "", "step");
-      const stage = this.#makeTag("x", load, "stage");
-      const comm = this.#makeTag("x", note, "comm");
+      const stepTag = this.#makeTag("x", "", { step: "" });
+      const stage = this.#makeTag("x", load, { stage: "" });
+      const comm = this.#makeTag("x", note, { comm: "" });
       stepTag.setAttribute("data-measure", "");
       stepTag.append(stage, comm);
       return stepTag;
     }
 
     #measureElements(...els) {
-      const props = ["width", "height", "x", "y"];
+      const props = ["top", "left", "width", "height", "x", "y"];
       for (const el of new Set(els)) {
         const rect = el.getBoundingClientRect();
         const style = el.style;
@@ -215,6 +219,7 @@
       }
     }
     // #endregion
+
     #xxx_move(anchorID, direction) {
       const anchor = this.#API.pick(anchorID);
       if (!anchor) return this.#API;
@@ -260,8 +265,14 @@
 
         bat.innerHTML = `<x data-move>${bat.innerHTML}</x>`;
         const wrapper = bat.children[0];
-        wrapper.style.setProperty(`--${this.#opts.fix}-dx`, `${Math.round(dx)}px`);
-        wrapper.style.setProperty(`--${this.#opts.fix}-dy`, `${Math.round(dy)}px`);
+        wrapper.style.setProperty(
+          `--${this.#opts.fix}-dx`,
+          `${Math.round(dx)}px`,
+        );
+        wrapper.style.setProperty(
+          `--${this.#opts.fix}-dy`,
+          `${Math.round(dy)}px`,
+        );
         wrapper.style.setProperty(`--${this.#opts.fix}-old-font`, bat.oldFont);
         wrapper.style.setProperty(`--${this.#opts.fix}-new-font`, bat.newFont);
       }
@@ -269,18 +280,17 @@
     }
 
     #move(anchorID, direction) {
+      log('moving on up')
       const anchor = this.#API.pick(anchorID);
       if (!anchor) return this.#API;
 
       const batsArray = new Set(
         direction === "after"
           ? Array.from(this.#batties).reverse()
-          : Array.from(this.#batties)
+          : Array.from(this.#batties),
       );
 
-      const allBats = Array.from(this.#stageObj.querySelectorAll("*"))
-        ;//.filter(el => !batsArray.has(el));
-
+      const allBats = Array.from(this.#stageObj.querySelectorAll("*")); //.filter(el => !batsArray.has(el));
       const snapshots = new Map();
       for (const [i, bat] of allBats.entries()) {
         bat.id ||= `${this.#opts.fix}-${i}`;
@@ -316,14 +326,19 @@
 
         bat.innerHTML = `<x data-move>${bat.innerHTML}</x>`;
         const wrapper = bat.children[0];
-        wrapper.style.setProperty(`--${this.#opts.fix}-dx`, `${Math.round(dx)}px`);
-        wrapper.style.setProperty(`--${this.#opts.fix}-dy`, `${Math.round(dy)}px`);
+        wrapper.style.setProperty(
+          `--${this.#opts.fix}-dx`,
+          `${Math.round(dx)}px`,
+        );
+        wrapper.style.setProperty(
+          `--${this.#opts.fix}-dy`,
+          `${Math.round(dy)}px`,
+        );
         wrapper.style.setProperty(`--${this.#opts.fix}-old-font`, bat.oldFont);
         wrapper.style.setProperty(`--${this.#opts.fix}-new-font`, bat.newFont);
       }
       return this.#API;
     }
-
 
     // #region SKILLS API
     #SKILLS = [
@@ -365,6 +380,29 @@
       },
       // #endregion
 
+      // #region GROWTH
+      // grow | shrink
+      (() => {
+        const gronk = (dir, v) => {
+          this.#wrap("grow", {
+            grow: dir,
+            ...(v && { [`--${this.#opts.fix}-grow-scale`]: v }),
+          });
+          for (const bat of this.#batties) {
+            this.#measureElements(bat.children[0]);
+          }
+          return this.#API;
+        };
+        return {
+          api: () => ({
+            grow: (v) => gronk("fore", v),
+            shrink: (v) => gronk("back", v),
+          }),
+          cleanup: (stage) => this.#unWrap("grow", stage),
+        };
+      })(),
+      // #endregion
+
       // #region GESTURES
       // cank
       (() => {
@@ -378,11 +416,12 @@
           shorthand: [
             "mbx-cank",
             (bat) => {
-              const cank = this.#makeTag("x", cankHTML(bat.innerHTML), "cank");
               const rot = bat.getAttribute("rot");
-              if (rot) {
-                cank.style.setProperty("--cank-rotate", rot);
-              }
+              const tmp = this.#makeTag("x", cankHTML(bat.innerHTML), {
+                cank: "",
+                ...(rot && { "--cank-rotate": rot }),
+              });
+              const cank = this.#makeTag("x", tmp.outerHTML);
               if (bat.id) cank.id = bat.id;
               return cank;
             },
@@ -390,20 +429,21 @@
           api: () => ({
             cank: (rot) => {
               for (const bat of this.#batties) {
-                bat.innerHTML = cankHTML(bat.innerHTML);
-                bat.setAttribute("data-cank", "fore");
-                if (rot) {
-                  bat.style.setProperty("--cank-rotate", rot);
-                }
+                const cank = this.#makeTag("x", cankHTML(bat.innerHTML), {
+                  cank: "fore",
+                  ...(rot && { "--cank-rotate": rot }),
+                });
+                bat.innerHTML = `${cank.outerHTML}`;
               }
               return this.#API;
             },
             unCank: () => {
               for (const bat of this.#batties) {
-                if (!bat.hasAttribute("data-cank")) return;
-                bat.setAttribute("data-cank", "back");
+                for (const cank of bat.querySelectorAll("[data-cank]")) {
+                  cank.setAttribute("data-cank", "back");
+                }
               }
-              return this.#API
+              return this.#API;
             },
           }),
           cleanup: (stage) => {
@@ -436,7 +476,9 @@
           shorthand: [
             "mbx-cirk",
             (bat) => {
-              const cirk = this.#makeTag("x", cirkHTML(bat.innerHTML), "cirk");
+              const cirk = this.#makeTag("x", cirkHTML(bat.innerHTML), {
+                cirk: "",
+              });
               if (bat.id) cirk.id = bat.id;
               return cirk;
             },
@@ -527,7 +569,9 @@
             },
           }),
           cleanup: (stage) => {
-            for (const bat of stage.querySelectorAll(`[data-frak="fore"], [data-frak="back"]`)) {
+            for (const bat of stage.querySelectorAll(
+              `[data-frak="fore"], [data-frak="back"]`,
+            )) {
               const val = bat.getAttribute("data-frak");
               if (val === "fore") {
                 bat.setAttribute("data-frak", "");
@@ -543,6 +587,34 @@
       })(),
       // #endregion
 
+      // during
+      {
+        api: () => ({
+          during: (start, end = null) => {
+            const s = start != null ? Math.max(0, Math.min(1, start)) : null;
+            const e = end != null ? Math.max(0, Math.min(1, end)) : null;
+
+            for (const bat of this.#batties) {
+              let fc;
+              if (bat.children[0].hasAttribute("data-grow")) {
+                fc = bat;
+              } else {
+                fc = bat.children[0];
+              }
+              if (start != null) fc.style.setProperty("--ani-start", start);
+              if (end != null) fc.style.setProperty("--ani-end", end);
+            }
+
+            return this.#API;
+          },
+        }),
+        cleanup: (stage) => {
+          for (const bat of stage.querySelectorAll("[style]")) {
+            bat.removeAttribute("style");
+          }
+        },
+      },
+
       // move !
       {
         cleanup: (stage) => {
@@ -550,7 +622,7 @@
             bat.remove();
           }
           this.#unWrap("move", stage);
-        }
+        },
       },
 
       // wink
@@ -622,8 +694,8 @@
           this.#batties = [this.#stageObj];
           return api;
         },
-        mount: (id, html, ...attrs) => {
-          const bat = this.#makeTag("x", html, ...attrs);
+        mount: (id, html, vals) => {
+          const bat = this.#makeTag("x", html, vals);
           bat.id = CSS.escape(id);
           this.#stageObj?.append(bat);
           this.#measureElements(bat);
@@ -672,17 +744,10 @@
           this.#measureElements(...this.#batties);
           return api;
         },
-        during: (start, end = null) => {
-          const s = start != null ? Math.max(0, Math.min(1, start)) : null;
-          const e = end != null ? Math.max(0, Math.min(1, end)) : null;
-
+        origin: (v) => {
           for (const bat of this.#batties) {
-            const fc = bat.children[0];
-            if (start != null) fc.style.setProperty("--ani-start", start);
-            if (end != null) fc.style.setProperty("--ani-end", end);
+            bat.children[0].style.setProperty("transform-origin", v);
           }
-
-          return this.#API;
         },
         moveBefore: (id) => this.#move(id, "before"),
         moveAfter: (id) => this.#move(id, "after"),
@@ -775,7 +840,7 @@
       if (!acted) return { ok: false, reason: acted };
 
       // copy the step tags for next time
-      const nextStep = this.#makeTag("x", stepTag.innerHTML, "step");
+      const nextStep = this.#makeTag("x", stepTag.innerHTML, { step: "" });
 
       // run cleanups
       this.#runCleanups(nextStep);
@@ -807,10 +872,10 @@
       this.#stepNum = 0;
 
       if (routine.intro) {
-        this.#holder.append(this.#saniTag("x", routine.intro, "intro"));
+        this.#holder.append(this.#saniTag("x", routine.intro, { intro: "" }));
       }
 
-      this.#stageObj = this.#saniTag("x", routine.stage, "stage");
+      this.#stageObj = this.#saniTag("x", routine.stage, { stage: "" });
 
       dispatch(this.#holder, `${this.#opts.fix}-routine-start`);
 

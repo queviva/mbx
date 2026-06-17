@@ -40,14 +40,16 @@
           illuminated acrobatic gestural mathematics
         `,
         stage: `
-          <x id="T5">5 +</x>
+          <x id="T5">5</x>
+          <x id="T9">+ 9</x>
+           <x id="T2-b">+ 2</x>
+           +
            <x id="T2x2" data-tite>
             <x id="T2-a">2</x>
             <x id="Tx2">x<x id="pow2" data-sup>2</x></x>
            </x>
-           <x id="T2-b">2</x>
+          </mbx-frak>
           <x id="EQ">=</x>
-          <x id="T9">9</x>
         `,
         steps: [
           {
@@ -55,18 +57,17 @@
               <x>short and sweet tags</x>
             `,
             acts: (X) => {
-              X.spot("T2x2").frak("T2-b").during(0.5);
-              X.spot("pow2").materialize();
+              X.spot("T2-b")
+                .spin()
+                .vault()
+                .moveBefore("T9")
+              ;
+              X.spot("EQ").spin().during(0.35);
             },
           },
           {
             note: "move is extremely destructive",
             acts: (X) => {
-              // X.spot("T2-a").cank("-15deg").during(0, 0.5);
-              // X.spot("T2-b").cank("-25deg").during(0.5);
-              // X.spot("T9").viva().during(0.8);
-              // X.spot("T9").moveBefore("EQ");
-              // X.spot("T2x2-frak").spin().moveBefore("T5");
             }
           },
           {},

@@ -220,6 +220,7 @@ x {
 
 /* #region GROW|SHRINK */
 x:has(> [data-grow]) {
+  /* border: 2px solid blue; */
   will-change: margin;
   animation: mbx-grow-margin linear both;
   animation-timeline: --anim-timeline;
@@ -233,7 +234,7 @@ x:has(> [data-grow="back"]) {
 }
 @keyframes mbx-grow-margin {
   from {
-    margin: 0 -0.25em;
+    margin: 0 -0.125em;
   }
   to {
     margin: 0 0;
@@ -241,8 +242,7 @@ x:has(> [data-grow="back"]) {
 }
 
 [data-grow] {
-  transform-origin: var(--mbx-transform-origin, 50% 50%);
-  will-change: margin, width, transform, opacity;
+  will-change: width, transform, opacity;
   animation: mbx-grow linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
@@ -255,15 +255,13 @@ x:has(> [data-grow="back"]) {
 }
 @keyframes mbx-grow {
   from {
-    margin-right: -0.25em;
     width: 0;
     transform: scale(0);
     opacity: 0;
   }
   to {
-    margin-right: 0em;
-    width: var(--mbx-width);
-    transform: scale(1);
+    width: calc(var(--mbx-width) * var(--mbx-grow-scale, 1));
+    transform: scale(var(--mbx-grow-scale));
     opacity: 1;
   }
 }
