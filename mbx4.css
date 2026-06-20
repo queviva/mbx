@@ -50,13 +50,11 @@ path {
 
   --animation-range: contain
     calc(
-      var(--animation-start) + (var(--animation-end) - var(--animation-start)) *
-        var(--ani-start, 0)
+      var(--animation-start) + (var(--animation-end) - var(--animation-start)) * var(--ani-start, 0)
     )
     contain
     calc(
-      var(--animation-start) + (var(--animation-end) - var(--animation-start)) *
-        var(--ani-end, 1)
+      var(--animation-start) + (var(--animation-end) - var(--animation-start)) * var(--ani-end, 1)
     );
 }
 
@@ -88,6 +86,7 @@ x {
   font-size: 0.5em;
   text-align: center;
   text-wrap: wrap;
+  user-select: none;
 }
 /* #endregion */
 
@@ -128,7 +127,7 @@ x {
   /* container-type: inline-size; */
   /* contain: layout size style; */
   overflow: visible;
-  height: 1.0lh;
+  height: 1lh;
   font-family: "Times New Roman", Times, serif;
   view-timeline: --anim-timeline block;
 }
@@ -188,15 +187,19 @@ x {
 
 /* #region MOVE */
 [data-move] {
+  --mbx-move-trans: translate(var(--mbx-dx), var(--mbx-dy));
   will-change: transform, font;
   animation: mbx-move linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
+[data-move="prime"] {
+  border: 1px solid green;
+  transform: translate(calc(var(--mbx-dx) + 0.125em), var(--mbx-dy));
+}
 @keyframes mbx-move {
   from {
-    /* transform: translate(calc(var(--mbx-dx) + 0.125em), var(--mbx-dy)); */
-    transform: translate(var(--mbx-dx), var(--mbx-dy));
+    transform: var(--mbx-move-trans);
     /* width: var(--mbx-old-wide); */
     font-size: var(--mbx-old-font);
   }
@@ -275,7 +278,7 @@ x:has(> [data-grow="back"]) {
 }
 @keyframes mbx-spin {
   to {
-    rotate: var(--spin-angle, -360deg);
+    rotate: var(--mbx-spin-val, -360deg);
   }
 }
 /* #endregion */
@@ -292,10 +295,10 @@ x:has(> [data-grow="back"]) {
     transform: translateY(0em);
   }
   15% {
-    transform: translateY(var(--vault-height, -1em));
+    transform: translateY(var(--mbx-vault-val, -1em));
   }
   85% {
-    transform: translateY(var(--vault-height, -1em));
+    transform: translateY(var(--mbx-vault-val, -1em));
   }
   100% {
     transform: translateY(0em);
@@ -315,10 +318,10 @@ x:has(> [data-grow="back"]) {
     transform: translateY(0em);
   }
   15% {
-    transform: translateY(var(--tuck-depth, 1em));
+    transform: translateY(var(--mbx-tuck-val, 1em));
   }
   85% {
-    transform: translateY(var(--tuck-depth, 1em));
+    transform: translateY(var(--mbx-tuck-val, 1em));
   }
   100% {
     transform: translateY(0em);
@@ -335,8 +338,7 @@ svg,
   --viva-f2: 0 0 8px hsl(var(--mbx-h), 100%, 58%);
   --viva-f3: 0 0 24px hsl(var(--mbx-h), 100%, 55%);
   --viva-shadow: var(--viva-f1), var(--viva-f2), var(--viva-f3);
-  --viva-filter: drop-shadow(var(--viva-f1)) drop-shadow(var(--viva-f2))
-    drop-shadow(var(--viva-f3));
+  --viva-filter: drop-shadow(var(--viva-f1)) drop-shadow(var(--viva-f2)) drop-shadow(var(--viva-f3));
 }
 [data-viva] {
   text-shadow: none;
@@ -564,8 +566,6 @@ path[data-materialize] {
 }
 @keyframes mbx-colorize {
   to {
-    /* color: hsl(var(--mbx-colorize-val, var(--mbx-h)), 80%, 60%); */
-    /* fill: hsl(var(--mbx-colorize-val, var(--mbx-h)), 80%, 60%); */
     color: var(--mbx-colorize-val);
     fill: var(--mbx-colorize-val);
   }
@@ -664,8 +664,8 @@ path[data-materialize] {
   align-items: baseline;
 }
 
-[data-absorb] > * {
-  transform-origin: left center;
+[data-absorb] > x {
+  transform-origin: 50% 50%;
   grid-area: stack;
   white-space: nowrap;
 }
@@ -697,17 +697,16 @@ path[data-materialize] {
   justify-items: center;
   align-items: baseline;
 
-  --xfade-range: var(--animation-range);
   animation: mbx-xfade-size linear both;
   animation-timeline: --anim-timeline;
-  animation-range: var(--xfade-range);
+  animation-range: var(--animation-range);
 }
 @keyframes mbx-xfade-size {
   from {
-    width: var(--mbx-xfade-wide0);
+    width: var(--mbx-xfade-wide-org);
   }
   to {
-    width: var(--mbx-xfade-wide1);
+    width: var(--mbx-xfade-wide-dop);
   }
 }
 [data-xfade] > x {
@@ -721,7 +720,7 @@ path[data-materialize] {
 [data-xfade] > :nth-child(1) {
   animation: mbx-xfade-out ease-out both;
   animation-timeline: --anim-timeline;
-  animation-range: var(--xfade-range);
+  animation-range: var(--animation-range);
 }
 @keyframes mbx-xfade-out {
   from {
@@ -734,7 +733,7 @@ path[data-materialize] {
 [data-xfade] > :nth-child(2) {
   animation: mbx-xfade-in ease-in both;
   animation-timeline: --anim-timeline;
-  animation-range: var(--xfade-range);
+  animation-range: var(--animation-range);
 }
 @keyframes mbx-xfade-in {
   from {
@@ -1175,7 +1174,83 @@ x:has(> [data-root="back"]) {
 }
 /* #endregion */
 
+/* #region JESTS*/
+[data-jest] > svg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  z-index: 10;
+}
+[data-jest] > svg > path {
+  fill: var(--main-color);
+  filter: drop-shadow(-2px 4px 0px var(--back-color));
+  transform-origin: 50% 50%;
+}
+[data-jest="fore"] > svg {
+  filter: var(--viva-filter);
+}
+[data-jest="fore"] > svg > path {
+  fill: var(--white-color);
+  filter: none;
+}
+[data-jext="fore"] [data-main] {
+  animation-direction: normal;
+}
+[data-jest="back"] [data-main] {
+  animation-direction: reverse;
+}
+[data-jest=""] [data-main] {
+  animation: none;
+}
+/* #endregion */
+
+[data-cank] {
+  animation: mbx-cank-keys linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+[data-jest=""] [data-cank] {
+  d: path("M0 8 L 98 100 100 92 2 0Z");
+}
+@keyframes mbx-cank-keys {
+  from {
+    d: path("M0 8 L 0 8 L 2 0 L 2 0 Z");
+  }
+  to {
+    d: path("M0 8 L 98 100 100 92 2 0Z");
+  }
+}
+
+[data-cirk-base] {
+  d: path("M0 50A50 50 0 0 0 100 50A50 50 0 0 0 0 50ZM5 50A40 42 30 0 1 95 50A40 42 30 0 1 5 50Z");
+}
+[data-cirk] {
+  animation: mbx-cirk-keys linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-cirk-keys {
+  0% {
+    d: path("M50 50 L -10 -10 L -10 -10 L -10 -10 L -10 -10 L -10 -10 Z");
+  }
+  25% {
+    d: path("M50 50 L -10 -10 L 110 -10 L 110 -10 L 110 -10 L 110 -10 Z");
+  }
+  50% {
+    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L 110 110 L 110 110 Z");
+  }
+  75% {
+    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L -10 110 L -10 110 Z");
+  }
+  100% {
+    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L -10 110 L -10 -10 Z");
+  }
+}
+/* #endregion */
+
 /* #region CANK */
+/*
 [data-cank] {
 }
 [data-cank] > svg {
@@ -1193,12 +1268,12 @@ x:has(> [data-root="back"]) {
   fill: var(--main-color);
   filter: drop-shadow(-2px 4px 0px var(--back-color));
   transform-origin: 50% 50%;
-  transform: rotate(var(--cank-rotate, 0deg));
+  transform: rotate(var(--mbx-cank-val, 0deg));
 }
 [data-cank="fore"] > svg > path,
 [data-cank="back"] > svg > path {
   will-change: d;
-  animation: mbx-cank linear both;
+  animation: mbx-cank-keyframes linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
@@ -1210,7 +1285,7 @@ x:has(> [data-root="back"]) {
 [data-cank="back"] > svg > path {
   animation-direction: reverse;
 }
-@keyframes mbx-cank {
+@keyframes mbx-cank-keyframes {
   from {
     d: path("M0 8 L 0 8 L 2 0 L 2 0 Z");
   }
@@ -1218,9 +1293,11 @@ x:has(> [data-root="back"]) {
     d: path("M0 8 L 98 100 100 92 2 0Z");
   }
 }
+*/
 /* #endregion */
 
 /* #region CIRK */
+/*
 [data-cirk] {
   --cirk-00: path(
     "M0 50A50 50 0 0 0 100 50A50 50 0 0 0 0 50ZM5 50A40 42 30 0 1 95 50A40 42 30 0 1 5 50Z"
@@ -1259,7 +1336,7 @@ x:has(> [data-root="back"]) {
   fill: var(--white-color);
 }
 [data-cirk] > svg > clipPath > path {
-    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L -10 110 L -10 -10 Z");
+  d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L -10 110 L -10 -10 Z");
 }
 [data-cirk="fore"] > svg > clipPath > path,
 [data-cirk="back"] > svg > clipPath > path {
@@ -1291,14 +1368,16 @@ x:has(> [data-root="back"]) {
     d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L -10 110 L -10 -10 Z");
   }
 }
+*/
 /* #endregion */
 
 /* #region TITE */
 [data-tite] {
   display: inline-flex;
   flex-direction: row;
-  gap: 0.1em;
+  gap: var(--mbx-tite-val, 0em);
   justify-content: center;
+  font-size: 0.75em;
 }
 /* #endregion */
 
@@ -1392,20 +1471,15 @@ x:has(> [data-inline-frak-holder="anim"]) {
   /* === THE BIG NESTED CALC === */
   --animation-range: contain
     calc(
-      /* parent start */ var(--parent-start) +
-        (var(--parent-end) - var(--parent-start)) *
-        (
-          var(--parent-ani-start) +
-            (var(--parent-ani-end) - var(--parent-ani-start)) * 0.4
-        )
+      /* parent start */ var(--parent-start) + (var(--parent-end) - var(--parent-start)) *
+        (var(--parent-ani-start) + (var(--parent-ani-end) - var(--parent-ani-start)) * 0.4)
     )
     contain
     calc(
       /* parent start + parent's full width * (0.4 + child's relative width) */
       var(--parent-start) + (var(--parent-end) - var(--parent-start)) *
         (
-          var(--parent-ani-start) +
-            (var(--parent-ani-end) - var(--parent-ani-start)) *
+          var(--parent-ani-start) + (var(--parent-ani-end) - var(--parent-ani-start)) *
             (0.4 + (var(--ani-end) - var(--ani-start)))
         )
     );
