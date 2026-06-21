@@ -593,7 +593,7 @@ path[data-materialize] {
   will-change: fill, color, filter;
   animation: mbx-wink ease-in-out var(--mbx-wink-val);
 }
-.mbx-wink [data-wink] path {
+.mbx-wink path {
   animation: mbx-wink ease-in-out var(--mbx-wink-val);
 }
 @keyframes mbx-wink {
@@ -1266,29 +1266,6 @@ x:has(> [data-root="back"]) {
 }
 /* #endregion */
 
-/* #region BRAK */
-[data-brak] {
-  animation: mbx-brak-keys linear both;
-  animation-timeline: --anim-timeline;
-  animation-range: var(--animation-range);
-}
-[data-jest] {
-  --brak-start: "M50 102 A 0 0 0 0 1 50 100 H 50 A 0 0 0 0 0 50 100 A 0 0 0 0 1 50 104 H 50 A 0 0 0 0 0 50 104 Z ";
-  --brak-final: "M50 102 A 2 2 0 0 1 52 100 H 100 A 3 3 0 0 0 103 97 A 3 6 0 0 1 100 104 H 53 A 3 3 0 0 0 50 107 Z ";
-}
-[data-jest=""] [data-brak] {
-  d: path(var(--brak-final));
-}
-@keyframes mbx-brak-keys {
-  0% {
-    d: path(var(--brak-start));
-  }
-  100% {
-    d: path(var(--brak-final));
-  }
-}
-/* #endregion */
-
 /* #region CIRK */
 [data-cirk-base] {
   --cirk-00: path(
@@ -1326,13 +1303,43 @@ x:has(> [data-root="back"]) {
 }
 /* #endregion */
 
+/* #region BRAK */
+[data-brak-base] {
+  --brak-thick:   "M50 105 A 5 5 0 0 1 55 100 H 100 A 10 10 0 0 0 110 90 A 10 20 0 0 1 100 110 H 60 A 10 10 0 0 0 50 120 A 10 10 0 0 0 40 110 H 0 A 10 20 0 0 1 -10 90 A 10 10 0 0 0 0 100 H 45 A 5 5 0 0 1 50 105 Z";
+  --brak-thin:    "M50 105 A 5 5 0 0 1 55 100 H 100 A 10 10 0 0 0 110 90 A 10 17 0 0 1 100 107 H 60 A 10 10 0 0 0 50 117 A 10 10 0 0 0 40 107 H 0 A 10 17 0 0 1 -10 90 A 10 10 0 0 0 0 100 H 45 A 5 5 0 0 1 50 105 Z";
+  --brak-scrawny: "M50 105 A 5 5 0 0 1 55 100 H 100 A 10 10 0 0 0 110 90 A 10 15 0 0 1 100 105 H 60 A 10 10 0 0 0 50 115 A 10 10 0 0 0 40 105 H 0 A 10 15 0 0 1 -10 90 A 10 10 0 0 0 0 100 H 45 A 5 5 0 0 1 50 105 Z";
+  d: path(var(--brak-thin));
+}
+[data-brak-base="thick"] {
+  d: path(var(--brak-thick));
+}
+[data-brak-svg] {
+  transform: rotate(var(--mbx-brak-val, 0deg));
+}
+[data-brak] {
+  animation: mbx-brak-keys linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-brak-keys {
+  0% {
+    d: path("M50 80 L 50 130 L 50 130 L 50 130 L 50 130 Z")
+  }
+  80% {
+    d: path("M50 80 L -30 130 L -30 130 L 130 130 L 130 130 Z")
+  }
+  100% {
+    d: path("M50 80 L -30 50 L -30 130 L 130 130 L 130 50 Z")
+  }
+}
+/* #endregion */
+
 /* #region TITE */
 [data-tite] {
   display: inline-flex;
   flex-direction: row;
   gap: var(--mbx-tite-val, 0em);
   justify-content: center;
-  font-size: 0.75em;
 }
 /* #endregion */
 

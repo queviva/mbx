@@ -60,6 +60,8 @@
     pa.replaceChild(b, placeholder);
   };
 
+  const camel = (s) => "un" + s[0].toUpperCase() + s.slice(1);
+
   // #endregion
 
   // #region OPTS
@@ -103,6 +105,7 @@
         this.#makeWrapSkills(),
         this.#makeGroinkSkills(),
         this.#makeJestorSkills(),
+        this.#makeFrakSkills(),
         this.#makeExitSkills(),
         this.#makeFadeSkills(),
       ];
@@ -509,29 +512,28 @@
 
     #makeJestorSkills() {
       const skills = {
-        draw: ["cank", "xout", "brak"],
-        clip: ["cirk"],
+        draw: ["cank", "xout"],
+        clip: ["cirk", "brak"],
       };
-      const unSkill = (s) => "un" + s[0].toUpperCase() + s.slice(1);
 
       const makeHTML = {
         draw: (html, skill) => {
-          return `
+          return (`
            <x>${html}</x>
-           <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+           <svg data-${skill}-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             <path data-main data-${skill} />
            </svg>
-          `;
+          `);
         },
         clip: (html, skill) => {
           const clipID = `${this.#opts.fix}-${crypto.randomUUID()}`;
-          return `
+          return (`
            <x>${html}</x>
-           <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+           <svg data-${skill}-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             <clipPath data-clip id="${clipID}"><path data-main data-${skill}/></clipPath>
             <path data-${skill}-base clip-path="url(#${clipID})" />
            </svg>
-          `;
+          `);
         },
       };
 
@@ -553,7 +555,7 @@
             }
             return this.#API;
           };
-          api[unSkill(skill)] = () => {
+          api[camel(skill)] = () => {
             for (const bat of this.#batties) {
               for (const jest of bat.querySelectorAll("[data-jest]")) {
                 jest.setAttribute("data-jest", "back");
@@ -591,9 +593,10 @@
             } else if (val === "back") {
               const targ = bat.children[0];
               bat.replaceWith(...[...targ.childNodes]);
-            } else {
-              log("[[[cleaning jest with no value]]]");
-            }
+            } 
+            // else {
+              // log("[[[cleaning jest with no value]]]");
+            // }
           }
         });
       }
@@ -606,80 +609,80 @@
     }
 
     #makeFrakSkills() {
-      // #region FRAK
-      /*
-      // frak
-      (() => {
-        const frakHTML = (id) => `
-         <x data-frak-holder>
-          <x data-frak>
-           <x data-numerator ${id ? `id="${id}-numerator"` : ""}></x>
-           <x data-slash ${id ? `id="${id}-slash"` : ""}>
-            <svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
-             <path/>
-            </svg>
-           </x>
-           <x data-denominator ${id ? `id="${id}-denominator"` : ""}></x>
-          </x>
-         </x>
-        `;
-        return {
-          shorthand: [
-            "mbx-frak",
-            (bat) => {
-              if (bat.children.length !== 2) return;
-              const [orgNum, orgDen] = bat.children;
-              const top = this.#makeTag("x", frakHTML(bat?.id));
-              const frak = top.querySelector("[data-frak]");
-              frak.children[0].append(orgNum);
-              frak.children[2].append(orgDen);
-              if (bat.id) top.id = bat.id;
-              return top;
-            },
-          ],
-          api: {
-            frak: (...ids) => {
-              const bat0 = this.#batties[0];
-              const frakID = `${bat0.id}-frak`;
+      const skills = ["frak"];
 
-              const top = this.#makeTag("x", frakHTML(frakID));
-              const frak = top.querySelector("[data-frak]");
-              frak.setAttribute("data-frak", "fore");
-              const [num, slash, den] = frak.children;
-              top.id = frakID;
-              bat0.parentNode.insertBefore(top, bat0);
-              for (const bat of this.#batties) num.append(bat);
-              for (const id of new Set(ids)) den.append(this.#API.pick(id));
-              return this.#API.spot(frakID);
-            },
-            unFrak: () => {
-              for (const bat of this.#batties) {
-                const frak = bat?.children[0]?.children[0];
-                if (!frak) continue;
-                frak.setAttribute("data-frak", "back");
-              }
-              return this.#API;
-            },
-          },
-          clean: (stage) => {
-            for (const bat of stage.querySelectorAll(
-              `[data-frak="fore"], [data-frak="back"]`,
-            )) {
-              const val = bat.getAttribute("data-frak");
-              if (val === "fore") {
-                bat.setAttribute("data-frak", "");
-              } else if (val === "back") {
-                const top = bat?.parentNode?.parentNode;
-                const num = bat?.children?.[0];
-                if (!top || !num) continue;
-                top.replaceWith(...[...num.childNodes]);
-              }
-            }
-          },
+      const makeHTML = {
+        frak: (id) => {
+          return `
+           <x data-frak-holder>
+            <x data-frak>
+             <x data-numerator ${id ? `id="${id}-numerator"` : ""}></x>
+             <x data-slash ${id ? `id="${id}-slash"` : ""}>
+              <svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
+               <path/>
+              </svg>
+             </x>
+             <x data-denominator ${id ? `id="${id}-denominator"` : ""}></x>
+            </x>
+           </x>
+          `;
+        },
+      };
+
+      const api = {};
+      const short = {};
+      const clean = [];
+
+      for (const skill of skills) {
+        const fixy = `${this.#opts.fix}-${skill}`;
+        api[skill] = (...ids) => {
+          const bat0 = this.#batties[0];
+          const ID = `${bat0.id}-${skill}`;
+
+          const top = this.#makeTag("x", makeHTML[skill](ID));
+          const guy = top.querySelector(`[data-${skill}]`);
+          guy.setAttribute(`data-${skill}`, "fore");
+          const [num, slash, den] = guy.children;
+          top.id = ID;
+          bat0.parentNode.insertBefore(top, bat0);
+          for (const bat of this.#batties) num.append(bat);
+          for (const id of new Set(ids)) den.append(this.#API.pick(id));
+          return this.#API.spot(ID);
         };
-      })(),
-      */
-      // #endregion
+        api[camel(skill)] = () => {
+          for (const bat of this.#batties) {
+            const guy = bat?.children[0]?.children[0];
+            if (!guy) continue;
+            guy.setAttribute(`data-${skill}`, "back");
+          }
+          return this.#API;
+        };
+        short[fixy] = (bat) => {
+          if (bat.children.length !== 2) return;
+          const [orgNum, orgDen] = bat.children;
+          const top = this.#makeTag("x", makeHTML[skill](bat?.id));
+          const guy = top.querySelector(`[data-${skill}]`);
+          guy.children[0].append(orgNum);
+          guy.children[2].append(orgDen);
+          if (bat.id) top.id = bat.id;
+          return top;
+        };
+        clean.push((stage) => {
+          for (const bat of stage.querySelectorAll(`[data-${skill}="fore"], [data-${skill}="back"]`)) {
+            const val = bat.getAttribute(`data-${skill}`);
+            if (val === "fore") {
+              bat.setAttribute(`data-${skill}`, "");
+            } else if (val === "back") {
+              const top = bat?.parentNode?.parentNode;
+              const num = bat?.children?.[0];
+              if (!top || !num) continue;
+              top.replaceWith(...[...num.childNodes]);
+            }
+          }
+        });
+      }
+
+      return { api: api, short: short, clean: clean };
     }
 
     #makeExitSkills() {

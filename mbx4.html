@@ -31,7 +31,7 @@
   </head>
 
   <body>
-    <rat-batix id="two" data-mbx='{"xxx_color":300}'></rat-batix>
+    <rat-batix id="two" data-mbx='{"color":300}'></rat-batix>
 
     <script id="ROUTINES">
       const routineTwo = {
@@ -49,7 +49,10 @@
             <x id="T5">+ 5</x>
            </x>
            <x id="EQ">=</x>
+           <mbx-frak id="frak-1">
             <x id="T9">9</x>
+            <x id="T11">11</x>
+           </mbx-frak>
         `,
         steps: [
           {
@@ -57,16 +60,15 @@
               <x>short and sweet tags</x>
             `,
             acts: (X) => {
-              X.spot("T2-a").brak();
-              X.spot("T3x").xout();
-              X.spot("T9").cirk();
+              X.spot("T-25").brak("180deg");
             },
           },
           {
             note: "move is extremely destructive",
             acts: (X) => {
-              X.spot("T3x").unXout();
-              X.spot("T9").unCirk();
+              X.mount("T3-b", "+ 3");
+              X.spot("T2-a", "T5").absorb("T3-b");
+              X.spot("T-25").wink();
             }
           },
           {},
