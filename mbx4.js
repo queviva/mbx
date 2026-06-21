@@ -101,9 +101,9 @@
         this.#makeDurationSkills(),
         this.#makeMoveSkills(),
         this.#makeWrapSkills(),
-        this.#makeGrowthSkills(),
-        this.#makeGestureSkills(),
-        this.#makeWinkSkills(),
+        this.#makeGroinkSkills(),
+        this.#makeJestorSkills(),
+        this.#makeExitSkills(),
         this.#makeFadeSkills(),
       ];
 
@@ -478,8 +478,8 @@
       return { api: api, short: short, clean: clean };
     }
 
-    #makeGrowthSkills() {
-      const gronk = (dir, v) => {
+    #makeGroinkSkills() {
+      const groink = (dir, v) => {
         this.#wrap("grow", {
           grow: dir,
           ...(v && { [`--${this.#opts.fix}-grow-scale`]: v }),
@@ -492,8 +492,8 @@
       return {
         short: {},
         api: {
-          grow: (v) => gronk("fore", v),
-          shrink: (v) => gronk("back", v),
+          grow: (v) => groink("fore", v),
+          shrink: (v) => groink("back", v),
         },
         clean: [
           (stage) => {
@@ -507,9 +507,9 @@
       };
     }
 
-    #makeGestureSkills() {
+    #makeJestorSkills() {
       const skills = {
-        draw: ["cank"],
+        draw: ["cank", "xout", "brak"],
         clip: ["cirk"],
       };
       const unSkill = (s) => "un" + s[0].toUpperCase() + s.slice(1);
@@ -560,7 +560,9 @@
                 if (type === "clip") {
                   const clip = jest.querySelector("[data-clip]");
                   clip.id = `${this.#opts.fix}-${crypto.randomUUID()}`;
-                  jest.querySelector(`[data-${skill}-base]`).setAttribute("clip-path", `url(#${clip.id})`)
+                  jest
+                    .querySelector(`[data-${skill}-base]`)
+                    .setAttribute("clip-path", `url(#${clip.id})`);
                 }
               }
             }
@@ -575,8 +577,7 @@
             if (bat.id) tag.id = bat.id;
             if (val) tag.style.setProperty(`--${fixy}-val`, val);
             if (type === "clip") {
-              tag.querySelector(`[data-${skill}-base]`)
-              .setAttribute("clip-path", "");
+              tag.querySelector(`[data-${skill}-base]`).setAttribute("clip-path", "");
             }
             return tag;
           };
@@ -605,10 +606,8 @@
     }
 
     #makeFrakSkills() {
-      // #region GESTURES
+      // #region FRAK
       /*
-
-
       // frak
       (() => {
         const frakHTML = (id) => `
@@ -683,33 +682,44 @@
       // #endregion
     }
 
-    #makeWinkSkills() {
-      return {
-        api: {
-          wink: (v = 1000) => {
-            const batties = this.#batties;
-            for (const bat of this.#batties) {
-              let targ;
-              if (bat.tagName === "path") {
-                bat.parentNode.setAttribute("data-wink", "");
-                targ = bat.parentNode;
-              } else {
-                this.#API.spot(bat.id);
-                this.#wrap("wink");
-                targ = bat.children[0];
-              }
-              bat.style.setProperty(`--${this.#opts.fix}-wink-dur`, `${v}ms`);
-              const anim = targ.getAnimations()?.[0];
-              if (!anim) continue;
-              anim.onfinish = (e) => {
-                bat.classList.add(`${this.#opts.fix}-wink`);
-                setTimeout(() => bat.classList.remove(`${this.#opts.fix}-wink`), v);
-              };
+    #makeExitSkills() {
+      const skills = ["wink", "fliz"];
+
+      const api = {};
+      const short = {};
+      const clean = [];
+
+      for (const skill of skills) {
+        const fixy = `${this.#opts.fix}-${skill}`;
+        api[skill] = (val = 1000) => {
+          const batties = this.#batties;
+          for (const bat of this.#batties) {
+            let targ;
+            if (bat.tagName === "path") {
+              bat.parentNode.setAttribute("data-exit", "");
+              targ = bat.parentNode;
+            } else {
+              this.#API.spot(bat.id);
+              this.#wrap("exit");
+              targ = bat.children[0];
             }
-            this.#batties = batties;
-            return this.#API;
-          },
-        },
+            bat.style.setProperty(`--${fixy}-val`, `${val}ms`);
+            const anim = targ.getAnimations()?.[0];
+            if (!anim) continue;
+            anim.onfinish = (e) => {
+              bat.classList.add(fixy);
+              setTimeout(() => bat.classList.remove(fixy), val);
+            };
+          }
+          this.#batties = batties;
+          return this.#API;
+        };
+      }
+
+      return {
+        api: api,
+        short: short,
+        clean: clean,
       };
     }
 

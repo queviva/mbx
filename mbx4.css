@@ -572,13 +572,13 @@ path[data-materialize] {
 }
 /* #endregion */
 
-/* #region WINK */
-[data-wink] {
-  animation: mbx-wink-trigger linear both;
+/* #region EXIT*/
+[data-exit] {
+  animation: mbx-exit-trigger linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
-@keyframes mbx-wink-trigger {
+@keyframes mbx-exit-trigger {
   from {
     --mbx-trig: 0;
   }
@@ -586,12 +586,15 @@ path[data-materialize] {
     --mbx-trig: 1;
   }
 }
+/* #endregion */
+
+/* #region WINK */
 .mbx-wink {
   will-change: fill, color, filter;
-  animation: mbx-wink ease-in-out var(--mbx-wink-dur);
+  animation: mbx-wink ease-in-out var(--mbx-wink-val);
 }
 .mbx-wink [data-wink] path {
-  animation: mbx-wink ease-in-out var(--mbx-wink-dur);
+  animation: mbx-wink ease-in-out var(--mbx-wink-val);
 }
 @keyframes mbx-wink {
   0% {
@@ -610,7 +613,24 @@ path[data-materialize] {
     filter: none;
   }
 }
+/* #endregion */
 
+/* #region FLIZ */
+.mbx-fliz {
+  will-change: transform;
+  animation: mbx-fliz ease-in var(--mbx-fliz-val);
+}
+.mbx-fliz [data-fliz] path {
+  animation: mbx-fliz ease-in var(--mbx-fliz-val);
+}
+@keyframes mbx-fliz {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
 /* #endregion */
 
 /* #region FILTER CLEAR */
@@ -1205,6 +1225,7 @@ x:has(> [data-root="back"]) {
 }
 /* #endregion */
 
+/* #region CANK */
 [data-cank] {
   animation: mbx-cank-keys linear both;
   animation-timeline: --anim-timeline;
@@ -1221,9 +1242,65 @@ x:has(> [data-root="back"]) {
     d: path("M0 8 L 98 100 100 92 2 0Z");
   }
 }
+/* #endregion */
 
+/* #region XOUT */
+[data-xout] {
+  animation: mbx-xout-keys linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+[data-jest=""] [data-xout] {
+  d: path("M0 8 L 98 100 L 100 92 L2 0Z M100 8 L 98 0 L 0 92 L 2 100Z");
+}
+@keyframes mbx-xout-keys {
+  0% {
+    d: path("M0 8 L 0 8 L 2 0 2 0Z  M100 8 L 98 0 L 98 0 L 100 8Z");
+  }
+  50% {
+    d: path("M0 8 L 98 100 L 100 92 L2 0Z  M100 8 L 98 0 L 98 0 L 100 8Z");
+  }
+  100% {
+    d: path("M0 8 L 98 100 L 100 92 L2 0Z M100 8 L 98 0 L 0 92 L 2 100Z");
+  }
+}
+/* #endregion */
+
+/* #region BRAK */
+[data-brak] {
+  animation: mbx-brak-keys linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+[data-jest] {
+  --brak-start: "M50 102 A 0 0 0 0 1 50 100 H 50 A 0 0 0 0 0 50 100 A 0 0 0 0 1 50 104 H 50 A 0 0 0 0 0 50 104 Z ";
+  --brak-final: "M50 102 A 2 2 0 0 1 52 100 H 100 A 3 3 0 0 0 103 97 A 3 6 0 0 1 100 104 H 53 A 3 3 0 0 0 50 107 Z ";
+}
+[data-jest=""] [data-brak] {
+  d: path(var(--brak-final));
+}
+@keyframes mbx-brak-keys {
+  0% {
+    d: path(var(--brak-start));
+  }
+  100% {
+    d: path(var(--brak-final));
+  }
+}
+/* #endregion */
+
+/* #region CIRK */
 [data-cirk-base] {
-  d: path("M0 50A50 50 0 0 0 100 50A50 50 0 0 0 0 50ZM5 50A40 42 30 0 1 95 50A40 42 30 0 1 5 50Z");
+  --cirk-00: path(
+    "M0 50A50 50 0 0 0 100 50A50 50 0 0 0 0 50ZM5 50A40 42 30 0 1 95 50A40 42 30 0 1 5 50Z"
+  );
+  --cirk-01: path(
+    "M25 20A25 30 0 0 0 0 50A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0C-8 2 10 45 15 45C5 20 20 8 50 8A45 42 0 0 1 95 50A45 40 0 0 1 50 90A48 45 0 0 1 2 48A28 28 0 0 1 30 20Z"
+  );
+  --cirk-02: path(
+    "M5 20Q0 30 0 50A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0C-8 2 10 45 15 45C5 20 20 8 50 8A45 42 0 0 1 95 50A45 40 0 0 1 50 90A48 45 0 0 1 2 45Q2 35 5 20Z"
+  );
+  d: var(--cirk-00);
 }
 [data-cirk] {
   animation: mbx-cirk-keys linear both;
@@ -1247,128 +1324,6 @@ x:has(> [data-root="back"]) {
     d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L -10 110 L -10 -10 Z");
   }
 }
-/* #endregion */
-
-/* #region CANK */
-/*
-[data-cank] {
-}
-[data-cank] > svg {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  z-index: 10;
-}
-[data-cank="fore"] > svg {
-  filter: var(--viva-filter);
-}
-[data-cank] > svg > path {
-  d: path("M0 8 L 98 100 100 92 2 0Z");
-  fill: var(--main-color);
-  filter: drop-shadow(-2px 4px 0px var(--back-color));
-  transform-origin: 50% 50%;
-  transform: rotate(var(--mbx-cank-val, 0deg));
-}
-[data-cank="fore"] > svg > path,
-[data-cank="back"] > svg > path {
-  will-change: d;
-  animation: mbx-cank-keyframes linear both;
-  animation-timeline: --anim-timeline;
-  animation-range: var(--animation-range);
-}
-[data-cank="fore"] > svg > path {
-  fill: var(--white-color);
-  filter: none;
-  animation-direction: normal;
-}
-[data-cank="back"] > svg > path {
-  animation-direction: reverse;
-}
-@keyframes mbx-cank-keyframes {
-  from {
-    d: path("M0 8 L 0 8 L 2 0 L 2 0 Z");
-  }
-  to {
-    d: path("M0 8 L 98 100 100 92 2 0Z");
-  }
-}
-*/
-/* #endregion */
-
-/* #region CIRK */
-/*
-[data-cirk] {
-  --cirk-00: path(
-    "M0 50A50 50 0 0 0 100 50A50 50 0 0 0 0 50ZM5 50A40 42 30 0 1 95 50A40 42 30 0 1 5 50Z"
-  );
-  --XXX-cirk-00: path(
-    "M50 0A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0ZM 20 20A33 30 330 0 0 82 80A33 30 330 0 0 20 20Z"
-  );
-  --cirk-01: path(
-    "M25 20A25 30 0 0 0 0 50A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0C-8 2 10 45 15 45C5 20 20 8 50 8A45 42 0 0 1 95 50A45 40 0 0 1 50 90A48 45 0 0 1 2 48A28 28 0 0 1 30 20Z"
-  );
-  --cirk-02: path(
-    "M5 20Q0 30 0 50A50 50 0 0 0 50 100A50 50 0 0 0 100 50A50 50 0 0 0 50 0C-8 2 10 45 15 45C5 20 20 8 50 8A45 42 0 0 1 95 50A45 40 0 0 1 50 90A48 45 0 0 1 2 45Q2 35 5 20Z"
-  );
-  --cirk-path: var(--cirk-00);
-}
-[data-cirk] > svg {
-  position: absolute;
-  top: -10%;
-  left: -10%;
-  width: 120%;
-  height: 120%;
-}
-[data-cirk] > svg > path {
-  d: var(--cirk-path);
-  fill: var(--main-color);
-  transform-origin: 50% 50%;
-  transform: rotate(var(--cirk-rotate, 0deg));
-  fill-rule: nonzero;
-}
-[data-cirk="fore"] > svg,
-[data-cirk="back"] > svg {
-  filter: var(--viva-filter);
-}
-[data-cirk="fore"] > svg > path,
-[data-cirk="back"] > svg > path {
-  fill: var(--white-color);
-}
-[data-cirk] > svg > clipPath > path {
-  d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L -10 110 L -10 -10 Z");
-}
-[data-cirk="fore"] > svg > clipPath > path,
-[data-cirk="back"] > svg > clipPath > path {
-  d: path("M50 50 L -10 -10 L -10 -10 L -10 -10 L -10 -10 L -10 -10 Z");
-  animation: mbx-cirk linear both;
-  animation-timeline: --anim-timeline;
-  animation-range: var(--animation-range);
-}
-[data-cirk="fore"] > svg > clipPath > path {
-  animation-direction: normal;
-}
-[data-cirk="back"] > svg > clipPath > path {
-  animation-direction: reverse;
-}
-@keyframes mbx-cirk {
-  0% {
-    d: path("M50 50 L -10 -10 L -10 -10 L -10 -10 L -10 -10 L -10 -10 Z");
-  }
-  25% {
-    d: path("M50 50 L -10 -10 L 110 -10 L 110 -10 L 110 -10 L 110 -10 Z");
-  }
-  50% {
-    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L 110 110 L 110 110 Z");
-  }
-  75% {
-    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L -10 110 L -10 110 Z");
-  }
-  100% {
-    d: path("M50 50 L -10 -10 L 110 -10 L 110 110 L -10 110 L -10 -10 Z");
-  }
-}
-*/
 /* #endregion */
 
 /* #region TITE */

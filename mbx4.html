@@ -44,8 +44,10 @@
             <x id="T3">3</x>
             <x id="Tx">x^2</x>
            </mbx-tite>
-           <x id="T2-a">- 2</x>
-           <x id="T5">+ 5</x>
+           <x id="T-25">
+            <x id="T2-a">- 2</x>
+            <x id="T5">+ 5</x>
+           </x>
            <x id="EQ">=</x>
             <x id="T9">9</x>
         `,
@@ -55,14 +57,15 @@
               <x>short and sweet tags</x>
             `,
             acts: (X) => {
-              X.spot("T3x").cank();
+              X.spot("T2-a").brak();
+              X.spot("T3x").xout();
               X.spot("T9").cirk();
             },
           },
           {
             note: "move is extremely destructive",
             acts: (X) => {
-              X.spot("T3x").unCank();
+              X.spot("T3x").unXout();
               X.spot("T9").unCirk();
             }
           },
