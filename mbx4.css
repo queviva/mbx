@@ -162,53 +162,74 @@ x {
 }
 /* #endregion */
 
-/* #region BLANKS */
+/* #region MOVE */
+
+[data-prime-mover] {
+  border: 0.25px solid green;
+  will-change: width;
+  /* animation: mbx-prime-mover linear both; */
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-prime-mover {
+  from {
+    width: 0px;
+  }
+  to {
+    width: var(--mbx-width);
+  }
+}
+
 [data-blank] {
-  border: 1px dashed #909;
-  will-change: width, margin;
+  border: 0.25px dashed #909;
+  color: hsla(40, 100%, 80%, 0.1);
+  display: inline-grid;
+  grid-template-areas: "stack";
+  will-change: margin, width, left;
   animation: mbx-blank linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
-
+[data-blank="new"] {
+  border: 0.25px dashed yellow;
+  animation-direction: reverse;
+}
 @keyframes mbx-blank {
   from {
     margin: 0 0;
     width: var(--blank-w);
-    height: var(--blank-h);
+    left: 0;
+    /* height: var(--blank-h); */
   }
   to {
     margin: 0 -0.125em;
+    left: -0.2em;
     width: 0px;
-    height: 0px;
+    /* height: 0px; */
   }
 }
-/* #endregion */
 
-/* #region MOVE */
 [data-move] {
+  border: 1px solid hsla(40, 80%, 80%, 0.15);
   --mbx-move-trans: translate(var(--mbx-dx), var(--mbx-dy));
-  will-change: transform, font;
+  will-change: transform, width, font;
   animation: mbx-move linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
-[data-move="prime"] {
-  border: 1px solid green;
-  transform: translate(calc(var(--mbx-dx) + 0.125em), var(--mbx-dy));
-}
 @keyframes mbx-move {
   from {
     transform: var(--mbx-move-trans);
-    /* width: var(--mbx-old-wide); */
+    width: var(--mbx-old-wide);
     font-size: var(--mbx-old-font);
   }
   to {
     transform: translate(0, 0);
-    /* width: var(--mbx-new-wide); */
+    width: var(--mbx-new-wide);
     font-size: var(--mbx-new-font);
   }
 }
+
 /* #endregion */
 
 /* #region DOPPLE */
@@ -1305,9 +1326,9 @@ x:has(> [data-root="back"]) {
 
 /* #region BRAK */
 [data-brak-base] {
-  --brak-thick:   "M50 105 A 5 5 0 0 1 55 100 H 100 A 10 10 0 0 0 110 90 A 10 20 0 0 1 100 110 H 60 A 10 10 0 0 0 50 120 A 10 10 0 0 0 40 110 H 0 A 10 20 0 0 1 -10 90 A 10 10 0 0 0 0 100 H 45 A 5 5 0 0 1 50 105 Z";
-  --brak-thin:    "M50 105 A 5 5 0 0 1 55 100 H 100 A 10 10 0 0 0 110 90 A 10 17 0 0 1 100 107 H 60 A 10 10 0 0 0 50 117 A 10 10 0 0 0 40 107 H 0 A 10 17 0 0 1 -10 90 A 10 10 0 0 0 0 100 H 45 A 5 5 0 0 1 50 105 Z";
-  --brak-scrawny: "M50 105 A 5 5 0 0 1 55 100 H 100 A 10 10 0 0 0 110 90 A 10 15 0 0 1 100 105 H 60 A 10 10 0 0 0 50 115 A 10 10 0 0 0 40 105 H 0 A 10 15 0 0 1 -10 90 A 10 10 0 0 0 0 100 H 45 A 5 5 0 0 1 50 105 Z";
+  --brak-thick: "M50 105 A 5 5 0 0 1 55 100 H 90 A 10 10 0 0 0 100 90 A 10 20 0 0 1 90 110 H 60 A 10 10 0 0 0 50 120 A 10 10 0 0 0 40 110 H 10 A 10 20 0 0 1 0 90 A 10 10 0 0 0 10 100 H 45 A 5 5 0 0 1 50 105 Z";
+  --brak-thin: "M50 105 A 5 5 0 0 1 55 100 H 90 A 10 10 0 0 0 100 90 A 10 17 0 0 1 90 107 H 60 A 10 10 0 0 0 50 117 A 10 10 0 0 0 40 107 H 10 A 10 17 0 0 1 0 90 A 10 10 0 0 0 10 100 H 45 A 5 5 0 0 1 50 105 Z";
+  --brak-scrawny: "M50 105 A 5 5 0 0 1 55 100 H 90 A 10 10 0 0 0 100 90 A 10 15 0 0 1 90 105 H 60 A 10 10 0 0 0 50 115 A 10 10 0 0 0 40 105 H 10 A 10 15 0 0 1 0 90 A 10 10 0 0 0 10 100 H 45 A 5 5 0 0 1 50 105 Z";
   d: path(var(--brak-thin));
 }
 [data-brak-base="thick"] {
@@ -1323,13 +1344,13 @@ x:has(> [data-root="back"]) {
 }
 @keyframes mbx-brak-keys {
   0% {
-    d: path("M50 80 L 50 130 L 50 130 L 50 130 L 50 130 Z")
+    d: path("M50 80 L 50 130 L 50 130 L 50 130 L 50 130 Z");
   }
   80% {
-    d: path("M50 80 L -30 130 L -30 130 L 130 130 L 130 130 Z")
+    d: path("M50 80 L -30 130 L -30 130 L 130 130 L 130 130 Z");
   }
   100% {
-    d: path("M50 80 L -30 50 L -30 130 L 130 130 L 130 50 Z")
+    d: path("M50 80 L -30 50 L -30 130 L 130 130 L 130 50 Z");
   }
 }
 /* #endregion */

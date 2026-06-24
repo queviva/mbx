@@ -31,7 +31,7 @@
   </head>
 
   <body>
-    <rat-batix id="two" data-mbx='{"color":300}'></rat-batix>
+    <rat-batix id="two" data-mbx='{"xxx_color":300}'></rat-batix>
 
     <script id="ROUTINES">
       const routineTwo = {
@@ -40,18 +40,23 @@
           illuminated acrobatic gestural mathematics
         `,
         stage: `
-           <mbx-tite id="T3x" val="-0.075em">
-            <x id="T3">3</x>
-            <x id="Tx">x^2</x>
-           </mbx-tite>
-           <x id="T-25">
-            <x id="T2-a">- 2</x>
-            <x id="T5">+ 5</x>
-           </x>
+           <x id="T7">7</x>
+           <mbx-frak id="T3x2-frak">
+            <x id="Tn3-num">
+             <x id="Tn">n</x>
+             <x id="Tplus">+</x>
+             <x id="T3">3</x>
+            </x>
+            <x id="Tx">x</x>
+           </mbx-frak>
+           <x id="T5">+ 5</x>
+           <x id="T2">+ 2</x>
            <x id="EQ">=</x>
            <mbx-frak id="frak-1">
             <x id="T9">9</x>
-            <x id="T11">11</x>
+            <x data-tite>
+             <x id="T11">n^7</x>
+            </x>
            </mbx-frak>
         `,
         steps: [
@@ -60,18 +65,21 @@
               <x>short and sweet tags</x>
             `,
             acts: (X) => {
-              X.spot("T-25").brak("180deg");
             },
           },
           {
             note: "move is extremely destructive",
             acts: (X) => {
-              X.mount("T3-b", "+ 3");
-              X.spot("T2-a", "T5").absorb("T3-b");
-              X.spot("T-25").wink();
+              X.spot("T5").moveAfter("EQ");
+              // X.spot("T3").moveBefore("T11");
             }
           },
-          {},
+          {
+            acts: (X) => {
+              X.spot("T2-holder").dismount();
+              X.spot("T3").spin();
+            }
+          },
         ],
       };
 
