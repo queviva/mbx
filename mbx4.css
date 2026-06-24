@@ -164,37 +164,17 @@ x {
 
 /* #region MOVE */
 
-[data-prime-mover] {
-  /* border: 0.25px solid green; */
-  /* color: var(--main-color); */
-  /* will-change: width; */
-  /* animation: mbx-prime-mover linear both; */
-  /* animation-timeline: --anim-timeline; */
-  /* animation-range: var(--animation-range); */
-}
-@keyframes mbx-prime-mover {
-  from {
-    width: 0px;
-  }
-  to {
-    width: var(--mbx-width);
-  }
-}
-
 [data-blank] {
   /* border: 0.25px dashed #909; */
   /* color: hsla(40, 100%, 80%, 0.1); */
   display: inline-grid;
   grid-template-areas: stack;
   gap: 0;
-  will-change: margin, width, left;
+
+  will-change: margin, left, width, height;
   animation: mbx-blank linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
-}
-[data-blank="new"] {
-  /* border: 0.25px dashed yellow; */
-  animation-direction: reverse;
 }
 [data-blank] > x {
   grid-area: stack;
@@ -207,8 +187,8 @@ x {
 @keyframes mbx-blank {
   from {
     margin: 0 0;
-    width: var(--blank-w);
     left: 0;
+    width: var(--blank-w);
     /* height: var(--blank-h); */
   }
   to {
@@ -218,11 +198,32 @@ x {
     /* height: 0px; */
   }
 }
+[data-blank="new"] {
+  /* border: 0.25px dashed yellow; */
+  will-change: margin, left, width, height;
+  animation: mbx-blank-new linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-blank-new {
+  from {
+    margin: 0 -0.125em;
+    left: 0;
+    width: 0px;
+    /* height: var(--blank-h); */
+  }
+  to {
+    margin: 0 0;
+    left: 0;
+    width: var(--blank-w);
+    /* height: 0px; */
+  }
+}
 
 [data-move] {
   /* border: 1px solid hsla(40, 80%, 80%, 0.15); */
   z-index: 10;
-  --mbx-move-trans: translate(calc(var(--mbx-dx) + 0.25em), var(--mbx-dy));
+  --mbx-move-trans: translate(calc(var(--mbx-dx) - 0.0em), var(--mbx-dy));
   will-change: transform, width, height, font;
   animation: mbx-move linear both;
   animation-timeline: --anim-timeline;

@@ -930,7 +930,7 @@
 
       // !!! display HAKC !!!
       // await raf();
-      void this.#stageObj.offsetHeight;
+      // void this.#stageObj.offsetHeight;
 
       // copy the step tags for next time
       const nextStep = this.#makeTag("x", stepTag.innerHTML, { step: "" });
