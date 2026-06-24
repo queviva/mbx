@@ -200,6 +200,7 @@ x {
   grid-area: stack;
 }
 [data-blank] > x:nth-child(1) {
+  /* !!! invisible color HAKC !!! */
   color: hsla(0, 0%, 0%, 0);
   opacity: 0;
 }

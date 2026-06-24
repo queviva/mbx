@@ -72,15 +72,17 @@
           {
             note: "move is extremely destructive",
             acts: (X) => {
-              // X.mount("T5minus", "-");
-              // X.spot("T5plus").xfade("T5minus");
+              // X.spot("T2").vaporize().during(0).shrink().during(0.8);
+              X.mount("T5minus", "-");
+              X.spot("T5plus").xfade("T5minus");
               X.spot("T3").moveBefore("T11");
               X.spot("T5").spin().vault().moveAfter("EQ");
             }
           },
           {
             acts: (X) => {
-              X.spot("T5").spin();
+              X.spot("T5").viva();
+              X.spot("T3").spin();
             }
           },
         ],

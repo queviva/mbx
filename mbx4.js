@@ -2,6 +2,8 @@
   // #region UTILS
   const log = console.log;
 
+  const stall = (v = 800) => new Promise((r) => setTimeout(r, v));
+
   const sieve = (base, incoming) => {
     incoming = incoming && typeof incoming === "object" ? incoming : {};
     return Object.fromEntries(
@@ -47,6 +49,8 @@
       clearTimeout(timerId);
     });
   };
+
+  const raf = () => new Promise((r) => requestAnimationFrame(r));
 
   const swapElements = (a, b) => {
     if (!a || !b || a === b) return;
@@ -392,10 +396,6 @@
         // get all the prime movers named for the move
         const primeMovers = direction === "after" ? this.#batties.reverse() : this.#batties;
 
-        // ~~~ DEBUGG ~~~
-        // label the prime movers
-        for (const prime of primeMovers) prime.setAttribute("data-prime-mover", "");
-
         // create old blank for each prime mover
         for (const prime of primeMovers) {
           // make a blank with INVISIBLE text ... haaaakc!!!
@@ -423,9 +423,6 @@
           // set prime mover's old font to the current font
           oldFonts.set(prime.id, getComputedStyle(prime).fontSize);
         }
-
-        // HAKC for dislay
-        // await new Promise((r) => requestAnimationFrame(r));
 
         // put the prime movers in their final position
         for (const prime of primeMovers) {
@@ -463,13 +460,11 @@
 
         // set move vals for prime movers
         for (const prime of primeMovers) {
-
           const oldRect = oldRects.get(prime.id);
           const newRect = newRects.get(prime.id);
 
           const oldWide = oldRect.width;
           const oldHigh = oldRect.height;
-
 
           const dx = oldRect.left - newRect.left;
           const dy = oldRect.top - newRect.top;
@@ -495,11 +490,7 @@
 
           // empty out the old blank
           // oldBlanks.get(prime.id).innerHTML = "";
-
         }
-
-        // ! HAKC for dislay
-        // await new Promise((r) => requestAnimationFrame(r));
 
         return this.#API;
       };
@@ -511,26 +502,12 @@
         },
         clean: [
           (stage) => {
-
-            log("cleaning step", this.#stepNum);
-
             for (const blank of stage.querySelectorAll(`[data-blank="new"]`)) {
-              const org = blank.children[1];
-              const id = org.id;
-              org.replaceWith(org.children[0]);
-              blank.children[1].id = id;
-              blank.replaceWith(blank.children[1]);
+              blank.children[0].id = blank.children[1].id;
+              blank.replaceWith(blank.children[0]);
             }
-
             for (const blank of stage.querySelectorAll("[data-blank]")) {
               blank.remove();
-            }
-
-            // this.#unWrap("move", stage);
-
-            for (const mover of stage.querySelectorAll("[data-prime-mover]")) {
-              //mover.removeAttribute("data-prime-mover");
-              // mover.removeAttribute("style");
             }
           },
         ],
@@ -928,7 +905,7 @@
 
     async #processStep(step) {
       // TEST & STALL
-      // await new Promise((r) => setTimeout(r, 800));
+      // await stall(1000);
 
       // load new stage if needed
       step.load ||= this.#stageObj.innerHTML;
@@ -945,17 +922,15 @@
       // append the steptags
       this.#holder.append(stepTag);
 
-      // !!! layout HAKC - must be here for measuring !!!
-      // await new Promise((r) => requestAnimationFrame(r));
-      //
-      // set measurements - requires HAKC
-      // this.#measureElements(...this.#stageObj.querySelectorAll("*"));
-
       // try to run the acts
       const acted = await this.#runActs(step);
 
       // check if that werked
       if (!acted) return { ok: false, reason: acted };
+
+      // !!! display HAKC !!!
+      // await raf();
+      void this.#stageObj.offsetHeight;
 
       // copy the step tags for next time
       const nextStep = this.#makeTag("x", stepTag.innerHTML, { step: "" });
