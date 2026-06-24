@@ -49,7 +49,9 @@
             </x>
             <x id="Tx">x</x>
            </mbx-frak>
-           <x id="T5">+ 5</x>
+           <x id="T5">
+            <x id="T5plus">+</x> 5
+           </x>
            <x id="T2">+ 2</x>
            <x id="EQ">=</x>
            <mbx-frak id="frak-1">
@@ -70,14 +72,15 @@
           {
             note: "move is extremely destructive",
             acts: (X) => {
-              X.spot("T5").moveAfter("EQ");
-              // X.spot("T3").moveBefore("T11");
+              // X.mount("T5minus", "-");
+              // X.spot("T5plus").xfade("T5minus");
+              X.spot("T3").moveBefore("T11");
+              X.spot("T5").spin().vault().moveAfter("EQ");
             }
           },
           {
             acts: (X) => {
-              X.spot("T2-holder").dismount();
-              X.spot("T3").spin();
+              X.spot("T5").spin();
             }
           },
         ],

@@ -377,36 +377,29 @@
         const anchor = this.#API.pick(anchorID);
         if (!anchor) return this.#API;
 
-        // maps for old & new bounding boxes
-        const oldRects = new Map();
-        const newRects = new Map();
-
         // maps for old & new blanks
         const oldBlanks = new Map();
         const newBlanks = new Map();
 
+        // maps for old & new bounding boxes
+        const oldRects = new Map();
+        const newRects = new Map();
+
         // maps for old & new fonts
-        const oldFont = new Map();
-        const newFont = new Map();
+        const oldFonts = new Map();
+        const newFonts = new Map();
 
         // get all the prime movers named for the move
         const primeMovers = direction === "after" ? this.#batties.reverse() : this.#batties;
 
+        // ~~~ DEBUGG ~~~
         // label the prime movers
         for (const prime of primeMovers) prime.setAttribute("data-prime-mover", "");
 
-        // get all the un-named
-        const otherMovers = Array.from(this.#stageObj.querySelectorAll("x")).filter(
-          (x) => !primeMovers.includes(x),
-        );
-
-        // just have a reference to all non-blank movers
-        const allMovers = [...primeMovers, ...otherMovers];
-
         // create old blank for each prime mover
         for (const prime of primeMovers) {
-          // make a blank
-          const blank = this.#makeTag("x", prime.innerHTML, { blank: "" });
+          // make a blank with INVISIBLE text ... haaaakc!!!
+          const blank = this.#makeTag("x", `<x>${prime.innerHTML}</x>`, { blank: "" });
 
           // put the blank in the original spot
           prime.parentNode.insertBefore(blank, prime);
@@ -428,19 +421,11 @@
           oldRects.set(prime.id, rect);
 
           // set prime mover's old font to the current font
-          oldFont.set(prime.id, getComputedStyle(prime).fontSize);
+          oldFonts.set(prime.id, getComputedStyle(prime).fontSize);
         }
 
         // HAKC for dislay
         // await new Promise((r) => requestAnimationFrame(r));
-
-        // measure other movers
-        for (const [i, mover] of otherMovers.entries()) {
-          mover.id ||= `${this.#opts.fix}-${i}`;
-          oldRects.set(mover.id, mover.getBoundingClientRect());
-          // their fonts should not change
-          // oldFont.set(mover.id, getComputedStyle(mover).fontSize);
-        }
 
         // put the prime movers in their final position
         for (const prime of primeMovers) {
@@ -450,16 +435,16 @@
 
         // create new blank for each prime mover
         for (const prime of primeMovers) {
-          // make a blank
-          const blank = this.#makeTag("x", "", { blank: "new" });
+          // make a blank with INVISIBLE text ... haaaakc!!!
+          const blank = this.#makeTag("x", `<x>${prime.innerHTML}</x>`, { blank: "new" });
 
-          // put the blank in the final spot
+          // put the new blank in the final position
           prime.parentNode.insertBefore(blank, prime);
 
           // put the prime mover inside the new blank
           blank.append(prime);
 
-          // get the blank's rect
+          // get the new blank's rect
           const rect = blank.getBoundingClientRect();
 
           // measure the blank for reverse animation
@@ -473,181 +458,48 @@
           newRects.set(prime.id, rect);
 
           // set prime mover's new font to the current font
-          newFont.set(prime.id, getComputedStyle(prime).fontSize);
+          newFonts.set(prime.id, getComputedStyle(prime).fontSize);
         }
 
-        return;
+        // set move vals for prime movers
+        for (const prime of primeMovers) {
 
-        // ! HAKC for dislay
-        // await new Promise((r) => requestAnimationFrame(r));
+          const oldRect = oldRects.get(prime.id);
+          const newRect = newRects.get(prime.id);
 
-        for (const [i, mover] of allMovers.entries()) {
-          newRects.set(mover.id, mover.getBoundingClientRect());
-          mover.newFont = getComputedStyle(mover).fontSize;
-        }
+          const oldWide = oldRect.width;
+          const oldHigh = oldRect.height;
 
-        // loop through all movers computing deltas
-        for (const mover of allMovers) {
-          const oldRect = oldRects.get(mover.id);
-          const newRect = newRects.get(mover.id);
 
           const dx = oldRect.left - newRect.left;
           const dy = oldRect.top - newRect.top;
+
+          const oldFont = oldFonts.get(prime.id);
+          const newFont = newFonts.get(prime.id);
 
           // a map of the delta
           const deltas = new Map([
             ["dx", `${Math.round(dx)}px`],
             ["dy", `${Math.round(dy)}px`],
-            ["old-font", mover.oldFont],
-            ["new-font", mover.newFont],
+            ["old-wide", `${Math.round(oldWide)}px`],
+            ["old-high", `${Math.round(oldHigh)}px`],
+            ["old-font", oldFont],
+            ["new-font", newFont],
           ]);
 
-          mover.innerHTML = `<x>${mover.innerHTML}</x>`;
-          const wrap = mover.children[0];
-          wrap.setAttribute("data-move", "");
-
-          // !!! DEBUGG !!!
-          const bug = mover.hasAttribute("data-frak-holder");
-
           for (const [key, val] of deltas) {
-            wrap.style.setProperty(`--${this.#opts.fix}-${key}`, val);
+            prime.style.setProperty(`--${this.#opts.fix}-${key}`, val);
           }
-        }
+          prime.setAttribute("data-move", "");
+          prime.innerHTML = `<x>${prime.innerHTML}</x>`;
 
-        return this.#API;
-      };
+          // empty out the old blank
+          // oldBlanks.get(prime.id).innerHTML = "";
 
-      return {
-        api: {
-          moveBefore: (id) => move(id, "before"),
-          moveAfter: (id) => move(id, "after"),
-        },
-        clean: [
-          (stage) => {
-            for (const blank of stage.querySelectorAll("[data-blank]")) {
-              blank.remove();
-            }
-            for (const mover of stage.querySelectorAll("[data-prime-mover]")) {
-              mover.removeAttribute("data-prime-mover");
-              // mover.removeAttribute("style");
-            }
-            this.#unWrap("move", stage);
-          },
-        ],
-      };
-    }
-
-    #xxx_makeMoveSkills() {
-      const move = async (anchorID, direction) => {
-        const anchor = this.#API.pick(anchorID);
-        if (!anchor) return this.#API;
-
-        const primeMovers =
-          direction === "after" ? Array.from(this.#batties).reverse() : Array.from(this.#batties);
-
-        if (primeMovers.length === 0) return this.#API;
-
-        // === PHASE 1: Replace primes with blanks ===
-        const blankMap = new Map();
-        for (const prime of primeMovers) {
-          if (!prime.parentNode) continue;
-
-          prime.style.setProperty(`--${this.#opts.fix}-old-font`, getComputedStyle(prime).fontSize);
-
-          const blank = this.#makeTag("x", prime.innerHTML, { blank: "" });
-
-          // Replace prime with blank (prime is removed from DOM)
-          prime.parentNode.replaceChild(blank, prime);
-
-          // Measure the blank — this becomes the starting rect for the prime
-          const rect = blank.getBoundingClientRect();
-          blank.style.setProperty("--blank-w", `${Math.round(rect.width)}px`);
-          blank.style.setProperty("--blank-h", `${Math.round(rect.height)}px`);
-
-          blankMap.set(prime, blank);
-        }
-
-        // === PHASE 2: Build allMovers (primes are now out) ===
-        const otherMovers = Array.from(this.#stageObj.querySelectorAll("x")).filter(
-          (x) => !primeMovers.includes(x),
-        );
-
-        const allMovers = [...primeMovers, ...otherMovers];
-
-        // Debug label
-        for (const prime of primeMovers) {
-          prime.setAttribute("data-prime-mover", "");
-        }
-
-        // === PHASE 3: Measure OLD positions ===
-        const oldRects = new Map();
-        const oldFonts = new Map();
-        for (const mover of allMovers) {
-          mover.id ||= `${this.#opts.fix}-${Math.random().toString(36).slice(2)}`;
-
-          if (primeMovers.includes(mover)) {
-            // Prime uses the blank's rect as starting position
-            const blank = blankMap.get(mover);
-            oldRects.set(mover.id, blank.getBoundingClientRect());
-          } else {
-            oldRects.set(mover.id, mover.getBoundingClientRect());
-          }
-          oldFonts.set(mover.id, getComputedStyle(mover).fontSize);
-        }
-        // ! HACK !
-        await new Promise((r) => requestAnimationFrame(r));
-
-        // === PHASE 4: Move primes to final position ===
-        for (const prime of primeMovers) {
-          const ref = direction === "after" ? anchor.nextSibling : anchor;
-          anchor.parentNode.insertBefore(prime, ref);
         }
 
         // ! HAKC for dislay
-        await new Promise((r) => requestAnimationFrame(r));
-
-        // === PHASE 5: Measure NEW positions ===
-        const newRects = new Map();
-        const newFonts = new Map();
-        for (const mover of allMovers) {
-          newRects.set(mover.id, mover.getBoundingClientRect());
-          newFonts.set(mover.id, getComputedStyle(mover).fontSize);
-        }
-
-        for (const blank of blankMap.values()) {
-          // blank.innerHTML = "";
-        }
-
-        // === PHASE 6: Wrap for animation ===
-        for (const mover of allMovers) {
-          if (mover.hasAttribute("data-blank")) continue;
-
-          const oldRect = oldRects.get(mover.id);
-          const newRect = newRects.get(mover.id);
-
-          const dx = oldRect.left - newRect.left;
-          const dy = oldRect.top - newRect.top;
-
-          const deltas = new Map([
-            ["dx", `${Math.round(dx)}px`],
-            ["dy", `${Math.round(dy)}px`],
-            ["old-wide", `${Math.round(oldRect.width)}px`],
-            ["new-wide", `${Math.round(newRect.width)}px`],
-            // ["old-font", oldFonts.get(mover.id)],
-            ["new-font", newFonts.get(mover.id)],
-          ]);
-          if (mover.hasAttribute("data-prime-mover")) {
-            this.#measureElements(mover);
-          }
-
-          mover.innerHTML = `<x>${mover.innerHTML}</x>`;
-          const wrap = mover.children[0];
-          wrap.setAttribute("data-move", "");
-
-          for (const [key, val] of deltas) {
-            wrap.style.setProperty(`--${this.#opts.fix}-${key}`, val);
-          }
-        }
+        // await new Promise((r) => requestAnimationFrame(r));
 
         return this.#API;
       };
@@ -659,14 +511,27 @@
         },
         clean: [
           (stage) => {
+
+            log("cleaning step", this.#stepNum);
+
+            for (const blank of stage.querySelectorAll(`[data-blank="new"]`)) {
+              const org = blank.children[1];
+              const id = org.id;
+              org.replaceWith(org.children[0]);
+              blank.children[1].id = id;
+              blank.replaceWith(blank.children[1]);
+            }
+
             for (const blank of stage.querySelectorAll("[data-blank]")) {
-              // blank.remove();
+              blank.remove();
             }
+
+            // this.#unWrap("move", stage);
+
             for (const mover of stage.querySelectorAll("[data-prime-mover]")) {
-              mover.removeAttribute("data-prime-mover");
-              mover.removeAttribute("style");
+              //mover.removeAttribute("data-prime-mover");
+              // mover.removeAttribute("style");
             }
-            this.#unWrap("move", stage);
           },
         ],
       };
@@ -1102,7 +967,7 @@
       this.#stageObj = nextStep.children[0];
 
       // remove IDs [or make #namespaceIDs()]
-      this.#removeIDs(stepTag.children[0]);
+      // this.#removeIDs(stepTag.children[0]);
       // this.#namespaceIDs(stepTag.children[0], this.#opts.fix, this.#stepNum);
 
       // the tag is done with measurements

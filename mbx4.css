@@ -165,11 +165,12 @@ x {
 /* #region MOVE */
 
 [data-prime-mover] {
-  border: 0.25px solid green;
-  will-change: width;
+  /* border: 0.25px solid green; */
+  /* color: var(--main-color); */
+  /* will-change: width; */
   /* animation: mbx-prime-mover linear both; */
-  animation-timeline: --anim-timeline;
-  animation-range: var(--animation-range);
+  /* animation-timeline: --anim-timeline; */
+  /* animation-range: var(--animation-range); */
 }
 @keyframes mbx-prime-mover {
   from {
@@ -181,18 +182,26 @@ x {
 }
 
 [data-blank] {
-  border: 0.25px dashed #909;
-  color: hsla(40, 100%, 80%, 0.1);
+  /* border: 0.25px dashed #909; */
+  /* color: hsla(40, 100%, 80%, 0.1); */
   display: inline-grid;
-  grid-template-areas: "stack";
+  grid-template-areas: stack;
+  gap: 0;
   will-change: margin, width, left;
   animation: mbx-blank linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
 [data-blank="new"] {
-  border: 0.25px dashed yellow;
+  /* border: 0.25px dashed yellow; */
   animation-direction: reverse;
+}
+[data-blank] > x {
+  grid-area: stack;
+}
+[data-blank] > x:nth-child(1) {
+  color: hsla(0, 0%, 0%, 0);
+  opacity: 0;
 }
 @keyframes mbx-blank {
   from {
@@ -210,9 +219,10 @@ x {
 }
 
 [data-move] {
-  border: 1px solid hsla(40, 80%, 80%, 0.15);
-  --mbx-move-trans: translate(var(--mbx-dx), var(--mbx-dy));
-  will-change: transform, width, font;
+  /* border: 1px solid hsla(40, 80%, 80%, 0.15); */
+  z-index: 10;
+  --mbx-move-trans: translate(calc(var(--mbx-dx) + 0.25em), var(--mbx-dy));
+  will-change: transform, width, height, font;
   animation: mbx-move linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
@@ -221,11 +231,13 @@ x {
   from {
     transform: var(--mbx-move-trans);
     width: var(--mbx-old-wide);
+    height: var(--mbx-old-high);
     font-size: var(--mbx-old-font);
   }
   to {
     transform: translate(0, 0);
     width: var(--mbx-new-wide);
+    height: var(--mbx-new-high);
     font-size: var(--mbx-new-font);
   }
 }
@@ -700,7 +712,7 @@ path[data-materialize] {
 [data-absorb] {
   position: relative;
   display: inline-grid;
-  grid-template-areas: "stack";
+  grid-template-areas: stack;
   justify-items: center;
   align-items: baseline;
 }
