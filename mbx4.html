@@ -40,26 +40,25 @@
           illuminated acrobatic gestural mathematics
         `,
         stage: `
-           <x id="T7">7</x>
-           <mbx-frak id="T3x2-frak">
-            <x id="Tn3-num">
-             <x id="Tn">n</x>
-             <x id="Tplus">+</x>
-             <x id="T3">3</x>
+          <x id="T5">5 +</x>
+          <x id="T3">3x
+            <x data-sup>
+              <x style="border:1px solid red;">
+                <x id="pow2">1</x>
+                <x>+ 1</x>
+              </x>
             </x>
-            <x id="Tx">x</x>
-           </mbx-frak>
-           <x id="T5">
-            <x id="T5plus">+</x> 5
-           </x>
-           <x id="T2">+ 2</x>
-           <x id="EQ">=</x>
-           <mbx-frak id="frak-1">
-            <x id="T9">9</x>
-            <x data-tite>
-             <x id="T11">n^7</x>
+          </x>
+          <x id="EQ">=</x>
+          <mbx-frak id="frak-1">
+            <x>9</x>
+            <x>
+              <x id="Tn">n</x>
+              <x data-sup><x data-tite>
+                <x id="powx">3xy</x>
+              </x></x>
             </x>
-           </mbx-frak>
+          </mbx-frak>
         `,
         steps: [
           {
@@ -72,17 +71,14 @@
           {
             note: "move is extremely destructive",
             acts: (X) => {
-              // X.spot("T2").vaporize().during(0).shrink().during(0.8);
-              X.mount("T5minus", "-");
-              X.spot("T5plus").xfade("T5minus");
-              X.spot("T3").moveBefore("T11");
-              X.spot("T5").spin().vault().moveAfter("EQ");
+              // X.spot("pow2").viva().moveBefore("powx");
+              // X.spot("pow2")
+              X.spot("T5")
+               .moveBefore("frak-1");
             }
           },
           {
             acts: (X) => {
-              X.spot("T5").viva();
-              X.spot("T3").spin();
             }
           },
         ],

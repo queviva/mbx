@@ -376,14 +376,21 @@
     }
 
     #makeMoveSkills() {
+      // !!! TASKS !!!
+      // + calc() gap in destination for "- 0.0em" in css:
+      //   --mbx-move-trans: translate(calc(var(--mbx-dx) - 0.0em), var(--mbx-dy));
+      //   this might be done with abs pos prime mover
+      //
+      // = ensure exponent moviture 
+      //   = requires changing sub|sub to being like frak
+      //   + sub still needs to do this
+      //
+      // + move ontop-of, doppel take-off & landing
+
       const move = async (anchorID, direction) => {
         // make sure there is a reference anchor
         const anchor = this.#API.pick(anchorID);
         if (!anchor) return this.#API;
-
-        // maps for old & new blanks
-        const oldBlanks = new Map();
-        const newBlanks = new Map();
 
         // maps for old & new bounding boxes
         const oldRects = new Map();
@@ -408,14 +415,12 @@
           blank.append(prime);
 
           // get the blank's rect
-          const rect = blank.getBoundingClientRect();
+          // const rect = blank.getBoundingClientRect();
+          const rect = prime.getBoundingClientRect();
 
           // measure the blank
           blank.style.setProperty("--blank-w", Math.round(rect.width) + "px");
           blank.style.setProperty("--blank-h", Math.round(rect.height) + "px");
-
-          // store that blank in the old blanks list
-          oldBlanks.set(prime.id, blank);
 
           // set prime mover's old rect to the blank's rect
           oldRects.set(prime.id, rect);
@@ -442,14 +447,12 @@
           blank.append(prime);
 
           // get the new blank's rect
-          const rect = blank.getBoundingClientRect();
+          // const rect = blank.getBoundingClientRect();
+          const rect = prime.getBoundingClientRect();
 
           // measure the blank for reverse animation
           blank.style.setProperty("--blank-w", Math.round(rect.width) + "px");
           blank.style.setProperty("--blank-h", Math.round(rect.height) + "px");
-
-          // store that blank in the new blanks list
-          newBlanks.set(prime.id, blank);
 
           // set prime mover's new rect to the blank's rect
           newRects.set(prime.id, rect);
@@ -460,11 +463,14 @@
 
         // set move vals for prime movers
         for (const prime of primeMovers) {
+
           const oldRect = oldRects.get(prime.id);
           const newRect = newRects.get(prime.id);
 
           const oldWide = oldRect.width;
+          const newWide = newRect.width;
           const oldHigh = oldRect.height;
+          const newHigh = newRect.height;
 
           const dx = oldRect.left - newRect.left;
           const dy = oldRect.top - newRect.top;
@@ -477,7 +483,9 @@
             ["dx", `${Math.round(dx)}px`],
             ["dy", `${Math.round(dy)}px`],
             ["old-wide", `${Math.round(oldWide)}px`],
+            ["new-wide", `${Math.round(newWide)}px`],
             ["old-high", `${Math.round(oldHigh)}px`],
+            ["new-high", `${Math.round(newHigh)}px`],
             ["old-font", oldFont],
             ["new-font", newFont],
           ]);
@@ -487,9 +495,6 @@
           }
           prime.setAttribute("data-move", "");
           prime.innerHTML = `<x>${prime.innerHTML}</x>`;
-
-          // empty out the old blank
-          // oldBlanks.get(prime.id).innerHTML = "";
         }
 
         return this.#API;

@@ -119,6 +119,7 @@ x {
 }
 [data-step] > :nth-child(1) {
   /* border: 2px dashed pink; */
+  position: relative;
   display: flex;
   flex-direction: row;
   gap: 0.25em;
@@ -147,7 +148,7 @@ x {
   align-items: baseline;
   justify-content: center;
   white-space: nowrap;
-  font-size: 0.55em;
+  font-size: var(--pow-size, 0.55em);
   margin-left: -0.35em;
 }
 [data-sup] {
@@ -156,14 +157,13 @@ x {
 }
 [data-sub] {
   border: 2px dashed green;
-  line-height: 1.5;
-  vertical-align: -0.6em;
+  line-height: 0.5;
+  vertical-align: -70%;
   font-style: italic;
 }
 /* #endregion */
 
-/* #region MOVE */
-
+/* #region BLANK */
 [data-blank] {
   /* border: 0.25px dashed #909; */
   /* color: hsla(40, 100%, 80%, 0.1); */
@@ -200,6 +200,7 @@ x {
 }
 [data-blank="new"] {
   /* border: 0.25px dashed yellow; */
+  position: relative;
   will-change: margin, left, width, height;
   animation: mbx-blank-new linear both;
   animation-timeline: --anim-timeline;
@@ -219,11 +220,13 @@ x {
     /* height: 0px; */
   }
 }
+/* #endregion */
 
+/* #region MOVE */
 [data-move] {
   /* border: 1px solid hsla(40, 80%, 80%, 0.15); */
   z-index: 10;
-  --mbx-move-trans: translate(calc(var(--mbx-dx) - 0.0em), var(--mbx-dy));
+  --mbx-move-trans: translate(calc(var(--mbx-dx) + 0px), calc(var(--mbx-dy) - 0px));
   will-change: transform, width, height, font;
   animation: mbx-move linear both;
   animation-timeline: --anim-timeline;
@@ -232,27 +235,33 @@ x {
 @keyframes mbx-move {
   from {
     transform: var(--mbx-move-trans);
+    /* left: var(--mbx-old-left); */
+    /* top: var(--mbx-old-top); */
     width: var(--mbx-old-wide);
     height: var(--mbx-old-high);
     font-size: var(--mbx-old-font);
   }
   to {
     transform: translate(0, 0);
+    /* left: var(--mbx-new-left); */
+    /* top: var(--mbx-new-top); */
     width: var(--mbx-new-wide);
     height: var(--mbx-new-high);
     font-size: var(--mbx-new-font);
   }
 }
-
 /* #endregion */
 
-/* #region DOPPLE */
-[data-dopple] {
+/* #region DOPPEL */
+[data-doppel] {
   display: inline-grid;
-  grid-template: 1fr 1fr;
+  grid-template-areas: stack;
+  justify-items: start;
+  align-items: start;
+  gap: 0;
 }
-[data-dopple] > x {
-  grid-area: 1 / 1 / 2 / 2;
+[data-doppel] > x {
+  grid-area: stack;
 }
 /* #endregion */
 
