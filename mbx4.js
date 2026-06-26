@@ -96,6 +96,7 @@
     #API = {};
     #short = {};
     #clean = [];
+    #queue = Promise.resolve();
     // #endregion
 
     constructor(holder, opts) {
@@ -153,11 +154,15 @@
       return tmpX.innerHTML;
     }
 
-    #makeTag(type, html, vals) {
+    #makeTag(type, html = "", vals) {
       const tag = document.createElement(type);
       tag.innerHTML = this.#markup(html);
       if (vals) {
         for (const [key, value] of Object.entries(vals)) {
+          if (key === "id") {
+            tag.id = CSS.escape(value);
+            continue;
+          }
           /^--/.test(key)
             ? tag.style.setProperty(key, value)
             : tag.setAttribute(`data-${key}`, value);
@@ -166,7 +171,7 @@
       return tag;
     }
 
-    #saniTag(type, html, vals) {
+    #saniTag(type, html = "", vals) {
       return this.#makeTag(type, this.#strip(html), vals);
     }
 
@@ -267,8 +272,7 @@
             return this.#API;
           },
           mount: (id, html, vals) => {
-            const bat = this.#makeTag("x", html, vals);
-            bat.id = CSS.escape(id);
+            const bat = this.#makeTag("x", html, { ...vals, id });
             this.#stageObj?.append(bat);
             return this.#API.spot(bat.id);
           },
@@ -331,13 +335,10 @@
           },
           "mbx-tite": (bat) => {
             const val = bat.getAttribute("val");
-            const tite = this.#makeTag(
-              "x",
-              `<x data-tite>${bat.innerHTML}</x>`,
-              !val || { [`--${this.#opts.fix}-tite-val`]: val },
-            );
-            if (bat.id) tite.id = bat.id;
-            return tite;
+            return this.#makeTag("x", `<x data-tite>${bat.innerHTML}</x>`, {
+              ...(val ? { [`--${this.#opts.fix}-tite-val`]: val } : {}),
+              ...(bat.id ? { id: bat.id } : {}),
+            });
           },
         },
       };
@@ -351,14 +352,19 @@
             const e = end != null ? Math.max(0, Math.min(1, end)) : null;
 
             for (const bat of this.#batties) {
-              let fc;
-              if (bat.children[0].hasAttribute("data-grow")) {
-                fc = bat;
-              } else {
-                fc = bat.children[0];
+              let fc = bat;
+              if (bat.children[0]) {
+                fc = bat.children[0].hasAttribute("data-grow") ? bat : bat.children[0];
               }
               if (start != null) fc.style.setProperty("--ani-start", start);
               if (end != null) fc.style.setProperty("--ani-end", end);
+              if (bat.hasAttribute("data-move")) {
+                const blanks = this.#stageObj.querySelectorAll(`[data-source="${bat.id}"]`);
+                for (const blank of blanks) {
+                  if (start != null) blank.style.setProperty("--ani-start", start);
+                  if (end != null) blank.style.setProperty("--ani-end", end);
+                }
+              }
             }
 
             return this.#API;
@@ -377,20 +383,20 @@
 
     #makeMoveSkills() {
       // !!! TASKS !!!
-      // + calc() gap in destination for "- 0.0em" in css:
-      //   --mbx-move-trans: translate(calc(var(--mbx-dx) - 0.0em), var(--mbx-dy));
-      //   this might be done with abs pos prime mover
-      //
-      // = ensure exponent moviture 
+      // = ensure exponent moviture
       //   = requires changing sub|sub to being like frak
       //   + sub still needs to do this
       //
       // + move ontop-of, doppel take-off & landing
 
-      const move = async (anchorID, direction) => {
+      const move = (anchorID, direction) => {
         // make sure there is a reference anchor
         const anchor = this.#API.pick(anchorID);
         if (!anchor) return this.#API;
+
+        // maps for old & new blanks
+        const oldBlanks = new Map();
+        const newBlanks = new Map();
 
         // maps for old & new bounding boxes
         const oldRects = new Map();
@@ -403,100 +409,106 @@
         // get all the prime movers named for the move
         const primeMovers = direction === "after" ? this.#batties.reverse() : this.#batties;
 
-        // create old blank for each prime mover
+        // loop through each mover
         for (const prime of primeMovers) {
-          // make a blank with INVISIBLE text ... haaaakc!!!
-          const blank = this.#makeTag("x", `<x>${prime.innerHTML}</x>`, { blank: "" });
+          // make old blank with INVISIBLE text ... haaaakc!!!
+          const oldBlank = this.#makeTag("x", `<x>${prime.innerHTML}</x>`, {
+            id: prime.id + "-old-blank",
+            source: prime.id,
+            blank: "",
+          });
 
-          // put the blank in the original spot
-          prime.parentNode.insertBefore(blank, prime);
+          // add old blank to old blank list
+          oldBlanks.set(prime.id, oldBlank);
+
+          // put the old blank in the original spot
+          prime.parentNode.insertBefore(oldBlank, prime);
 
           // put the prime mover inside the old blank
-          blank.append(prime);
+          oldBlank.append(prime);
 
-          // get the blank's rect
-          // const rect = blank.getBoundingClientRect();
-          const rect = prime.getBoundingClientRect();
+          // get the old blank's rect
+          const oldRect = oldBlank.getBoundingClientRect();
 
-          // measure the blank
-          blank.style.setProperty("--blank-w", Math.round(rect.width) + "px");
-          blank.style.setProperty("--blank-h", Math.round(rect.height) + "px");
+          // measure old blank for its own animation
+          oldBlank.style.setProperty("--blank-w", oldRect.width + "px");
+          oldBlank.style.setProperty("--blank-h", oldRect.height + "px");
 
-          // set prime mover's old rect to the blank's rect
-          oldRects.set(prime.id, rect);
+          // set the old rect
+          oldRects.set(prime.id, oldRect);
 
-          // set prime mover's old font to the current font
-          oldFonts.set(prime.id, getComputedStyle(prime).fontSize);
-        }
+          // set the old font
+          oldFonts.set(prime.id, parseFloat(getComputedStyle(prime).fontSize));
 
-        // put the prime movers in their final position
-        for (const prime of primeMovers) {
+          // put the prime mover in its final position
           const ref = direction === "after" ? anchor.nextSibling : anchor;
           anchor.parentNode.insertBefore(prime, ref);
-        }
 
-        // create new blank for each prime mover
-        for (const prime of primeMovers) {
-          // make a blank with INVISIBLE text ... haaaakc!!!
-          const blank = this.#makeTag("x", `<x>${prime.innerHTML}</x>`, { blank: "new" });
+          // make new blank with INVISIBLE text ... haaaakc!!!
+          const newBlank = this.#makeTag("x", `<x>${prime.innerHTML}</x>`, {
+            id: prime.id + "-new-blank",
+            source: prime.id,
+            blank: "",
+          });
+
+          // add new blank to the list
+          newBlanks.set(prime.id, newBlank);
 
           // put the new blank in the final position
-          prime.parentNode.insertBefore(blank, prime);
+          prime.parentNode.insertBefore(newBlank, prime);
 
           // put the prime mover inside the new blank
-          blank.append(prime);
+          newBlank.append(prime);
 
           // get the new blank's rect
-          // const rect = blank.getBoundingClientRect();
-          const rect = prime.getBoundingClientRect();
+          const newRect = newBlank.getBoundingClientRect();
 
-          // measure the blank for reverse animation
-          blank.style.setProperty("--blank-w", Math.round(rect.width) + "px");
-          blank.style.setProperty("--blank-h", Math.round(rect.height) + "px");
+          // measure new blank for its own animation
+          newBlank.style.setProperty("--blank-w", newRect.width + "px");
+          newBlank.style.setProperty("--blank-h", newRect.height + "px");
 
-          // set prime mover's new rect to the blank's rect
-          newRects.set(prime.id, rect);
+          // set the new rect
+          newRects.set(prime.id, newRect);
 
-          // set prime mover's new font to the current font
-          newFonts.set(prime.id, getComputedStyle(prime).fontSize);
-        }
-
-        // set move vals for prime movers
-        for (const prime of primeMovers) {
-
-          const oldRect = oldRects.get(prime.id);
-          const newRect = newRects.get(prime.id);
-
-          const oldWide = oldRect.width;
-          const newWide = newRect.width;
-          const oldHigh = oldRect.height;
-          const newHigh = newRect.height;
-
-          const dx = oldRect.left - newRect.left;
-          const dy = oldRect.top - newRect.top;
+          // set the new font
+          newFonts.set(prime.id, parseFloat(getComputedStyle(prime).fontSize));
 
           const oldFont = oldFonts.get(prime.id);
           const newFont = newFonts.get(prime.id);
 
           // a map of the delta
           const deltas = new Map([
-            ["dx", `${Math.round(dx)}px`],
-            ["dy", `${Math.round(dy)}px`],
-            ["old-wide", `${Math.round(oldWide)}px`],
-            ["new-wide", `${Math.round(newWide)}px`],
-            ["old-high", `${Math.round(oldHigh)}px`],
-            ["new-high", `${Math.round(newHigh)}px`],
+            ["dx", oldRect.left - newRect.left],
+            ["dy", oldRect.top - newRect.top],
+            ["old-wide", oldRect.width],
+            ["new-wide", newRect.width],
+            ["old-high", oldRect.height],
+            ["new-high", newRect.height],
             ["old-font", oldFont],
             ["new-font", newFont],
           ]);
 
-          for (const [key, val] of deltas) {
-            prime.style.setProperty(`--${this.#opts.fix}-${key}`, val);
-          }
           prime.setAttribute("data-move", "");
           prime.innerHTML = `<x>${prime.innerHTML}</x>`;
+
+          for (const [key, val] of deltas) {
+            prime.style.setProperty(`--${this.#opts.fix}-${key}`, `${Math.round(val)}px`);
+          }
         }
 
+        // turn old blanks on
+        for (const blank of oldBlanks.values()) {
+          blank.style.display = "inline-grid";
+          blank.setAttribute("data-blank", "old");
+        }
+
+        // turn new blanks on
+        for (const blank of newBlanks.values()) {
+          blank.style.display = "inline-grid";
+          blank.setAttribute("data-blank", "new");
+        }
+
+        // returns promise, this is async
         return this.#API;
       };
 
@@ -640,10 +652,12 @@
             const tag = this.#makeTag(
               "x",
               `<x data-jest>${makeHTML[type](bat.innerHTML, skill)}</x>`,
+              {
+                ...(bat.id ? { id: bat.id } : {}),
+                ...(bat.getAttribute("val") ? { [`--${fixy}-val`]: bat.getAttribute("val") } : {}),
+              },
             );
-            const val = bat.getAttribute("val");
-            if (bat.id) tag.id = bat.id;
-            if (val) tag.style.setProperty(`--${fixy}-val`, val);
+
             if (type === "clip") {
               tag.querySelector(`[data-${skill}-base]`).setAttribute("clip-path", "");
             }
@@ -704,12 +718,10 @@
         api[skill] = (...ids) => {
           const bat0 = this.#batties[0];
           const ID = `${bat0.id}-${skill}`;
-
-          const top = this.#makeTag("x", makeHTML[skill](ID));
+          const top = this.#makeTag("x", makeHTML[skill](ID), { id: ID });
           const guy = top.querySelector(`[data-${skill}]`);
           guy.setAttribute(`data-${skill}`, "fore");
           const [num, slash, den] = guy.children;
-          top.id = ID;
           bat0.parentNode.insertBefore(top, bat0);
           for (const bat of this.#batties) num.append(bat);
           for (const id of new Set(ids)) den.append(this.#API.pick(id));
@@ -726,11 +738,12 @@
         short[fixy] = (bat) => {
           if (bat.children.length !== 2) return;
           const [orgNum, orgDen] = bat.children;
-          const top = this.#makeTag("x", makeHTML[skill](bat?.id));
+          const top = this.#makeTag("x", makeHTML[skill](bat?.id), {
+            ...(bat.id ? { id: bat.id } : {}),
+          });
           const guy = top.querySelector(`[data-${skill}]`);
           guy.children[0].append(orgNum);
           guy.children[2].append(orgDen);
-          if (bat.id) top.id = bat.id;
           return top;
         };
         clean.push((stage) => {

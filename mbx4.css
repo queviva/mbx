@@ -118,7 +118,7 @@ x {
   margin-bottom: 30vh;
 }
 [data-step] > :nth-child(1) {
-  /* border: 2px dashed pink; */
+  background-color: hsla(0, 100%, 100%, 0.1);
   position: relative;
   display: flex;
   flex-direction: row;
@@ -152,8 +152,8 @@ x {
   margin-left: -0.35em;
 }
 [data-sup] {
-  line-height: 1;
-  vertical-align: 70%;
+  /* line-height: 1; */
+  /* vertical-align: 70%; */
 }
 [data-sub] {
   border: 2px dashed green;
@@ -166,25 +166,27 @@ x {
 /* #region BLANK */
 [data-blank] {
   /* border: 0.25px dashed #909; */
-  /* color: hsla(40, 100%, 80%, 0.1); */
+  background-color: hsla(40, 100%, 90%, 0.5);
+  color: hsla(40, 100%, 10%, 0.5);
   display: inline-grid;
   grid-template-areas: stack;
   gap: 0;
-
-  will-change: margin, left, width, height;
-  animation: mbx-blank linear both;
-  animation-timeline: --anim-timeline;
-  animation-range: var(--animation-range);
 }
 [data-blank] > x {
   grid-area: stack;
 }
 [data-blank] > x:nth-child(1) {
   /* !!! invisible color HAKC !!! */
-  color: hsla(0, 0%, 0%, 0);
-  opacity: 0;
+  /* color: hsla(0, 0%, 0%, 0); */
+  /* opacity: 0; */
 }
-@keyframes mbx-blank {
+[data-blank="old"] {
+  will-change: margin, left, width, height;
+  animation: mbx-blank-old linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-blank-old {
   from {
     margin: 0 0;
     left: 0;
@@ -200,6 +202,7 @@ x {
 }
 [data-blank="new"] {
   /* border: 0.25px dashed yellow; */
+  color: hsla(300, 100%, 90%, 0.5);
   position: relative;
   will-change: margin, left, width, height;
   animation: mbx-blank-new linear both;
@@ -224,9 +227,10 @@ x {
 
 /* #region MOVE */
 [data-move] {
-  /* border: 1px solid hsla(40, 80%, 80%, 0.15); */
+  position: absolute;
+  color: red;
   z-index: 10;
-  --mbx-move-trans: translate(calc(var(--mbx-dx) + 0px), calc(var(--mbx-dy) - 0px));
+  --mbx-move-trans: translate(calc(var(--mbx-dx) + 0px + 0.0em), calc(var(--mbx-dy) - 0px));
   will-change: transform, width, height, font;
   animation: mbx-move linear both;
   animation-timeline: --anim-timeline;
@@ -235,16 +239,12 @@ x {
 @keyframes mbx-move {
   from {
     transform: var(--mbx-move-trans);
-    /* left: var(--mbx-old-left); */
-    /* top: var(--mbx-old-top); */
     width: var(--mbx-old-wide);
     height: var(--mbx-old-high);
     font-size: var(--mbx-old-font);
   }
   to {
     transform: translate(0, 0);
-    /* left: var(--mbx-new-left); */
-    /* top: var(--mbx-new-top); */
     width: var(--mbx-new-wide);
     height: var(--mbx-new-high);
     font-size: var(--mbx-new-font);

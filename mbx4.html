@@ -41,24 +41,16 @@
         `,
         stage: `
           <x id="T5">5 +</x>
-          <x id="T3">3x
-            <x data-sup>
-              <x style="border:1px solid red;">
-                <x id="pow2">1</x>
-                <x>+ 1</x>
-              </x>
-            </x>
-          </x>
-          <x id="EQ">=</x>
           <mbx-frak id="frak-1">
-            <x>9</x>
-            <x>
-              <x id="Tn">n</x>
-              <x data-sup><x data-tite>
-                <x id="powx">3xy</x>
-              </x></x>
-            </x>
+            <x id="Tx">x</x>
+            <x>2</x>
           </mbx-frak>
+          <x id="EQ">=</x>
+          <mbx-frak id="frak-2">
+            <x><x id="T3">3</x></x>
+            <x><x id="T4">4</x></x>
+          </mbx-frak>
+          <x id="T9">+ 9</x>
         `,
         steps: [
           {
@@ -71,10 +63,12 @@
           {
             note: "move is extremely destructive",
             acts: (X) => {
-              // X.spot("pow2").viva().moveBefore("powx");
-              // X.spot("pow2")
-              X.spot("T5")
-               .moveBefore("frak-1");
+              X.spot("T9").viva();
+              X.spot("Tx")
+                .moveAfter("frak-2")
+                .during(0.0, 0.3)
+              ;
+              X.spot("T5").spin().vault().moveAfter("T9");
             }
           },
           {
