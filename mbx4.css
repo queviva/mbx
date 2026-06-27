@@ -117,8 +117,9 @@ x {
   position: relative;
   margin-bottom: 30vh;
 }
+[data-stage],
 [data-step] > :nth-child(1) {
-  background-color: hsla(0, 100%, 100%, 0.1);
+  /* background-color: hsla(0, 100%, 100%, 0.1); */
   position: relative;
   display: flex;
   flex-direction: row;
@@ -165,9 +166,8 @@ x {
 
 /* #region BLANK */
 [data-blank] {
-  /* border: 0.25px dashed #909; */
-  background-color: hsla(40, 100%, 90%, 0.5);
-  color: hsla(40, 100%, 10%, 0.5);
+  /* background-color: hsla(40, 100%, 90%, 0.5); */
+  /* color: hsla(40, 100%, 10%, 0.5); */
   display: inline-grid;
   grid-template-areas: stack;
   gap: 0;
@@ -177,16 +177,16 @@ x {
 }
 [data-blank] > x:nth-child(1) {
   /* !!! invisible color HAKC !!! */
-  /* color: hsla(0, 0%, 0%, 0); */
-  /* opacity: 0; */
+  color: hsla(0, 0%, 0%, 0);
+  opacity: 0;
 }
-[data-blank="old"] {
+[data-blank="origin"] {
   will-change: margin, left, width, height;
-  animation: mbx-blank-old linear both;
+  animation: mbx-blank-origin linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
-@keyframes mbx-blank-old {
+@keyframes mbx-blank-origin {
   from {
     margin: 0 0;
     left: 0;
@@ -200,16 +200,16 @@ x {
     /* height: 0px; */
   }
 }
-[data-blank="new"] {
-  /* border: 0.25px dashed yellow; */
-  color: hsla(300, 100%, 90%, 0.5);
+[data-blank="destiny"] {
+  /* background-color: hsla(300, 100%, 90%, 0.5); */
+  /* color: hsla(300, 100%, 20%, 0.3); */
   position: relative;
   will-change: margin, left, width, height;
-  animation: mbx-blank-new linear both;
+  animation: mbx-blank-destiny linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
-@keyframes mbx-blank-new {
+@keyframes mbx-blank-destiny {
   from {
     margin: 0 -0.125em;
     left: 0;
@@ -228,23 +228,26 @@ x {
 /* #region MOVE */
 [data-move] {
   position: absolute;
-  color: red;
   z-index: 10;
-  --mbx-move-trans: translate(calc(var(--mbx-dx) + 0px + 0.0em), calc(var(--mbx-dy) - 0px));
-  will-change: transform, width, height, font;
+  /* --mbx-move-trans: translate(calc(var(--mbx-dx) + 0px + 0.0em), calc(var(--mbx-dy) - 0px)); */
+  will-change: left, top, width, height, font;
   animation: mbx-move linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
 @keyframes mbx-move {
   from {
-    transform: var(--mbx-move-trans);
+    /* transform: var(--mbx-move-trans); */
+    left: var(--mbx-old-left);
+    top: var(--mbx-old-top);
     width: var(--mbx-old-wide);
     height: var(--mbx-old-high);
     font-size: var(--mbx-old-font);
   }
   to {
-    transform: translate(0, 0);
+    /* transform: translate(0, 0); */
+    left: var(--mbx-new-left);
+    top: var(--mbx-new-top);
     width: var(--mbx-new-wide);
     height: var(--mbx-new-high);
     font-size: var(--mbx-new-font);
@@ -329,7 +332,7 @@ x:has(> [data-grow="back"]) {
 
 /* #region VAULT */
 [data-vault] {
-  --vault-height: -1em;
+  --vault-height: 1em;
   animation: mbx-vault ease-out both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
@@ -339,10 +342,10 @@ x:has(> [data-grow="back"]) {
     transform: translateY(0em);
   }
   15% {
-    transform: translateY(var(--mbx-vault-val, -1em));
+    transform: translateY(calc(-1 * var(--mbx-vault-val, -1em)));
   }
   85% {
-    transform: translateY(var(--mbx-vault-val, -1em));
+    transform: translateY(calc(-1 * var(--mbx-vault-val, -1em)));
   }
   100% {
     transform: translateY(0em);

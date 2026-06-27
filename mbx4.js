@@ -381,134 +381,150 @@
       };
     }
 
-    #makeMoveSkills() {
-      // !!! TASKS !!!
-      // = ensure exponent moviture
-      //   = requires changing sub|sub to being like frak
-      //   + sub still needs to do this
-      //
-      // + move ontop-of, doppel take-off & landing
+    #makeMoveBlank(type, prime, val) {
+      // try using a stripped clone
+      const clone = prime.cloneNode(true);
+      for (const tuck of clone.querySelectorAll("[data-tuck], [data-vault], [data-spin]")) {
+        tuck.replaceWith(...[...tuck.childNodes]);
+      }
 
+      // make blank with INVISIBLE text ... haaaakc!!!
+      const blank = this.#makeTag("x", `<x>${clone.innerHTML}</x>`, {
+        id: `${prime.id}-${type}-blank`,
+        source: prime.id,
+        blank: type,
+      });
+
+      // put the blank in the original spot
+      prime.parentNode.insertBefore(blank, prime);
+
+      // put the prime mover inside the blank
+      blank.append(prime);
+
+      // get the blank's rect
+      const rect = blank.getBoundingClientRect();
+
+      // measure blank for its own animation
+      blank.style.setProperty("--blank-w", rect.width + "px");
+      blank.style.setProperty("--blank-h", rect.height + "px");
+    }
+
+    #makeMoveSkills() {
       const move = (anchorID, direction) => {
         // make sure there is a reference anchor
         const anchor = this.#API.pick(anchorID);
         if (!anchor) return this.#API;
 
-        // maps for old & new blanks
-        const oldBlanks = new Map();
-        const newBlanks = new Map();
-
-        // maps for old & new bounding boxes
-        const oldRects = new Map();
-        const newRects = new Map();
-
-        // maps for old & new fonts
-        const oldFonts = new Map();
-        const newFonts = new Map();
+        // storage maps
+        const orig = { blanks: new Map(), rects: new Map(), fonts: new Map() };
+        const dest = { blanks: new Map(), rects: new Map(), fonts: new Map() };
 
         // get all the prime movers named for the move
         const primeMovers = direction === "after" ? this.#batties.reverse() : this.#batties;
 
-        // loop through each mover
+        // loop through each mover & make blanks
         for (const prime of primeMovers) {
-          // make old blank with INVISIBLE text ... haaaakc!!!
-          const oldBlank = this.#makeTag("x", `<x>${prime.innerHTML}</x>`, {
-            id: prime.id + "-old-blank",
-            source: prime.id,
-            blank: "",
-          });
-
-          // add old blank to old blank list
-          oldBlanks.set(prime.id, oldBlank);
-
-          // put the old blank in the original spot
-          prime.parentNode.insertBefore(oldBlank, prime);
-
-          // put the prime mover inside the old blank
-          oldBlank.append(prime);
-
-          // get the old blank's rect
-          const oldRect = oldBlank.getBoundingClientRect();
-
-          // measure old blank for its own animation
-          oldBlank.style.setProperty("--blank-w", oldRect.width + "px");
-          oldBlank.style.setProperty("--blank-h", oldRect.height + "px");
-
-          // set the old rect
-          oldRects.set(prime.id, oldRect);
-
-          // set the old font
-          oldFonts.set(prime.id, parseFloat(getComputedStyle(prime).fontSize));
+          // make old blank
+          this.#makeMoveBlank("origin", prime);
 
           // put the prime mover in its final position
           const ref = direction === "after" ? anchor.nextSibling : anchor;
           anchor.parentNode.insertBefore(prime, ref);
 
-          // make new blank with INVISIBLE text ... haaaakc!!!
-          const newBlank = this.#makeTag("x", `<x>${prime.innerHTML}</x>`, {
-            id: prime.id + "-new-blank",
-            source: prime.id,
-            blank: "",
-          });
+          // make new blank
+          this.#makeMoveBlank("destiny", prime);
 
-          // add new blank to the list
-          newBlanks.set(prime.id, newBlank);
+          // make it a prime mover
+          prime.setAttribute("data-move", "");
+        }
 
-          // put the new blank in the final position
-          prime.parentNode.insertBefore(newBlank, prime);
+        // grab ALL movers on stage
+        const movers = this.#stageObj.querySelectorAll("[data-move]");
 
-          // put the prime mover inside the new blank
-          newBlank.append(prime);
+        // sort all the blanks on the stage
+        for (const blank of this.#stageObj.querySelectorAll(`[data-blank="origin"]`)) {
+          const id = blank.getAttribute("data-source");
+          orig.blanks.set(id, blank);
+          blank.setAttribute("data-blank", "");
+        }
+        for (const blank of this.#stageObj.querySelectorAll(`[data-blank="destiny"]`)) {
+          const id = blank.getAttribute("data-source");
+          dest.blanks.set(id, blank);
+          blank.setAttribute("data-blank", "");
+        }
 
-          // get the new blank's rect
-          const newRect = newBlank.getBoundingClientRect();
+        // turn on origin blanks
+        for (const blank of orig.blanks.values()) {
+          blank.style.display = "inline-grid";
+        }
 
-          // measure new blank for its own animation
-          newBlank.style.setProperty("--blank-w", newRect.width + "px");
-          newBlank.style.setProperty("--blank-h", newRect.height + "px");
+        // turn off destiny blanks
+        for (const blank of dest.blanks.values()) {
+          blank.style.display = "none";
+        }
 
-          // set the new rect
-          newRects.set(prime.id, newRect);
+        // get origin rects
+        for (const [id, blank] of orig.blanks.entries()) {
+          orig.rects.set(id, blank.getBoundingClientRect());
+          orig.fonts.set(id, parseFloat(getComputedStyle(blank).fontSize));
+        }
 
-          // set the new font
-          newFonts.set(prime.id, parseFloat(getComputedStyle(prime).fontSize));
+        // turn off origin blanks
+        for (const blank of orig.blanks.values()) {
+          blank.style.display = "none";
+        }
 
-          const oldFont = oldFonts.get(prime.id);
-          const newFont = newFonts.get(prime.id);
+        // turn on destiny blanks
+        for (const blank of dest.blanks.values()) {
+          blank.style.display = "inline-grid";
+        }
+
+        // get destiny rects
+        for (const [id, blank] of dest.blanks.entries()) {
+          dest.rects.set(id, blank.getBoundingClientRect());
+          dest.fonts.set(id, parseFloat(getComputedStyle(blank).fontSize));
+        }
+
+        // mesure and set rect deltas
+        for (const prime of movers) {
+          // make it absolute position on the stage
+          this.#stageObj.append(prime);
+
+          const OR = orig.rects.get(prime.id);
+          const DR = dest.rects.get(prime.id);
+          const SR = this.#stageObj.getBoundingClientRect();
 
           // a map of the delta
           const deltas = new Map([
-            ["dx", oldRect.left - newRect.left],
-            ["dy", oldRect.top - newRect.top],
-            ["old-wide", oldRect.width],
-            ["new-wide", newRect.width],
-            ["old-high", oldRect.height],
-            ["new-high", newRect.height],
-            ["old-font", oldFont],
-            ["new-font", newFont],
+            ["old-top", OR.top - SR.top],
+            ["new-top", DR.top - SR.top],
+            ["old-left", OR.left - SR.left],
+            ["new-left", DR.left - SR.left],
+            ["old-wide", OR.width],
+            ["new-wide", DR.width],
+            ["old-high", OR.height],
+            ["new-high", DR.height],
+            ["old-font", orig.fonts.get(prime.id)],
+            ["new-font", dest.fonts.get(prime.id)],
           ]);
 
-          prime.setAttribute("data-move", "");
-          prime.innerHTML = `<x>${prime.innerHTML}</x>`;
-
+          // set the animation values
           for (const [key, val] of deltas) {
             prime.style.setProperty(`--${this.#opts.fix}-${key}`, `${Math.round(val)}px`);
           }
         }
 
-        // turn old blanks on
-        for (const blank of oldBlanks.values()) {
+        for (const blank of orig.blanks.values()) {
+          blank.setAttribute("data-blank", "origin");
           blank.style.display = "inline-grid";
-          blank.setAttribute("data-blank", "old");
         }
 
-        // turn new blanks on
-        for (const blank of newBlanks.values()) {
+        for (const blank of dest.blanks.values()) {
+          blank.setAttribute("data-blank", "destiny");
           blank.style.display = "inline-grid";
-          blank.setAttribute("data-blank", "new");
         }
 
-        // returns promise, this is async
+        // return the api
         return this.#API;
       };
 
@@ -519,12 +535,16 @@
         },
         clean: [
           (stage) => {
-            for (const blank of stage.querySelectorAll(`[data-blank="new"]`)) {
-              blank.children[0].id = blank.children[1].id;
+            for (const blank of stage.querySelectorAll(`[data-blank="destiny"]`)) {
+              const id = blank.getAttribute("data-source");
+              blank.children[0].id = id;
               blank.replaceWith(blank.children[0]);
             }
             for (const blank of stage.querySelectorAll("[data-blank]")) {
               blank.remove();
+            }
+            for (const mover of stage.querySelectorAll("[data-move]")) {
+              mover.remove();
             }
           },
         ],
@@ -699,7 +719,7 @@
              <x data-numerator ${id ? `id="${id}-numerator"` : ""}></x>
              <x data-slash ${id ? `id="${id}-slash"` : ""}>
               <svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
-               <path/>
+               <path ${id ? `id="${id}-slash-path"` : ""}   />
               </svg>
              </x>
              <x data-denominator ${id ? `id="${id}-denominator"` : ""}></x>
