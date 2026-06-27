@@ -130,7 +130,8 @@ x {
   /* contain: layout size style; */
   overflow: visible;
   height: 1lh;
-  font-family: "Times New Roman", Times, serif;
+  /* font-family: "Times New Roman", Times, serif; */
+  font-family: "Noto";
   view-timeline: --anim-timeline block;
 }
 [data-step] > :nth-child(2) {
@@ -228,7 +229,7 @@ x {
 /* #region MOVE */
 [data-move] {
   position: absolute;
-  z-index: 10;
+  /* z-index: 10; */
   /* --mbx-move-trans: translate(calc(var(--mbx-dx) + 0px + 0.0em), calc(var(--mbx-dy) - 0px)); */
   will-change: left, top, width, height, font;
   animation: mbx-move linear both;
@@ -255,26 +256,16 @@ x {
 }
 /* #endregion */
 
-/* #region DOPPEL */
-[data-doppel] {
-  display: inline-grid;
-  grid-template-areas: stack;
-  justify-items: start;
-  align-items: start;
-  gap: 0;
-}
-[data-doppel] > x {
-  grid-area: stack;
-}
-/* #endregion */
-
 /* #region GROW|SHRINK */
 x:has(> [data-grow]) {
-  /* border: 2px solid blue; */
+  --mbx-grow-margin: 0 -0.125em;
   will-change: margin;
   animation: mbx-grow-margin linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
+}
+[data-tite] x:has(> [data-grow]) {
+  --mbx-grow-margin: 0 0em;
 }
 x:has(> [data-grow="fore"]) {
   animation-direction: normal;
@@ -284,7 +275,7 @@ x:has(> [data-grow="back"]) {
 }
 @keyframes mbx-grow-margin {
   from {
-    margin: 0 -0.125em;
+    margin: var(--mbx-grow-margin);
   }
   to {
     margin: 0 0;
@@ -342,10 +333,10 @@ x:has(> [data-grow="back"]) {
     transform: translateY(0em);
   }
   15% {
-    transform: translateY(calc(-1 * var(--mbx-vault-val, -1em)));
+    transform: translateY(calc(-1 * var(--mbx-vault-val, 1em)));
   }
   85% {
-    transform: translateY(calc(-1 * var(--mbx-vault-val, -1em)));
+    transform: translateY(calc(-1 * var(--mbx-vault-val, 1em)));
   }
   100% {
     transform: translateY(0em);
@@ -718,7 +709,8 @@ path[data-materialize] {
 
 /* #region X-VAR */
 [data-xvar]::after {
-  content: "\1d6a1";
+  content: "x";
+  font-style: italic;
 }
 /* #endregion */
 
@@ -1279,14 +1271,14 @@ x:has(> [data-root="back"]) {
   animation-range: var(--animation-range);
 }
 [data-jest=""] [data-cank] {
-  d: path("M0 8 L 98 100 100 92 2 0Z");
+  d: path("M   0 8 L 98 100 L 100 92 L 2 0 Z");
 }
 @keyframes mbx-cank-keys {
   from {
-    d: path("M0 8 L 0 8 L 2 0 L 2 0 Z");
+    d: path("M 0 8 L  0   8 L   2  0 L 2 0 Z");
   }
   to {
-    d: path("M0 8 L 98 100 100 92 2 0Z");
+    d: path("M 0 8 L 98 100 L 100 92 L 2 0 Z");
   }
 }
 /* #endregion */
@@ -1390,16 +1382,18 @@ x:has(> [data-root="back"]) {
 }
 /* #endregion */
 
-/* #region HUDDLE */
-
-[data-huddle] {
+/* #region DOPPEL */
+[data-doppel] {
+  /* background: hsla(0,100%,100%,0.2); */
   display: inline-grid;
-  grid-template: 1fr 1fr;
+  grid-template-areas: stack;
+  justify-items: center;
+  align-items: center;
+  gap: 0;
 }
-[data-huddle] * {
-  grid-area: 1 / 1 / 2 / 2;
+[data-doppel] > x {
+  grid-area: stack;
 }
-
 /* #endregion */
 
 /* #region INLINE FRAK*/

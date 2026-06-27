@@ -40,15 +40,31 @@
           illuminated acrobatic gestural mathematics
         `,
         stage: `
+          <x id="Tdoppel" data-doppel>
+            <x id="T5-a">5</x>
+            <x id="T5-b">5</x>
+            <x id="T5-c">5</x>
+            <x id="T5-1">5</x>
+            <x id="T5-0">5</x>
+          </x>
           <mbx-frak id="frak-1">
-            <x id="Tx">x</x>
-            <x id="T2">
-              2<x id="Tdot">&middot;</x>
+            <x>
+            <x id="T2x" xxx-data-tite>
+              <x id="Tx3">
+                <x id="Tx">x</x>
+                <x data-sup>
+                  <x id="Ty">y</x>
+                </x>
+              </x>
+            </x>
+            </x>
+            <x>
+              <x id="T2-b">2</x>
             </x>
           </mbx-frak>
           <x id="EQ">=</x>
           <mbx-frak id="frak-2">
-            <x><x id="T3">3</x></x>
+            <x data-doppel><x id="T3">3</x></x>
             <x><x id="T4">4</x></x>
           </mbx-frak>
         `,
@@ -63,14 +79,17 @@
           {
             note: "move is extremely destructive",
             acts: (X) => {
-              X.spot("frak-1-slash-path").vaporize();
-              X.spot("frak-1").unFrak();
-              X.spot("Tdot").grow();
-              X.spot("T2").viva().moveBefore("T3");
+              X.spot("T5-0").ghost().during(0, 0.3).shrink().during(0.5);
+              X.spot("T5-1").vaporize().during(0.3, 0.5);
+              X.mount("T3-z", "3");
+              X.spot("T5-a").xfade("T3-z").spin().vault("1.2em").during(0.5, 1).moveBefore("T3").during(0.5, 1);
+              X.spot("T5-b").moveBefore("Ty").during(0.5, 1);
+              X.spot("T5-c").moveBefore("frak-2").during(0.5, 1);
             }
           },
           {
             acts: (X) => {
+              X.spot("Tdoppel").dismount();
             }
           },
         ],

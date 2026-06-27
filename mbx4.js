@@ -347,24 +347,37 @@
     #makeDurationSkills() {
       return {
         api: {
-          during: (start, end = null) => {
-            const s = start != null ? Math.max(0, Math.min(1, start)) : null;
-            const e = end != null ? Math.max(0, Math.min(1, end)) : null;
+          during: (val1, val2 = null) => {
+            let start = val1;
+            let end = val2;
+
+            if (val1 != null && val2 != null) {
+              start = Math.min(val1, val2);
+              end = Math.max(val1, val2);
+            }
+
+            const s = start != null ? Math.max(0, Math.min(1, start)) : 0;
+            const e = end != null ? Math.max(0, Math.min(1, end)) : 1;
 
             for (const bat of this.#batties) {
+
+              if (bat.hasAttribute("data-move")) {
+                bat.style.setProperty("--ani-start", s);
+                bat.style.setProperty("--ani-end", e);
+                const blanks = this.#stageObj.querySelectorAll(`[data-source="${bat.id}"]`);
+                for (const blank of blanks) {
+                  blank.style.setProperty("--ani-start", s);
+                  blank.style.setProperty("--ani-end", e);
+                }
+                continue;
+              }
               let fc = bat;
               if (bat.children[0]) {
                 fc = bat.children[0].hasAttribute("data-grow") ? bat : bat.children[0];
               }
-              if (start != null) fc.style.setProperty("--ani-start", start);
-              if (end != null) fc.style.setProperty("--ani-end", end);
-              if (bat.hasAttribute("data-move")) {
-                const blanks = this.#stageObj.querySelectorAll(`[data-source="${bat.id}"]`);
-                for (const blank of blanks) {
-                  if (start != null) blank.style.setProperty("--ani-start", start);
-                  if (end != null) blank.style.setProperty("--ani-end", end);
-                }
-              }
+
+              fc.style.setProperty("--ani-start", s);
+              fc.style.setProperty("--ani-end", e);
             }
 
             return this.#API;
@@ -511,6 +524,7 @@
           // set the animation values
           for (const [key, val] of deltas) {
             prime.style.setProperty(`--${this.#opts.fix}-${key}`, `${Math.round(val)}px`);
+            // prime.style.setProperty(`--${this.#opts.fix}-${key}`, `${val}px`);
           }
         }
 
