@@ -360,7 +360,6 @@
             const e = end != null ? Math.max(0, Math.min(1, end)) : 1;
 
             for (const bat of this.#batties) {
-
               if (bat.hasAttribute("data-move")) {
                 bat.style.setProperty("--ani-start", s);
                 bat.style.setProperty("--ani-end", e);
@@ -423,6 +422,8 @@
     }
 
     #makeMoveSkills() {
+      // !!! MAKE THIS ANCHORS INSTEAD OF ABS !!!
+      //
       const move = (anchorID, direction) => {
         // make sure there is a reference anchor
         const anchor = this.#API.pick(anchorID);
