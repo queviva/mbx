@@ -97,6 +97,7 @@
     #short = {};
     #clean = [];
     #queue = Promise.resolve();
+    #RO;
     // #endregion
 
     constructor(holder, opts) {
@@ -114,8 +115,8 @@
         this.#makeExitSkills(),
         this.#makeFadeSkills(),
       ];
-
       this.#makeAPI_SHORT_CLEAN();
+      this.#RO = this.#makeResizeObserver();
     }
 
     // #region SPOT UTILS
@@ -421,125 +422,174 @@
       blank.style.setProperty("--blank-h", rect.height + "px");
     }
 
+    #makeResizeObserver() {
+      return new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          let first = parseInt(entry.target.getAttribute("data-resized"));
+          if (first === 0) {
+            // entry.target.setAttribute("data-resized", ++first);
+            // continue;
+          }
+          entry.target.setAttribute("data-resized", ++first);
+          // log("resizing for", first,
+          // entry.target.cloneNode(true)
+          // );
+          // void entry.target.offsetHeight;
+          this.#measureMovers(entry.target);
+        }
+      });
+    }
+
+    #measureMovers(stage) {
+      // 1. Gather all elements dynamically from the specific stage passed in
+      const movers = stage.querySelectorAll("[data-move]");
+      const origBlanks = stage.querySelectorAll(`[data-blank="origin"]`);
+      const destBlanks = stage.querySelectorAll(`[data-blank="destiny"]`);
+
+      const orig = { blanks: new Map(), rects: new Map(), fonts: new Map() };
+      const dest = { blanks: new Map(), rects: new Map(), fonts: new Map() };
+
+      // 2. Map the blanks by their source ID
+      for (const blank of origBlanks) {
+        const id = blank.getAttribute("data-source");
+        orig.blanks.set(id, blank);
+        blank.setAttribute("data-blank", "");
+      }
+      for (const blank of destBlanks) {
+        const id = blank.getAttribute("data-source");
+        dest.blanks.set(id, blank);
+        blank.setAttribute("data-blank", "");
+      }
+
+      // 3. Measure Origin State
+      /*
+      for (const prime of movers) {
+        const clone = prime.cloneNode(true);
+        const dirty = orig.blanks.get(prime.id);
+        const clean = this.#makeTag("x", `<x>${clone.innerHTML}</x>`, {
+          id: `${prime.id}-origin-blank`,
+          source: prime.id,
+          blank: "",
+        });
+
+        orig.blanks.set(prime.id, clean);
+        dirty.replaceWith(clean);
+
+        const rect = clean.getBoundingClientRect();
+        clean.style.setProperty("--blank-w", rect.width + "px");
+        clean.style.setProperty("--blank-h", rect.height + "px");
+
+      }
+      */
+
+      for (const blank of orig.blanks.values()) {
+        blank.style.display = "inline-grid";
+      }
+      for (const blank of dest.blanks.values()) {
+        blank.style.display = "none";
+      }
+      for (const [id, blank] of orig.blanks.entries()) {
+        const rect = blank.getBoundingClientRect();
+        blank.style.setProperty("--blank-w", rect.width + "px");
+        blank.style.setProperty("--blank-h", rect.height + "px");
+        orig.rects.set(id, rect);
+        orig.fonts.set(id, parseFloat(getComputedStyle(blank).fontSize));
+      }
+
+      // 4. Measure Destiny State
+      /*
+      for (const prime of movers) {
+        const clone = prime.cloneNode(true);
+        const dirty = dest.blanks.get(prime.id);
+        const clean = this.#makeTag("x", `<x>${clone.innerHTML}</x>`, {
+          id: `${prime.id}-destiny-blank`,
+          source: prime.id,
+          blank: "",
+        });
+
+        dest.blanks.set(prime.id, clean);
+        dirty.replaceWith(clean);
+
+        const rect = clean.getBoundingClientRect();
+        clean.style.setProperty("--blank-w", rect.width + "px");
+        clean.style.setProperty("--blank-h", rect.height + "px");
+      }
+      */
+      for (const blank of orig.blanks.values()) {
+        blank.style.display = "none";
+      }
+      for (const blank of dest.blanks.values()) {
+        blank.style.display = "inline-grid";
+      }
+      for (const [id, blank] of dest.blanks.entries()) {
+        const rect = blank.getBoundingClientRect();
+        blank.style.setProperty("--blank-w", rect.width + "px");
+        blank.style.setProperty("--blank-h", rect.height + "px");
+        dest.rects.set(id, rect);
+        dest.fonts.set(id, parseFloat(getComputedStyle(blank).fontSize));
+      }
+
+      // 5. Compute Deltas relative to THIS specific stage
+      const stageRect = stage.getBoundingClientRect();
+
+      for (const prime of movers) {
+        const OR = orig.rects.get(prime.id);
+        const DR = dest.rects.get(prime.id);
+
+        if (!OR || !DR) continue;
+
+        const deltas = new Map([
+          ["old-top", OR.top - stageRect.top],
+          ["new-top", DR.top - stageRect.top],
+          ["old-left", OR.left - stageRect.left],
+          ["new-left", DR.left - stageRect.left],
+          ["old-wide", OR.width],
+          ["new-wide", DR.width],
+          ["old-high", OR.height],
+          ["new-high", DR.height],
+          ["old-font", orig.fonts.get(prime.id)],
+          ["new-font", dest.fonts.get(prime.id)],
+        ]);
+
+        for (const [key, val] of deltas) {
+          // prime.style.setProperty(`--${this.#opts.fix}-${key}`, `${Math.round(val)}px`);
+          prime.style.setProperty(`--${this.#opts.fix}-${key}`, `${val}px`);
+        }
+      }
+
+      // 6. Restore DOM Flags
+      for (const blank of orig.blanks.values()) {
+        blank.setAttribute("data-blank", "origin");
+        blank.style.display = "inline-grid";
+      }
+      for (const blank of dest.blanks.values()) {
+        blank.setAttribute("data-blank", "destiny");
+        blank.style.display = "inline-grid";
+      }
+    }
+
     #makeMoveSkills() {
-      // !!! MAKE THIS ANCHORS INSTEAD OF ABS !!!
-      //
       const move = (anchorID, direction) => {
-        // make sure there is a reference anchor
         const anchor = this.#API.pick(anchorID);
         if (!anchor) return this.#API;
 
-        // storage maps
-        const orig = { blanks: new Map(), rects: new Map(), fonts: new Map() };
-        const dest = { blanks: new Map(), rects: new Map(), fonts: new Map() };
-
-        // get all the prime movers named for the move
         const primeMovers = direction === "after" ? this.#batties.reverse() : this.#batties;
 
-        // loop through each mover & make blanks
         for (const prime of primeMovers) {
-          // make old blank
           this.#makeMoveBlank("origin", prime);
-
-          // put the prime mover in its final position
           const ref = direction === "after" ? anchor.nextSibling : anchor;
           anchor.parentNode.insertBefore(prime, ref);
-
-          // make new blank
           this.#makeMoveBlank("destiny", prime);
-
-          // make it a prime mover
           prime.setAttribute("data-move", "");
-        }
-
-        // grab ALL movers on stage
-        const movers = this.#stageObj.querySelectorAll("[data-move]");
-
-        // sort all the blanks on the stage
-        for (const blank of this.#stageObj.querySelectorAll(`[data-blank="origin"]`)) {
-          const id = blank.getAttribute("data-source");
-          orig.blanks.set(id, blank);
-          blank.setAttribute("data-blank", "");
-        }
-        for (const blank of this.#stageObj.querySelectorAll(`[data-blank="destiny"]`)) {
-          const id = blank.getAttribute("data-source");
-          dest.blanks.set(id, blank);
-          blank.setAttribute("data-blank", "");
-        }
-
-        // turn on origin blanks
-        for (const blank of orig.blanks.values()) {
-          blank.style.display = "inline-grid";
-        }
-
-        // turn off destiny blanks
-        for (const blank of dest.blanks.values()) {
-          blank.style.display = "none";
-        }
-
-        // get origin rects
-        for (const [id, blank] of orig.blanks.entries()) {
-          orig.rects.set(id, blank.getBoundingClientRect());
-          orig.fonts.set(id, parseFloat(getComputedStyle(blank).fontSize));
-        }
-
-        // turn off origin blanks
-        for (const blank of orig.blanks.values()) {
-          blank.style.display = "none";
-        }
-
-        // turn on destiny blanks
-        for (const blank of dest.blanks.values()) {
-          blank.style.display = "inline-grid";
-        }
-
-        // get destiny rects
-        for (const [id, blank] of dest.blanks.entries()) {
-          dest.rects.set(id, blank.getBoundingClientRect());
-          dest.fonts.set(id, parseFloat(getComputedStyle(blank).fontSize));
-        }
-
-        // mesure and set rect deltas
-        for (const prime of movers) {
-          // make it absolute position on the stage
           this.#stageObj.append(prime);
-
-          const OR = orig.rects.get(prime.id);
-          const DR = dest.rects.get(prime.id);
-          const SR = this.#stageObj.getBoundingClientRect();
-
-          // a map of the delta
-          const deltas = new Map([
-            ["old-top", OR.top - SR.top],
-            ["new-top", DR.top - SR.top],
-            ["old-left", OR.left - SR.left],
-            ["new-left", DR.left - SR.left],
-            ["old-wide", OR.width],
-            ["new-wide", DR.width],
-            ["old-high", OR.height],
-            ["new-high", DR.height],
-            ["old-font", orig.fonts.get(prime.id)],
-            ["new-font", dest.fonts.get(prime.id)],
-          ]);
-
-          // set the animation values
-          for (const [key, val] of deltas) {
-            prime.style.setProperty(`--${this.#opts.fix}-${key}`, `${Math.round(val)}px`);
-            // prime.style.setProperty(`--${this.#opts.fix}-${key}`, `${val}px`);
-          }
         }
 
-        for (const blank of orig.blanks.values()) {
-          blank.setAttribute("data-blank", "origin");
-          blank.style.display = "inline-grid";
-        }
+        this.#measureMovers(this.#stageObj);
 
-        for (const blank of dest.blanks.values()) {
-          blank.setAttribute("data-blank", "destiny");
-          blank.style.display = "inline-grid";
-        }
+        this.#stageObj.setAttribute("data-resized", "0");
+        this.#stageObj.setAttribute("data-stepNum", this.#stepNum);
+        this.#RO.observe(this.#stageObj);
 
-        // return the api
         return this.#API;
       };
 
@@ -958,7 +1008,7 @@
 
     async #processStep(step) {
       // TEST & STALL
-      // await stall(1000);
+      await stall(1000);
 
       // load new stage if needed
       step.load ||= this.#stageObj.innerHTML;

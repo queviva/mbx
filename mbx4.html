@@ -26,6 +26,9 @@
         background-color: #111;
       }
       @media screen and (orientation: portrait) {
+        rat-batix {
+          font-size: 2.25em;
+        }
       }
     </style>
   </head>
@@ -40,12 +43,12 @@
           illuminated acrobatic gestural mathematics
         `,
         stage: `
-          <x id="Tdoppel" data-doppel>
+          <x id="Tdoppel" data-doppel style="z-index:100;">
+            <x id="T5-1">5</x>
+            <x id="T5-0">5</x>
             <x id="T5-a">5</x>
             <x id="T5-b">5</x>
             <x id="T5-c">5</x>
-            <x id="T5-1">5</x>
-            <x id="T5-0">5</x>
           </x>
           <mbx-frak id="frak-1">
             <x>
@@ -90,8 +93,13 @@
           {
             acts: (X) => {
               X.spot("Tdoppel").dismount();
+              X.mount("T6", "- 6").insertAfter("frak-2");
+              X.spot("T6").moveBefore("EQ");
             }
           },
+          {
+            acts: (X) => {}
+          }
         ],
       };
 
