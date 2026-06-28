@@ -98,6 +98,7 @@
     #clean = [];
     #queue = Promise.resolve();
     #RO;
+    #resizeFrames = new WeakMap();
     // #endregion
 
     constructor(holder, opts) {
@@ -394,7 +395,7 @@
       };
     }
 
-    #makeMoveBlank(type, prime, val) {
+    #makeMoveBlank(type, prime) {
       // try using a stripped clone
       const clone = prime.cloneNode(true);
       for (const tuck of clone.querySelectorAll("[data-tuck], [data-vault], [data-spin]")) {
@@ -411,37 +412,40 @@
       // put the blank in the original spot
       prime.parentNode.insertBefore(blank, prime);
 
-      // put the prime mover inside the blank
+      // store the prime mover inside the blank
       blank.append(prime);
-
-      // get the blank's rect
-      const rect = blank.getBoundingClientRect();
-
-      // measure blank for its own animation
-      blank.style.setProperty("--blank-w", rect.width + "px");
-      blank.style.setProperty("--blank-h", rect.height + "px");
     }
 
     #makeResizeObserver() {
       return new ResizeObserver((entries) => {
         for (const entry of entries) {
-          let first = parseInt(entry.target.getAttribute("data-resized"));
-          if (first === 0) {
-            // entry.target.setAttribute("data-resized", ++first);
-            // continue;
+          const target = entry.target;
+          let count = parseInt(target.getAttribute("data-resized")) || 0;
+
+          if (count === 0) {
+            target.setAttribute("data-resized", 1);
+            continue;
           }
-          entry.target.setAttribute("data-resized", ++first);
-          // log("resizing for", first,
-          // entry.target.cloneNode(true)
-          // );
-          // void entry.target.offsetHeight;
-          this.#measureMovers(entry.target);
+
+          target.setAttribute("data-resized", ++count);
+
+          // Check the WeakMap for a pending frame ID
+          if (this.#resizeFrames.has(target)) {
+            cancelAnimationFrame(this.#resizeFrames.get(target));
+          }
+
+          // Schedule the frame and save the ID to the WeakMap
+          const frameId = requestAnimationFrame(() => {
+            this.#measureMovers(target);
+            this.#resizeFrames.delete(target); // Clean up when done
+          });
+
+          this.#resizeFrames.set(target, frameId);
         }
       });
     }
 
     #measureMovers(stage) {
-      // 1. Gather all elements dynamically from the specific stage passed in
       const movers = stage.querySelectorAll("[data-move]");
       const origBlanks = stage.querySelectorAll(`[data-blank="origin"]`);
       const destBlanks = stage.querySelectorAll(`[data-blank="destiny"]`);
@@ -449,7 +453,7 @@
       const orig = { blanks: new Map(), rects: new Map(), fonts: new Map() };
       const dest = { blanks: new Map(), rects: new Map(), fonts: new Map() };
 
-      // 2. Map the blanks by their source ID
+      // --- PHASE 1: Setup ---
       for (const blank of origBlanks) {
         const id = blank.getAttribute("data-source");
         orig.blanks.set(id, blank);
@@ -461,84 +465,53 @@
         blank.setAttribute("data-blank", "");
       }
 
-      // 3. Measure Origin State
-      /*
-      for (const prime of movers) {
-        const clone = prime.cloneNode(true);
-        const dirty = orig.blanks.get(prime.id);
-        const clean = this.#makeTag("x", `<x>${clone.innerHTML}</x>`, {
-          id: `${prime.id}-origin-blank`,
-          source: prime.id,
-          blank: "",
-        });
+      // --- PHASE 2: Measure Origin ---
+      // Write (Batch state change)
+      for (const blank of orig.blanks.values()) blank.style.display = "inline-grid";
+      for (const blank of dest.blanks.values()) blank.style.display = "none";
 
-        orig.blanks.set(prime.id, clean);
-        dirty.replaceWith(clean);
-
-        const rect = clean.getBoundingClientRect();
-        clean.style.setProperty("--blank-w", rect.width + "px");
-        clean.style.setProperty("--blank-h", rect.height + "px");
-
-      }
-      */
-
-      for (const blank of orig.blanks.values()) {
-        blank.style.display = "inline-grid";
-      }
-      for (const blank of dest.blanks.values()) {
-        blank.style.display = "none";
-      }
+      // Read (Batch measurements) -> Browser calculates layout ONCE here
       for (const [id, blank] of orig.blanks.entries()) {
-        const rect = blank.getBoundingClientRect();
-        blank.style.setProperty("--blank-w", rect.width + "px");
-        blank.style.setProperty("--blank-h", rect.height + "px");
-        orig.rects.set(id, rect);
+        orig.rects.set(id, blank.getBoundingClientRect());
         orig.fonts.set(id, parseFloat(getComputedStyle(blank).fontSize));
       }
 
-      // 4. Measure Destiny State
-      /*
-      for (const prime of movers) {
-        const clone = prime.cloneNode(true);
-        const dirty = dest.blanks.get(prime.id);
-        const clean = this.#makeTag("x", `<x>${clone.innerHTML}</x>`, {
-          id: `${prime.id}-destiny-blank`,
-          source: prime.id,
-          blank: "",
-        });
+      // --- PHASE 3: Measure Destiny ---
+      // Write (Batch state change)
+      for (const blank of orig.blanks.values()) blank.style.display = "none";
+      for (const blank of dest.blanks.values()) blank.style.display = "inline-grid";
 
-        dest.blanks.set(prime.id, clean);
-        dirty.replaceWith(clean);
-
-        const rect = clean.getBoundingClientRect();
-        clean.style.setProperty("--blank-w", rect.width + "px");
-        clean.style.setProperty("--blank-h", rect.height + "px");
-      }
-      */
-      for (const blank of orig.blanks.values()) {
-        blank.style.display = "none";
-      }
-      for (const blank of dest.blanks.values()) {
-        blank.style.display = "inline-grid";
-      }
+      // Read (Batch measurements) -> Browser calculates layout ONCE here
       for (const [id, blank] of dest.blanks.entries()) {
-        const rect = blank.getBoundingClientRect();
-        blank.style.setProperty("--blank-w", rect.width + "px");
-        blank.style.setProperty("--blank-h", rect.height + "px");
-        dest.rects.set(id, rect);
+        dest.rects.set(id, blank.getBoundingClientRect());
         dest.fonts.set(id, parseFloat(getComputedStyle(blank).fontSize));
       }
 
-      // 5. Compute Deltas relative to THIS specific stage
+      // Read Stage -> Still in a read phase, so this is cheap!
       const stageRect = stage.getBoundingClientRect();
 
+      // --- PHASE 4: Update Customs Properties & Reset ---
+      // Write (Apply styles to origin/destiny blanks calculated in Phases 2 & 3)
+      for (const [id, blank] of orig.blanks.entries()) {
+        const rect = orig.rects.get(id);
+        blank.style.setProperty("--blank-w", rect.width + "px");
+        blank.style.setProperty("--blank-h", rect.height + "px");
+      }
+
+      for (const [id, blank] of dest.blanks.entries()) {
+        const rect = dest.rects.get(id);
+        blank.style.setProperty("--blank-w", rect.width + "px");
+        blank.style.setProperty("--blank-h", rect.height + "px");
+      }
+
+      // Write (Apply styles to movers)
       for (const prime of movers) {
         const OR = orig.rects.get(prime.id);
         const DR = dest.rects.get(prime.id);
 
         if (!OR || !DR) continue;
 
-        const deltas = new Map([
+        const deltas = [
           ["old-top", OR.top - stageRect.top],
           ["new-top", DR.top - stageRect.top],
           ["old-left", OR.left - stageRect.left],
@@ -549,15 +522,14 @@
           ["new-high", DR.height],
           ["old-font", orig.fonts.get(prime.id)],
           ["new-font", dest.fonts.get(prime.id)],
-        ]);
+        ];
 
         for (const [key, val] of deltas) {
-          // prime.style.setProperty(`--${this.#opts.fix}-${key}`, `${Math.round(val)}px`);
           prime.style.setProperty(`--${this.#opts.fix}-${key}`, `${val}px`);
         }
       }
 
-      // 6. Restore DOM Flags
+      // Write (Cleanup state)
       for (const blank of orig.blanks.values()) {
         blank.setAttribute("data-blank", "origin");
         blank.style.display = "inline-grid";

@@ -117,7 +117,6 @@ x {
   position: relative;
   margin-bottom: 30vh;
 }
-[data-stage],
 [data-step] > :nth-child(1) {
   /* background-color: hsla(0, 100%, 100%, 0.1); */
   position: relative;
@@ -130,8 +129,7 @@ x {
   /* contain: layout size style; */
   overflow: visible;
   height: 1lh;
-  /* font-family: "Times New Roman", Times, serif; */
-  font-family: "Noto";
+  font-family: "Times New Roman", Times, serif;
   view-timeline: --anim-timeline block;
 }
 [data-step] > :nth-child(2) {
