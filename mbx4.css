@@ -110,6 +110,12 @@ x {
 }
 /* #endregion */
 
+/* #region MEASURE */
+[data-measure] {
+  opacity: 0;
+}
+/* #endregion */
+
 /* #region STEP */
 [data-step] {
   width: 100%;
@@ -118,15 +124,12 @@ x {
   margin-bottom: 30vh;
 }
 [data-step] > :nth-child(1) {
-  /* background-color: hsla(0, 100%, 100%, 0.1); */
   position: relative;
   display: flex;
   flex-direction: row;
   gap: 0.25em;
   align-items: baseline;
   justify-content: center;
-  /* container-type: inline-size; */
-  /* contain: layout size style; */
   overflow: visible;
   height: 1lh;
   font-family: "Times New Roman", Times, serif;
@@ -145,41 +148,45 @@ x {
   display: inline-flex;
   flex-direction: row;
   gap: 0.25em;
-  align-items: baseline;
   justify-content: center;
   white-space: nowrap;
   font-size: var(--pow-size, 0.55em);
   margin-left: -0.35em;
 }
 [data-sup] {
-  /* line-height: 1; */
-  /* vertical-align: 70%; */
+  /* background-color: hsla(0,100%,60%,0.2); */
+  transform: translateY(-0.1em);
+  align-items: baseline;
 }
 [data-sub] {
-  border: 2px dashed green;
-  line-height: 0.5;
-  vertical-align: -70%;
+  /* background-color: hsla(180,100%,60%,0.2); */
+  align-items: end;
   font-style: italic;
 }
 /* #endregion */
 
 /* #region BLANK */
 [data-blank] {
-  /* background-color: hsla(40, 100%, 90%, 0.5); */
-  /* color: hsla(40, 100%, 10%, 0.5); */
+  background-color: hsla(40, 100%, 90%, 0.15);
+  /* color: hsla(200, 100%, 20%, 0.85); */
   display: inline-grid;
   grid-template-areas: stack;
   gap: 0;
+  /* overflow: hidden; */
 }
 [data-blank] > x {
   grid-area: stack;
+  margin: 0 0;
+  padding: 0 0;
 }
 [data-blank] > x:nth-child(1) {
   /* !!! invisible color HAKC !!! */
-  color: hsla(0, 0%, 0%, 0);
-  opacity: 0;
+  /* color: hsla(0, 0%, 0%, 0); */
+  /* opacity: 0; */
 }
 [data-blank="origin"] {
+  background-color: hsl(200, 100%, 20%);
+  color: hsl(200, 100%, 10%);
   will-change: margin, left, width, height;
   animation: mbx-blank-origin linear both;
   animation-timeline: --anim-timeline;
@@ -200,8 +207,8 @@ x {
   }
 }
 [data-blank="destiny"] {
-  /* background-color: hsla(300, 100%, 90%, 0.5); */
-  /* color: hsla(300, 100%, 20%, 0.3); */
+  background-color: hsl(0, 100%, 20%);
+  color: hsl(0, 100%, 10%);
   position: relative;
   will-change: margin, left, width, height;
   animation: mbx-blank-destiny linear both;
@@ -218,6 +225,7 @@ x {
   to {
     margin: 0 0;
     left: 0;
+    width: 150px;
     width: var(--blank-w);
     /* height: 0px; */
   }
@@ -226,9 +234,9 @@ x {
 
 /* #region MOVE */
 [data-move] {
+  /* color: hsla(var(--mbx-h), 80%, 60%, 0.2); */
   position: absolute;
   /* z-index: 10; */
-  /* --mbx-move-trans: translate(calc(var(--mbx-dx) + 0px + 0.0em), calc(var(--mbx-dy) - 0px)); */
   will-change: left, top, width, height, font;
   animation: mbx-move linear both;
   animation-timeline: --anim-timeline;
@@ -236,7 +244,7 @@ x {
 }
 @keyframes mbx-move {
   from {
-    /* transform: var(--mbx-move-trans); */
+    /* transform: translate(var(--mbx-dx), var(--mbx-dy)); */
     left: var(--mbx-old-left);
     top: var(--mbx-old-top);
     width: var(--mbx-old-wide);
@@ -281,6 +289,7 @@ x:has(> [data-grow="back"]) {
 }
 
 [data-grow] {
+  /* background-color: hsla(0, 100%, 50%, 0.2); */
   will-change: width, transform, opacity;
   animation: mbx-grow linear both;
   animation-timeline: --anim-timeline;
@@ -321,30 +330,28 @@ x:has(> [data-grow="back"]) {
 
 /* #region VAULT */
 [data-vault] {
-  --vault-height: 1em;
   animation: mbx-vault ease-out both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
 @keyframes mbx-vault {
   0% {
-    transform: translateY(0em);
+    transform: translate(0em, 0em);
   }
   15% {
-    transform: translateY(calc(-1 * var(--mbx-vault-val, 1em)));
+    transform: translate(-0.25em, calc(-1 * var(--mbx-vault-val, 1em)));
   }
   85% {
-    transform: translateY(calc(-1 * var(--mbx-vault-val, 1em)));
+    transform: translate(0em, calc(-1 * var(--mbx-vault-val, 1em)));
   }
   100% {
-    transform: translateY(0em);
+    transform: translate(0em, 0em);
   }
 }
 /* #endregion */
 
 /* #region TUCK */
 [data-tuck] {
-  --tuck-depth: 1em;
   animation: mbx-tuck ease-out both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
@@ -361,6 +368,27 @@ x:has(> [data-grow="back"]) {
   }
   100% {
     transform: translateY(0em);
+  }
+}
+/* #endregion */
+
+/* #region BULK */
+[data-bulk] {
+  transform-origin: 50% 50%;
+  will-change: transform;
+  animation: mbx-bulk ease-out both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-bulk {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(var(--mbx-bulk-val, 1.25));
+  }
+  100% {
+    transform: scale(1);
   }
 }
 /* #endregion */
@@ -608,7 +636,7 @@ path[data-materialize] {
 }
 /* #endregion */
 
-/* #region EXIT*/
+/* #region EXIT */
 [data-exit] {
   animation: mbx-exit-trigger linear both;
   animation-timeline: --anim-timeline;
@@ -669,8 +697,8 @@ path[data-materialize] {
 }
 /* #endregion */
 
-/* #region FILTER CLEAR */
-[data-filter-clear] {
+/* #region CLEAR FILTER */
+[data-clearFilter] {
   animation: mbx-filter-clear linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
@@ -688,20 +716,24 @@ path[data-materialize] {
 
 /* #region PARENS */
 [data-parens-left] {
+  /* background-color: hsla(0,100%,50%,0.2); */
+  display: inline;
+  position: relative;
   margin-right: -0.21em;
 }
 [data-parens-rite] {
+  /* background-color: hsla(200,100%,50%,0.2); */
+  display: inline;
+  position: relative;
   margin-left: -0.21em;
 }
 /* #endregion */
 
 /* #region MIDDOT */
 [data-middot] {
+  /* content: "\00B7"; */
   margin-left: -0.12em;
   margin-right: -0.12em;
-}
-[data-middot]::after {
-  content: "\00B7";
 }
 /* #endregion */
 
@@ -716,7 +748,8 @@ path[data-materialize] {
 [data-absorb] {
   position: relative;
   display: inline-grid;
-  grid-template-areas: stack;
+  grid-template-areas: "stack";
+  grid-template-columns: 100%;
   justify-items: center;
   align-items: baseline;
 }
@@ -768,10 +801,9 @@ path[data-materialize] {
 }
 [data-xfade] > x {
   grid-area: stack;
-  position: relative;
   display: inline-flex;
   gap: 0.25em;
-  transform-origin: center center;
+  transform-origin: 50% 50%;
   white-space: nowrap;
 }
 [data-xfade] > :nth-child(1) {
@@ -1373,6 +1405,7 @@ x:has(> [data-root="back"]) {
 
 /* #region TITE */
 [data-tite] {
+  /* margin-left: -0.125em; */
   display: inline-flex;
   flex-direction: row;
   gap: var(--mbx-tite-val, 0em);

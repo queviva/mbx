@@ -5,10 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- <link rel="stylesheet" href="mbx3.css" /> -->
-    <script
-      src="mbx4.js"
-      data-mbx='{"tag":"rat-batix","css":"mbx4.css"}'
-    ></script>
+    <script src="mbx4.js" data-mbx='{"tag":"rat-batix","css":"mbx4.css"}'></script>
     <style>
       body {
         display: flex;
@@ -43,63 +40,33 @@
           illuminated acrobatic gestural mathematics
         `,
         stage: `
-          <x id="Tdoppel" data-doppel style="z-index:100;">
-            <x id="T5-1">5</x>
-            <x id="T5-0">5</x>
-            <x id="T5-a">5</x>
-            <x id="T5-b">5</x>
-            <x id="T5-c">5</x>
-          </x>
-          <mbx-frak id="frak-1">
-            <x>
-            <x id="T2x" xxx-data-tite>
-              <x id="Tx3">
-                <x id="Tx">x</x>
-                <x data-sup>
-                  <x id="Ty">y</x>
-                </x>
-              </x>
-            </x>
-            </x>
-            <x>
-              <x id="T2-b">2</x>
-            </x>
-          </mbx-frak>
+          <x id="P1" data-parens-left>(</x>
+            <x id="Tx">x</x> + <x id="T3">3</x>
+          <x id="P2" data-parens-rite>)</x>
+          <x id="T7">7</x>
           <x id="EQ">=</x>
-          <mbx-frak id="frak-2">
-            <x data-doppel><x id="T3">3</x></x>
-            <x><x id="T4">4</x></x>
-          </mbx-frak>
+          <x id="T9">9</x>
         `,
         steps: [
           {
-            note: `
-              <x>short and sweet tags</x>
+            note: "move is extremely destructive",
+            load: `
+              7x
+              <x id="Tplus21"> <x id="Tplus">-</x> 21</x> 
+              = <x>2<x data-sup><x id="T9">9</x></x></x>
+              <x id="Tk">+ k</x>
             `,
-            acts: (X) => {
+            acts: async (X) => {
+              X.mount("Tminus", "-");
+              X.spot("Tplus").xfade("Tminus");
+              await X.spot("Tplus21").spin().vault().moveAfter("T9");
+              X.spot("Tk").grow();
             },
           },
           {
-            note: "move is extremely destructive",
             acts: (X) => {
-              X.spot("T5-0").ghost().during(0, 0.3).shrink().during(0.5);
-              X.spot("T5-1").vaporize().during(0.3, 0.5);
-              X.mount("T3-z", "3");
-              X.spot("T5-a").xfade("T3-z").spin().vault("1.2em").during(0.5, 1).moveBefore("T3").during(0.5, 1);
-              X.spot("T5-b").moveBefore("Ty").during(0.5, 1);
-              X.spot("T5-c").moveBefore("frak-2").during(0.5, 1);
-            }
+            },
           },
-          {
-            acts: (X) => {
-              X.spot("Tdoppel").dismount();
-              X.mount("T6", "- 6").insertAfter("frak-2");
-              X.spot("T6").moveBefore("EQ");
-            }
-          },
-          {
-            acts: (X) => {}
-          }
         ],
       };
 

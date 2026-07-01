@@ -111,6 +111,7 @@
         this.#makeMoveSkills(),
         this.#makeWrapSkills(),
         this.#makeGroinkSkills(),
+        this.#makeLogSkills(),
         this.#makeJestorSkills(),
         this.#makeFrakSkills(),
         this.#makeExitSkills(),
@@ -224,6 +225,7 @@
           bat.innerHTML = `<x data-${type}>${bat.innerHTML}</x>`;
           targ = bat.children[0];
         }
+        targ.setAttribute("data-subject", bat.id);
         if (vals) {
           for (const [key, value] of Object.entries(vals)) {
             /^--/.test(key)
@@ -322,6 +324,19 @@
             for (const bat of this.#batties) {
               bat.children[0].style.setProperty("transform-origin", v);
             }
+            return this.#API;
+          },
+          setColor: (v) => {
+            for (const bat of this.#batties) {
+              bat.style.setProperty("color", v);
+            }
+            return this.#API;
+          },
+          setFilter: (v) => {
+            for (const bat of this.#batties) {
+              bat.setAttribute("data-filter", v);
+            }
+            return this.#API;
           },
         },
       };
@@ -412,110 +427,88 @@
       // put the blank in the original spot
       prime.parentNode.insertBefore(blank, prime);
 
+      const rect = blank.getBoundingClientRect();
+      blank.style.setProperty("--blank-w", rect.width + "px");
+      blank.style.setProperty("--blank-h", rect.height + "px");
+
       // store the prime mover inside the blank
       blank.append(prime);
     }
 
-    #makeResizeObserver() {
-      return new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const target = entry.target;
-          let count = parseInt(target.getAttribute("data-resized")) || 0;
-
-          if (count === 0) {
-            target.setAttribute("data-resized", 1);
-            continue;
-          }
-
-          target.setAttribute("data-resized", ++count);
-
-          // Check the WeakMap for a pending frame ID
-          if (this.#resizeFrames.has(target)) {
-            cancelAnimationFrame(this.#resizeFrames.get(target));
-          }
-
-          // Schedule the frame and save the ID to the WeakMap
-          const frameId = requestAnimationFrame(() => {
-            this.#measureMovers(target);
-            this.#resizeFrames.delete(target); // Clean up when done
-          });
-
-          this.#resizeFrames.set(target, frameId);
-        }
-      });
-    }
-
-    #measureMovers(stage) {
+    async #measureMovers(stage) {
+      const all = stage.querySelectorAll(":not([data-move])");
       const movers = stage.querySelectorAll("[data-move]");
       const origBlanks = stage.querySelectorAll(`[data-blank="origin"]`);
       const destBlanks = stage.querySelectorAll(`[data-blank="destiny"]`);
 
       const orig = { blanks: new Map(), rects: new Map(), fonts: new Map() };
       const dest = { blanks: new Map(), rects: new Map(), fonts: new Map() };
+      const anims = new Map();
 
-      // --- PHASE 1: Setup ---
+      // sort blanks
       for (const blank of origBlanks) {
         const id = blank.getAttribute("data-source");
         orig.blanks.set(id, blank);
-        blank.setAttribute("data-blank", "");
       }
       for (const blank of destBlanks) {
         const id = blank.getAttribute("data-source");
         dest.blanks.set(id, blank);
-        blank.setAttribute("data-blank", "");
       }
 
-      // --- PHASE 2: Measure Origin ---
-      // Write (Batch state change)
-      for (const blank of orig.blanks.values()) blank.style.display = "inline-grid";
-      for (const blank of dest.blanks.values()) blank.style.display = "none";
+      // get animations
+      for (const one of all) {
+        const animList = one.getAnimations();
+        if (animList.length > 0) {
+          anims.set(one, animList);
+        }
+      }
 
-      // Read (Batch measurements) -> Browser calculates layout ONCE here
+      // set to initial state
+      for (const animList of anims.values()) {
+        for (const anim of animList) {
+          anim.pause();
+          anim.currentTime = CSS.percent(0);
+        }
+      }
+
+      // force layout HAKC !!!
+      await raf();
+
+      // set origin rects
       for (const [id, blank] of orig.blanks.entries()) {
         orig.rects.set(id, blank.getBoundingClientRect());
         orig.fonts.set(id, parseFloat(getComputedStyle(blank).fontSize));
       }
 
-      // --- PHASE 3: Measure Destiny ---
-      // Write (Batch state change)
-      for (const blank of orig.blanks.values()) blank.style.display = "none";
-      for (const blank of dest.blanks.values()) blank.style.display = "inline-grid";
+      // set all animations to final state
+      for (const animList of anims.values()) {
+        for (const anim of animList) {
+          anim.currentTime = CSS.percent(100);
+        }
+      }
 
-      // Read (Batch measurements) -> Browser calculates layout ONCE here
+      // force layout HAKC !!!
+      await raf();
+
+      // set the destiny rects
       for (const [id, blank] of dest.blanks.entries()) {
         dest.rects.set(id, blank.getBoundingClientRect());
         dest.fonts.set(id, parseFloat(getComputedStyle(blank).fontSize));
       }
 
-      // Read Stage -> Still in a read phase, so this is cheap!
-      const stageRect = stage.getBoundingClientRect();
-
-      // --- PHASE 4: Update Customs Properties & Reset ---
-      // Write (Apply styles to origin/destiny blanks calculated in Phases 2 & 3)
-      for (const [id, blank] of orig.blanks.entries()) {
-        const rect = orig.rects.get(id);
-        blank.style.setProperty("--blank-w", rect.width + "px");
-        blank.style.setProperty("--blank-h", rect.height + "px");
-      }
-
-      for (const [id, blank] of dest.blanks.entries()) {
-        const rect = dest.rects.get(id);
-        blank.style.setProperty("--blank-w", rect.width + "px");
-        blank.style.setProperty("--blank-h", rect.height + "px");
-      }
-
-      // Write (Apply styles to movers)
+      // set the deltas for the move animation
       for (const prime of movers) {
+        const SR = stage.getBoundingClientRect();
         const OR = orig.rects.get(prime.id);
         const DR = dest.rects.get(prime.id);
 
-        if (!OR || !DR) continue;
-
         const deltas = [
-          ["old-top", OR.top - stageRect.top],
-          ["new-top", DR.top - stageRect.top],
-          ["old-left", OR.left - stageRect.left],
-          ["new-left", DR.left - stageRect.left],
+          // ["dx", OR.x - DR.x],
+          // ["dy", OR.y - DR.y],
+          ["old-top", OR.top - SR.top],
+          ["new-top", DR.top - SR.top],
+          ["old-left", OR.left - SR.left],
+          ["new-left", DR.left - SR.left],
           ["old-wide", OR.width],
           ["new-wide", DR.width],
           ["old-high", OR.height],
@@ -529,15 +522,13 @@
         }
       }
 
-      // Write (Cleanup state)
-      for (const blank of orig.blanks.values()) {
-        blank.setAttribute("data-blank", "origin");
-        blank.style.display = "inline-grid";
+      // restart animations
+      for (const animList of anims.values()) {
+        for (const anim of animList) {
+          anim.play();
+        }
       }
-      for (const blank of dest.blanks.values()) {
-        blank.setAttribute("data-blank", "destiny");
-        blank.style.display = "inline-grid";
-      }
+      return true;
     }
 
     #makeMoveSkills() {
@@ -588,6 +579,34 @@
       };
     }
 
+    #makeResizeObserver() {
+      return new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const target = entry.target;
+          let count = parseInt(target.getAttribute("data-resized")) || 0;
+
+          if (count === 0) {
+            target.setAttribute("data-resized", 1);
+            continue;
+          }
+
+          target.setAttribute("data-resized", ++count);
+
+          if (this.#resizeFrames.has(target)) {
+            cancelAnimationFrame(this.#resizeFrames.get(target));
+          }
+
+          const frameId = requestAnimationFrame(() => {
+            // log(count, target.id);
+            this.#measureMovers(target);
+            this.#resizeFrames.delete(target);
+          });
+
+          this.#resizeFrames.set(target, frameId);
+        }
+      });
+    }
+
     #makeWrapSkills() {
       const skills = [
         "viva",
@@ -597,7 +616,9 @@
         "tuck",
         "vault",
         "spin",
+        "bulk",
         "colorize",
+        "clearFilter",
         "salute",
       ];
       const permas = [];
@@ -608,7 +629,7 @@
 
       for (const skill of [...skills, ...permas]) {
         const fixy = `${this.#opts.fix}-${skill}`;
-        api[skill] = (val) => this.#wrap(skill, !val || { [`--${fixy}-val`]: val });
+        api[skill] = (val) => this.#wrap(skill, { ...(val ? { [`--${fixy}-val`]: val } : {}) });
         short[fixy] = (bat) => this.#unShort(skill, bat);
         if (!permas.includes(skill)) clean.push((stage) => this.#unWrap(skill, stage));
       }
@@ -642,6 +663,37 @@
             }
           },
         ],
+      };
+    }
+
+    #makeLogSkills() {
+      return {
+        short: {},
+        api: {
+          log: (base) => {
+            for (const bat of this.#batties) {
+              this.#API
+                .mount(
+                  `${bat.id}-log-open`,
+                  `
+                log<x data-sub>${base}</x><x data-parens-left>(</x>
+              `,
+                )
+                .grow()
+                .insertBefore(bat.id);
+              this.#API
+                .mount(
+                  `${bat.id}-log-close`,
+                  `
+                <x data-parens-rite>)</x>
+              `,
+                )
+                .grow()
+                .insertAfter(bat.id);
+            }
+          },
+        },
+        clean: [],
       };
     }
 
@@ -979,8 +1031,8 @@
     }
 
     async #processStep(step) {
-      // TEST & STALL
-      await stall(1000);
+      // !!! TESTING STALL !!!
+      // await stall(1000);
 
       // load new stage if needed
       step.load ||= this.#stageObj.innerHTML;
@@ -1003,10 +1055,6 @@
       // check if that werked
       if (!acted) return { ok: false, reason: acted };
 
-      // !!! display HAKC !!!
-      // await raf();
-      // void this.#stageObj.offsetHeight;
-
       // copy the step tags for next time
       const nextStep = this.#makeTag("x", stepTag.innerHTML, { step: "" });
 
@@ -1016,6 +1064,9 @@
       // reset the stage to the cleaned version
       this.#stageObj = nextStep.children[0];
 
+      // !!! EMERGENCY !!!
+      // !!! async measureMovers() causes all
+      // !!! the lines after !acted to run !!!
       // remove IDs [or make #namespaceIDs()]
       // this.#removeIDs(stepTag.children[0]);
       // this.#namespaceIDs(stepTag.children[0], this.#opts.fix, this.#stepNum);
