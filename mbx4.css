@@ -167,7 +167,7 @@ x {
 
 /* #region BLANK */
 [data-blank] {
-  background-color: hsla(40, 100%, 90%, 0.15);
+  /* background-color: hsla(40, 100%, 90%, 0.15); */
   /* color: hsla(200, 100%, 20%, 0.85); */
   display: inline-grid;
   grid-template-areas: stack;
@@ -181,12 +181,12 @@ x {
 }
 [data-blank] > x:nth-child(1) {
   /* !!! invisible color HAKC !!! */
-  /* color: hsla(0, 0%, 0%, 0); */
-  /* opacity: 0; */
+  color: hsla(0, 0%, 0%, 0);
+  opacity: 0;
 }
 [data-blank="origin"] {
-  background-color: hsl(200, 100%, 20%);
-  color: hsl(200, 100%, 10%);
+  /* background-color: hsl(200, 100%, 20%); */
+  /* color: hsl(200, 100%, 10%); */
   will-change: margin, left, width, height;
   animation: mbx-blank-origin linear both;
   animation-timeline: --anim-timeline;
@@ -207,8 +207,8 @@ x {
   }
 }
 [data-blank="destiny"] {
-  background-color: hsl(0, 100%, 20%);
-  color: hsl(0, 100%, 10%);
+  /* background-color: hsl(0, 100%, 20%); */
+  /* color: hsl(0, 100%, 10%); */
   position: relative;
   will-change: margin, left, width, height;
   animation: mbx-blank-destiny linear both;
@@ -330,6 +330,8 @@ x:has(> [data-grow="back"]) {
 
 /* #region VAULT */
 [data-vault] {
+  /* make an ="left" ="rite" x trans */
+  --mbx-vault-x-trans: -0.25em;
   animation: mbx-vault ease-out both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
@@ -339,7 +341,9 @@ x:has(> [data-grow="back"]) {
     transform: translate(0em, 0em);
   }
   15% {
-    transform: translate(-0.25em, calc(-1 * var(--mbx-vault-val, 1em)));
+    /* give this an xtrans based on direction */
+    /* transform: translate(var(--mbx-vault-x-trans), calc(-1 * var(--mbx-vault-val, 1em))); */
+    transform: translate(0, calc(-1 * var(--mbx-vault-val, 1em)));
   }
   85% {
     transform: translate(0em, calc(-1 * var(--mbx-vault-val, 1em)));

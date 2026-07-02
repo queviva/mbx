@@ -387,6 +387,18 @@
                 }
                 continue;
               }
+              if (bat.hasAttribute("data-logged")) {
+                bat.style.setProperty("--ani-start", s);
+                bat.style.setProperty("--ani-end", e);
+                const id = bat.getAttribute("data-logged");
+                const open = this.#stageObj.querySelector(`[data-subject="${id}-log-open"]`);
+                const close = this.#stageObj.querySelector(`[data-subject="${id}-log-close"]`);
+                for (const log of [open, close]) {
+                  log.style.setProperty("--ani-start", s);
+                  log.style.setProperty("--ani-end", e);
+                }
+                continue;
+              }
               let fc = bat;
               if (bat.children[0]) {
                 fc = bat.children[0].hasAttribute("data-grow") ? bat : bat.children[0];
@@ -433,6 +445,9 @@
 
       // store the prime mover inside the blank
       blank.append(prime);
+
+      // remember the prime id
+      prime.setAttribute("data-source", prime.id);
     }
 
     async #measureMovers(stage) {
@@ -498,9 +513,10 @@
 
       // set the deltas for the move animation
       for (const prime of movers) {
+        const id = prime.getAttribute("data-source");
         const SR = stage.getBoundingClientRect();
-        const OR = orig.rects.get(prime.id);
-        const DR = dest.rects.get(prime.id);
+        const OR = orig.rects.get(id);
+        const DR = dest.rects.get(id);
 
         const deltas = [
           // ["dx", OR.x - DR.x],
@@ -513,8 +529,8 @@
           ["new-wide", DR.width],
           ["old-high", OR.height],
           ["new-high", DR.height],
-          ["old-font", orig.fonts.get(prime.id)],
-          ["new-font", dest.fonts.get(prime.id)],
+          ["old-font", orig.fonts.get(id)],
+          ["new-font", dest.fonts.get(id)],
         ];
 
         for (const [key, val] of deltas) {
@@ -547,11 +563,9 @@
           this.#stageObj.append(prime);
         }
 
-        this.#measureMovers(this.#stageObj);
-
         this.#stageObj.setAttribute("data-resized", "0");
         this.#stageObj.setAttribute("data-stepNum", this.#stepNum);
-        this.#RO.observe(this.#stageObj);
+        this.#RO.observe(this.#stageObj); // note: observe calls #measureMovers
 
         return this.#API;
       };
@@ -586,8 +600,8 @@
           let count = parseInt(target.getAttribute("data-resized")) || 0;
 
           if (count === 0) {
-            target.setAttribute("data-resized", 1);
-            continue;
+            // target.setAttribute("data-resized", 1);
+            // continue;
           }
 
           target.setAttribute("data-resized", ++count);
@@ -671,7 +685,9 @@
         short: {},
         api: {
           log: (base) => {
+            const batties = this.#batties;
             for (const bat of this.#batties) {
+              bat.setAttribute("data-logged", bat.id);
               this.#API
                 .mount(
                   `${bat.id}-log-open`,
@@ -691,6 +707,8 @@
                 .grow()
                 .insertAfter(bat.id);
             }
+            this.#batties = batties;
+            return this.#API;
           },
         },
         clean: [],
@@ -1040,6 +1058,9 @@
       // make the step tags
       const stepTag = this.#makeStepTag(step.load, step.note || "");
 
+      // step measuring
+      stepTag.setAttribute("data-measure", "");
+
       // set the stage object
       this.#stageObj = stepTag.children[0];
 
@@ -1064,11 +1085,8 @@
       // reset the stage to the cleaned version
       this.#stageObj = nextStep.children[0];
 
-      // !!! EMERGENCY !!!
-      // !!! async measureMovers() causes all
-      // !!! the lines after !acted to run !!!
       // remove IDs [or make #namespaceIDs()]
-      // this.#removeIDs(stepTag.children[0]);
+      this.#removeIDs(stepTag.children[0]);
       // this.#namespaceIDs(stepTag.children[0], this.#opts.fix, this.#stepNum);
 
       // the tag is done with measurements

@@ -51,16 +51,26 @@
           {
             note: "move is extremely destructive",
             load: `
-              7x
-              <x id="Tplus21"> <x id="Tplus">-</x> 21</x> 
-              = <x>2<x data-sup><x id="T9">9</x></x></x>
-              <x id="Tk">+ k</x>
+             <x id="doppel" data-doppel>
+              <x id="T7-AA">
+               <x id="T7-a">7</x>
+              </x>
+              <x id="T7-b">7</x>
+            </x>
+             + 3 = 
+            <x id="Ty">
+             <x>y</x>
+             <x data-sup data-vert="-0.25em">
+              <mbx-frak>
+                <x><x data-doppel><x id ="Tk">5</x></x></x>
+                <x>n</x>
+              </mbx-frak>
+             </x>
+            </x>
             `,
-            acts: async (X) => {
-              X.mount("Tminus", "-");
-              X.spot("Tplus").xfade("Tminus");
-              await X.spot("Tplus21").spin().vault().moveAfter("T9");
-              X.spot("Tk").grow();
+            acts: (X) => {
+              X.spot("T7-b").vaporize().during(0, 0.5).shrink().during(0.5);
+              X.spot("Ty").log("3").during(0.5).viva();
             },
           },
           {
