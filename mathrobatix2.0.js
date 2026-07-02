@@ -247,6 +247,8 @@
         for (const el of targetArray) {
           const ref = direction === "before" ? anchor : anchor.nextSibling;
           anchor.parentNode.insertBefore(el, ref);
+
+              X.spot("T3", "Ty").log("y");
         }
 
         for (const el of allElements) {

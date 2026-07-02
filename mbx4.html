@@ -41,45 +41,132 @@
         `,
         stage: `
           <x id="P1" data-parens-left>(</x>
-            <x id="Tx">x</x> + <x id="T3">3</x>
-          <x id="P2" data-parens-rite>)</x>
-          <x id="T7">7</x>
+          <x id="Tx2">
+           <x id="Tx-a">x</x>
+           <x id="pow-area" data-sup>
+            <x data-doppel>
+             <x id="Pow2">2</x>
+            </x>
+           </x>
+          </x>
+          +
+          <x id="T4x" data-tite>
+           <x id="T4">4</x>
+           <x id="Tx-b">x</x>
+          </x>
+          <x id="P2" data-parens-rite style="margin-right:-0.125em;">)</x>
+          <x data-sup>
+            <x id="Pow-paren"></x>
+          </x>
           <x id="EQ">=</x>
-          <x id="T9">9</x>
+          <x id="T5">5</x>
+          <x id="Tplus">+ <x id="something">!?!</x></x>
+          <mbx-half id="T-half"></mbx-half>
         `,
         steps: [
           {
-            note: "move is extremely destructive",
-            load: `
-            <x id="T3">3</x>
-            <x id="EQ">=</x>
-            <x id="Ty">
-             <x id="yy">y</x>
-             <x data-sup data-vert="-0.25em">
-              <mbx-frak id="frak-1">
-                <x><x id="T9">9</x></x>
-                <x><x id="Tk">k</x></x>
-              </mbx-frak>
-             </x>
-            </x>
+            note: `
+            <x>move the square outside</x>
+            <x>turn the x into one-half</x>
+            <x>and add <i>something</i> ?!?</x>
             `,
             acts: (X) => {
-              X.spot("T3", "Ty").log("y");
+              X.spot("Tplus").grow();
+              X.spot("something").viva();
+              X.spot("Tx-b").xfade("T-half").during(0.5, 1.0);
+              X.spot("Pow2").spin().vault("0.5em").moveAfter("Pow-paren").during(0, 1);
             },
           },
           {
+            load: `
+            <x id="P1"><x data-parens-left>(</x></x>
+            x +
+            <x id="T-all">
+             <x data-tite>4<mbx-half></mbx-half></x>
+             <x data-parens-rite>)</x>^2
+            </x>
+            = 5 <x id="T-plus">+</x>
+             <x id="T-exclaim">!?!</x>
+            
+            `,
+            note: `
+            <x>what do we add?!? ...</x>
+            <x>the <em>exact same thing</em></x>
+            `,
             acts: (X) => {
-              X.spot("frak-1").moveBefore("Ty-log-open");
-              X.spot("Ty-log-open", "Ty-log-close", "Ty").shrink();
+              X.spot("T-exclaim").vaporize().shrink().around("-200% 50%");
+              X.spot("P1", "T-all").doppel();
+              X.spot("P1-doppel", "T-all-doppel").vault().moveAfter("T-plus");
             },
           },
           {
+            load: `
+            (x + 
+            <x id="T4-half-a" data-tite>
+             4<mbx-half id="T-half-a"></mbx-half>
+            </x>
+            <x data-parens-rite>)</x>^2
+            = 5 +
+            <x id="pow-spin">
+            <x>
+            <x data-parens-left>(</x>
+            <x id="T4-half" data-tite>
+             4<mbx-half id="T-half"></mbx-half>
+            </x>
+            <x data-parens-rite>)</x>^2
+            </x>
+            </x>
+
+            <x id="T2">2</x>
+            <x id="T2-a">2</x>
+            <x id="T4">4</x>
+            `,
+            note: `
+            <x>half of four is two</x>
+            <x>and two-squared is four</x>
+            `,
             acts: (X) => {
-              X.spot("frak-1").spin("180deg");
-              X.spot("T9", "Tk").spin("-180deg");
+              X.spot("T4-half-a").xfade("T2-a").during(0, 0.5).spin("-360deg").during(0, 0.5);
+              X.spot("T4-half").xfade("T2").during(0, 0.5).spin("-360deg").during(0, 0.5);
+              X.spot("pow-spin").xfade("T4").during(0.5).spin("360deg").during(0.5);
+            },
+          },
+          {
+            load: `
+            (x + 2)^2 = <x id="T5-T4">5 + 4</x>
+            `,
+            note: "I don't know what five plus four is",
+            acts: (X) => {
+              X.spot("T5-T4").brak();
             }
           },
-          {}
+          {
+            load: `
+            (x + 2)^2 =
+            <x>
+             <mbx-brak id="T5-T4">
+              <x>
+              <x id="T54">
+                5 + 4
+              </x>
+              <x id="T9">9</x>
+              </x>
+             </mbx-brak>
+            </x>
+            `,
+            note: `
+             that turned out to be nine
+            `,
+            acts: (X) => {
+              X.spot("T9").spin("720deg");
+              X.spot("T5-T4").unBrak().during(0, 0.5);
+              X.spot("T54").absorb("T9");
+            }
+          },
+          {
+            acts: (X) => {
+            }
+          }
         ],
       };
 

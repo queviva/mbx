@@ -3,6 +3,7 @@
 mathro-batix [data-holder] {
   --animation-start: 50%;
   --animation-end: 80%;
+
   --font-size: 2.5em;
   --back-color: #111;
   --mbx-h: 35;
@@ -12,6 +13,9 @@ mathro-batix [data-holder] {
 
   --frak-font-size: 0.75em;
   --frak-vertical-align: 65%;
+
+  --mbx-pow-size: 0.55em;
+  --mbx-log-size: 0.7em;
 }
 
 /* LAYOUT */
@@ -65,6 +69,7 @@ x {
   display: inline-flex;
   flex-direction: row;
   gap: 0.25em;
+  align-items: baseline;
   justify-content: center;
   text-wrap: nowrap;
   font-weight: normal;
@@ -142,25 +147,24 @@ x {
 /* #endregion */
 
 /* #region SUP|SUB */
-[data-sup],
-[data-sub] {
+[data-sub],
+[data-sup] {
   position: relative;
   display: inline-flex;
   flex-direction: row;
   gap: 0.25em;
   justify-content: center;
   white-space: nowrap;
-  font-size: var(--pow-size, 0.55em);
+  font-size: var(--mbx-pow-size, 0.55em);
   margin-left: -0.35em;
 }
 [data-sup] {
   /* background-color: hsla(0,100%,60%,0.2); */
-  transform: translateY(-0.1em);
-  align-items: baseline;
+  transform: translateY(-0.8em);
 }
 [data-sub] {
   /* background-color: hsla(180,100%,60%,0.2); */
-  align-items: end;
+  transform: translateY(0.35em);
   font-style: italic;
 }
 /* #endregion */
@@ -487,6 +491,7 @@ path[data-ghost] {
 
 /* #region VAPORIZE|MATERIALIZE */
 svg,
+[data-flash],
 [data-materialize],
 [data-vaporize],
 [data-filter="vaporize"] {
@@ -625,6 +630,29 @@ path[data-materialize] {
 
 /* #endregion */
 
+
+/* #region FLASH */
+[data-flash] {
+  animation: mbx-flash linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-flash {
+  0% {
+    text-shadow: none;
+  }
+  40% {
+    text-shadow: var(--ghost-shadow);
+  }
+  75% {
+    text-shadow: var(--vapor-shadow);
+  }
+  100% {
+    text-shadow: var(--vapor-shadow);
+  }
+}
+/* #endregion */
+
 /* #region COLORIZE */
 [data-colorize],
 [data-colorize] path {
@@ -745,6 +773,14 @@ path[data-materialize] {
 [data-xvar]::after {
   content: "x";
   font-style: italic;
+}
+/* #endregion */
+
+/* #region HALF */
+[data-half] {
+  font-size: 0.8em;
+  margin-left:0.1em;
+  transform:translateY(-0.1em);
 }
 /* #endregion */
 
@@ -936,7 +972,8 @@ path[data-materialize] {
   display: inline-flex;
   flex-direction: column;
   gap: 0em;
-  width: 100%;
+  width: auto;
+  align-items: center;
   vertical-align: var(--frak-vertical-align, 70%);
 }
 [data-frak="fore"],
@@ -963,6 +1000,8 @@ path[data-materialize] {
 }
 
 [data-frak] > [data-numerator] {
+  /* background-color: hsl(200, 100%, 20%); */
+  z-index: 10;
 }
 
 [data-frak] > [data-slash] {
@@ -1014,6 +1053,8 @@ path[data-materialize] {
 }
 
 [data-frak] > [data-denominator] {
+  /* background-color: hsl(0, 100%, 20%); */
+  z-index: 10;
 }
 [data-frak="fore"] > [data-denominator],
 [data-frak="back"] > [data-denominator] {
@@ -1036,10 +1077,12 @@ path[data-materialize] {
 @keyframes mbx-frak-denominator {
   from {
     transform: scale(0);
+    width: 0;
     opacity: 0;
   }
   to {
     transform: scale(1);
+    width: auto;
     opacity: 1;
   }
 }
@@ -1179,6 +1222,13 @@ x:has(> [data-root="back"]) {
   to {
     d: path("M-10 0L 100 0L98 3 L 0 7Z");
   }
+}
+/* #endregion */
+
+/* #region LOG */
+[data-log-text] {
+  font-size: var(--mbx-log-size, 0.75em);
+  /* transform: translateY(-0.25em); */
 }
 /* #endregion */
 
@@ -1419,7 +1469,7 @@ x:has(> [data-root="back"]) {
 
 /* #region DOPPEL */
 [data-doppel] {
-  /* background: hsla(0,100%,100%,0.2); */
+  /* background-color: hsl(0, 100%, 20%); */
   display: inline-grid;
   grid-template-areas: stack;
   justify-items: center;
@@ -1487,39 +1537,5 @@ x:has(> [data-inline-frak-holder="anim"]) {
   to {
     d: path("M0 95L5 100L100 5L95 0Z");
   }
-}
-/* #endregion */
-
-/* #region FLIPFLOP */
-
-[data-flip-flop] {
-}
-
-[data-XXX-flip-flop] [data-frak] x {
-  /* optional: make sure they inherit the parent's computed range */
-  --parent-start: var(--animation-start);
-  --parent-end: var(--animation-end);
-  --parent-ani-start: var(--ani-start);
-  --parent-ani-end: var(--ani-end);
-
-  /* Now the child's own local range (still 0–1) */
-  /* --ani-start: 0.5;  */
-  /* --ani-end:   1; */
-
-  /* === THE BIG NESTED CALC === */
-  --animation-range: contain
-    calc(
-      /* parent start */ var(--parent-start) + (var(--parent-end) - var(--parent-start)) *
-        (var(--parent-ani-start) + (var(--parent-ani-end) - var(--parent-ani-start)) * 0.4)
-    )
-    contain
-    calc(
-      /* parent start + parent's full width * (0.4 + child's relative width) */
-      var(--parent-start) + (var(--parent-end) - var(--parent-start)) *
-        (
-          var(--parent-ani-start) + (var(--parent-ani-end) - var(--parent-ani-start)) *
-            (0.4 + (var(--ani-end) - var(--ani-start)))
-        )
-    );
 }
 /* #endregion */

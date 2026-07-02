@@ -338,6 +338,24 @@
             }
             return this.#API;
           },
+          doppel: (v) => {
+            let val = Number(v);
+            if (!Number.isInteger(val) || val < 1 || val >= 10) {
+              val = 1;
+            }
+            for (const bat of this.#batties) {
+              const holder = this.#makeTag("x", "", { doppel: "", source: bat.id });
+              bat.replaceWith(holder);
+              for (let i = 0; i < val; i++) {
+                const dop = this.#makeTag("x", bat.innerHTML, {
+                  id: `${bat.id}-doppel${val > 1 ? `-${i + 1}` : ""}`,
+                });
+                holder.append(dop);
+              }
+              holder.append(bat);
+            }
+            return this.#API;
+          },
         },
       };
     }
@@ -355,6 +373,12 @@
             return this.#makeTag("x", `<x data-tite>${bat.innerHTML}</x>`, {
               ...(val ? { [`--${this.#opts.fix}-tite-val`]: val } : {}),
               ...(bat.id ? { id: bat.id } : {}),
+            });
+          },
+          "mbx-half": (bat) => {
+            return this.#makeTag("x", `&frac12;`, {
+              ...(bat.id ? { id: bat.id } : {}),
+              half: "",
             });
           },
         },
@@ -397,7 +421,7 @@
                   log.style.setProperty("--ani-start", s);
                   log.style.setProperty("--ani-end", e);
                 }
-                continue;
+                // continue;
               }
               let fc = bat;
               if (bat.children[0]) {
@@ -691,18 +715,20 @@
               this.#API
                 .mount(
                   `${bat.id}-log-open`,
-                  `
-                log<x data-sub>${base}</x><x data-parens-left>(</x>
-              `,
+                  `<x>
+                    <x><x data-log-text>log</x></x>
+                    <x data-sub>${base}</x>
+                   </x>
+                   <x style="margin-left:-0.2em;" data-parens-left>(</x>`,
+                  //{ log: "" },
                 )
                 .grow()
                 .insertBefore(bat.id);
               this.#API
                 .mount(
                   `${bat.id}-log-close`,
-                  `
-                <x data-parens-rite>)</x>
-              `,
+                  `<x data-parens-rite>)</x>`,
+                  // { log: "" }
                 )
                 .grow()
                 .insertAfter(bat.id);
@@ -889,6 +915,30 @@
           }
         });
       }
+
+      api["ciprokate"] = () => {
+        const batties = this.#batties;
+        this.#API.spin("180deg");
+        for (const bat of batties) {
+          bat.setAttribute("data-ciprokate", "");
+          const [num, den] = bat.querySelectorAll("[data-numerator], [data-denominator]");
+          this.#batties = [num, den];
+          this.#API.spin("-180deg");
+        }
+        this.#batties = batties;
+        return this.#API;
+      };
+      clean.push((stage) => {
+        for (const bat of stage.querySelectorAll("[data-ciprokate]")) {
+          const [num, den] = bat.querySelectorAll("[data-numerator], [data-denominator]");
+          num.removeAttribute("data-numerator");
+          num.setAttribute("data-denominator", "");
+          den.removeAttribute("data-denominator");
+          den.setAttribute("data-numerator", "");
+          swapElements(num, den);
+          bat.removeAttribute("data-ciprokate");
+        }
+      });
 
       return { api: api, short: short, clean: clean };
     }
@@ -1086,7 +1136,7 @@
       this.#stageObj = nextStep.children[0];
 
       // remove IDs [or make #namespaceIDs()]
-      this.#removeIDs(stepTag.children[0]);
+      // this.#removeIDs(stepTag.children[0]);
       // this.#namespaceIDs(stepTag.children[0], this.#opts.fix, this.#stepNum);
 
       // the tag is done with measurements
@@ -1112,7 +1162,8 @@
         this.#holder.append(this.#saniTag("x", routine.intro, { intro: "" }));
       }
 
-      this.#stageObj = this.#saniTag("x", routine.stage, { stage: "" });
+      // this.#stageObj = this.#saniTag("x", routine.stage, { stage: "" });
+      this.#stageObj = this.#makeTag("x", routine.stage, { stage: "" });
 
       dispatch(this.#holder, `${this.#opts.fix}-routine-start`);
 
