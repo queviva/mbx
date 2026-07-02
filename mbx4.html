@@ -51,32 +51,35 @@
           {
             note: "move is extremely destructive",
             load: `
-             <x id="doppel" data-doppel>
-              <x id="T7-AA">
-               <x id="T7-a">7</x>
-              </x>
-              <x id="T7-b">7</x>
-            </x>
-             + 3 = 
+            <x id="T3">3</x>
+            <x id="EQ">=</x>
             <x id="Ty">
-             <x>y</x>
+             <x id="yy">y</x>
              <x data-sup data-vert="-0.25em">
-              <mbx-frak>
-                <x><x data-doppel><x id ="Tk">5</x></x></x>
-                <x>n</x>
+              <mbx-frak id="frak-1">
+                <x><x id="T9">9</x></x>
+                <x><x id="Tk">k</x></x>
               </mbx-frak>
              </x>
             </x>
             `,
             acts: (X) => {
-              X.spot("T7-b").vaporize().during(0, 0.5).shrink().during(0.5);
-              X.spot("Ty").log("3").during(0.5).viva();
+              X.spot("T3", "Ty").log("y");
             },
           },
           {
             acts: (X) => {
+              X.spot("frak-1").moveBefore("Ty-log-open");
+              X.spot("Ty-log-open", "Ty-log-close", "Ty").shrink();
             },
           },
+          {
+            acts: (X) => {
+              X.spot("frak-1").spin("180deg");
+              X.spot("T9", "Tk").spin("-180deg");
+            }
+          },
+          {}
         ],
       };
 
