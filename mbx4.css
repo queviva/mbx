@@ -334,8 +334,7 @@ x:has(> [data-grow="back"]) {
 
 /* #region VAULT */
 [data-vault] {
-  /* make an ="left" ="rite" x trans */
-  --mbx-vault-x-trans: -0.25em;
+  /* --mbx-vault-x: -0.25em; */
   animation: mbx-vault ease-out both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
@@ -345,9 +344,7 @@ x:has(> [data-grow="back"]) {
     transform: translate(0em, 0em);
   }
   15% {
-    /* give this an xtrans based on direction */
-    /* transform: translate(var(--mbx-vault-x-trans), calc(-1 * var(--mbx-vault-val, 1em))); */
-    transform: translate(0, calc(-1 * var(--mbx-vault-val, 1em)));
+    transform: translate(var(--mbx-vault-x, 0), calc(-1 * var(--mbx-vault-val, 1em)));
   }
   85% {
     transform: translate(0em, calc(-1 * var(--mbx-vault-val, 1em)));
@@ -508,6 +505,14 @@ svg,
   --vapor-shadow: var(--vapor-f1), var(--vapor-f2), var(--vapor-f3);
   --vapor-filter: drop-shadow(var(--vapor-f1)) drop-shadow(var(--vapor-f2))
     drop-shadow(var(--vapor-f3));
+      --vapor-f1: 0 0 5px var(--back-color);
+
+  --transp-f1: 0 0 5px transparent;
+  --transp-f2: 0 0 40px transparent;
+  --transp-f3: 0 0 41px transparent;
+  --transp-shadow: var(--transp-f1), var(--transp-f2), var(--transp-f3);
+  --transp-filter: drop-shadow(var(--transp-f1)) drop-shadow(var(--transp-f2))
+    drop-shadow(var(--transp-f3));
 }
 [data-vaporize] {
   animation: mbx-vaporize linear both;
@@ -630,7 +635,6 @@ path[data-materialize] {
 
 /* #endregion */
 
-
 /* #region FLASH */
 [data-flash] {
   animation: mbx-flash linear both;
@@ -644,11 +648,11 @@ path[data-materialize] {
   40% {
     text-shadow: var(--ghost-shadow);
   }
-  75% {
+  85% {
     text-shadow: var(--vapor-shadow);
   }
   100% {
-    text-shadow: var(--vapor-shadow);
+    text-shadow: var(--transp-shadow);
   }
 }
 /* #endregion */
@@ -779,8 +783,8 @@ path[data-materialize] {
 /* #region HALF */
 [data-half] {
   font-size: 0.8em;
-  margin-left:0.1em;
-  transform:translateY(-0.1em);
+  margin-left: 0.1em;
+  transform: translateY(-0.1em);
 }
 /* #endregion */
 
@@ -1124,20 +1128,18 @@ x:has(> [data-root="back"]) {
 [data-root] {
   box-sizing: border-box;
 }
-[data-root] > [data-radicand] {
-  margin-left: 0.125em;
-}
-
-[data-root] > [data-rootlines],
-[data-root] > [data-rootlines] x {
+[data-root] > [data-root-lines],
+[data-root] > [data-root-lines] x {
+  /* background-color: hsla(200, 100%, 60%, 0.2); */
   position: absolute;
-  top: 0;
   left: 0;
+  top: 0;
   bottom: 0;
   right: 0;
 }
 
-[data-root] > [data-rootlines] [data-front-svg] {
+[data-root] [data-front-svg] {
+  /* background-color: hsla(0, 100%, 60%, 0.2); */
   position: absolute;
   left: -0.45em;
   top: -0.25em;
@@ -1145,7 +1147,8 @@ x:has(> [data-root="back"]) {
   height: calc(100% + 0.25em);
   overflow: visible;
 }
-[data-root] > [data-rootlines] [data-top-svg] {
+[data-root] [data-top-svg] {
+  /* background-color: hsla(100, 100%, 60%, 0.2); */
   position: absolute;
   left: 0;
   top: -0.25em;

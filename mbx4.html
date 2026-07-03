@@ -67,7 +67,7 @@
           {
             note: `
             <x>move the square outside</x>
-            <x>turn the x into one-half</x>
+            <x>turn the x into a one-half</x>
             <x>and add <i>something</i> ?!?</x>
             `,
             acts: (X) => {
@@ -90,13 +90,14 @@
             
             `,
             note: `
-            <x>what do we add?!? ...</x>
-            <x>the <em>exact same thing</em></x>
+            <x>but what do we add?!? ...</x>
+            <x style="font-weight:bold;">the exact same thing</x>
             `,
             acts: (X) => {
-              X.spot("T-exclaim").vaporize().shrink().around("-200% 50%");
+              X.spot("T-all").flash().during(0, 0.4);
+              X.spot("T-exclaim").vaporize().shrink().around("-200% 50%").during(0.3, 1);
               X.spot("P1", "T-all").doppel();
-              X.spot("P1-doppel", "T-all-doppel").vault().moveAfter("T-plus");
+              X.spot("P1-doppel", "T-all-doppel").vault().during(0.3, 1).moveAfter("T-plus").during(0.3, 1);
             },
           },
           {
@@ -138,11 +139,18 @@
             note: "I don't know what five plus four is",
             acts: (X) => {
               X.spot("T5-T4").brak();
-            }
+            },
           },
           {
             load: `
-            (x + 2)^2 =
+            <x id="P1">
+              <x data-parens-left>(</x>
+            </x>
+            <x>x + 2</x>
+            <x id="P2">
+             <x data-parens-rite>)</x>^2
+            </x>
+            <x id="EQ">=</x>
             <x>
              <mbx-brak id="T5-T4">
               <x>
@@ -161,10 +169,79 @@
               X.spot("T9").spin("720deg");
               X.spot("T5-T4").unBrak().during(0, 0.5);
               X.spot("T54").absorb("T9");
-            }
+            },
+          },
+          {
+            note: `
+            square root both sides
+            `,
+            acts: (X) => {
+              X.spot("P1", "P2")
+                .vaporize().during(0, 0.7)
+                .shrink().during(0.5, 1)
+              ;
+              X.mount("Tpm", "&#177;").insertBefore("T9").grow();
+              X.spot("T9").root("T9-root");
+            },
           },
           {
             acts: (X) => {
+              X.spot("P1", "P2").dismount();
+              X.mount("T3", "3");
+              X.spot("T9").xfade("T3");
+              X.spot("T9-root").unRoot();
+            }
+          },
+          {
+            load: `
+            x 
+            <x id="Tplus2">
+             <x id="Tplus">+</x>
+             <x id="T2">2</x>
+            </x>
+            <x id="EQ">=</x>
+            &#177; 3
+            `,
+            acts: (X) => {
+              X.mount("Tminus","-").viva();
+              X.spot("Tplus").xfade("Tminus");
+              X.spot("Tplus2").spin().vault().moveAfter("EQ");
+            }
+          },
+          {
+            load: `
+            x = <x id="B1">{</x>
+            - 2
+            <x id="Tplusminus">&#177;</x>
+            <x id="Tplus-a">+</x>
+            <x id="T3-a">3</x>
+            <x id="comma">,</x>
+            <x id="Tminus-b">-</x>
+            <x id="T2-b">2</x>
+            <x id="Tminus-c">-</x>
+            <x id="T3-b">3</x>
+            <x id="B2">}</x>
+
+            `,
+            acts: (X) => {
+              X.spot("comma","Tminus-b","T2-b","Tminus-c","T3-b","B2").unfurl();
+              X.spot("B1").grow();
+              X.spot("Tplusminus").xfade("Tplus-a");
+            }
+          },
+          {
+            load: `
+            x = {
+             <x id="T23-a">- 2 + 3</x>
+             <x id="T1">1</x>
+             ,
+             <x id="T23-b">- 2 - 3</x>
+             <x id="T-5">-5</x>
+            }
+            `,
+            acts: (X) => {
+              X.spot("T23-a").absorb("T1");
+              X.spot("T23-b").absorb("T-5");
             }
           }
         ],

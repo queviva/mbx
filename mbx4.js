@@ -113,6 +113,7 @@
         this.#makeGroinkSkills(),
         this.#makeLogSkills(),
         this.#makeJestorSkills(),
+        this.#makeRootSkills(),
         this.#makeFrakSkills(),
         this.#makeExitSkills(),
         this.#makeFadeSkills(),
@@ -338,6 +339,12 @@
             }
             return this.#API;
           },
+          setVar: (prop, val) => {
+            for (const bat of this.#batties) {
+              bat.children[0].style.setProperty(`--${this.#opts.fix}-${prop}`, val);
+            }
+            return this.#API;
+          },
           doppel: (v) => {
             let val = Number(v);
             if (!Number.isInteger(val) || val < 1 || val >= 10) {
@@ -354,6 +361,18 @@
               }
               holder.append(bat);
             }
+            return this.#API;
+          },
+          unfurl: () => {
+            const batties = this.#batties;
+            const total = batties.length;
+            for (const [i, bat] of batties.entries()) {
+              this.#API
+                .spot(bat.id)
+                .grow()
+                .during(i / total, 1);
+            }
+            this.#batties = batties;
             return this.#API;
           },
         },
@@ -651,6 +670,7 @@
         "ghost",
         "vaporize",
         "materialize",
+        "flash",
         "tuck",
         "vault",
         "spin",
@@ -943,6 +963,61 @@
       return { api: api, short: short, clean: clean };
     }
 
+    #makeRootSkills() {
+      const api = {};
+      const short = {};
+      const clean = [];
+      api["root"] = (id) => {
+        const bat0 = this.#batties[0];
+        id = id || `${this.#opts.fix}${crypto.randomUUID()}`;
+        const lines = this.#makeTag(
+          "x",
+          `
+            <svg data-front-svg viewBox="0 0 24 100" preserveAspectRatio="none" aria-hidden="true">
+             <path/>
+            </svg>
+            <svg data-top-svg viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true">
+             <path/>
+            </svg>
+          `,
+          {
+            ["root-lines"]: "",
+          },
+        );
+        const terms = this.#makeTag("x", "", {
+          source: CSS.escape(id),
+          ["root-terms"]: "",
+        });
+        const root = this.#makeTag("x", "", {
+          id: CSS.escape(id),
+          root: "fore",
+        });
+        root.append(lines, terms);
+        const holder = this.#makeTag("x");
+        holder.append(root);
+        bat0.replaceWith(holder);
+        for (const el of this.#batties) {
+          terms.append(el);
+        }
+        return this.#API.spot(id);
+      };
+      api["unRoot"] = () => {
+        for (const bat of this.#batties) {
+          bat.setAttribute("data-root", "back");
+        }
+      };
+      clean.push((stage) => {
+        for (const bat of stage.querySelectorAll("[data-root]")) {
+          const val = bat.getAttribute("data-root");
+          if (val) {
+            bat.setAttribute("data-root", "");
+          }
+        }
+      });
+
+      return { api: api, short: short, clean: clean };
+    }
+
     #makeExitSkills() {
       const skills = ["wink", "fliz"];
 
@@ -1136,7 +1211,7 @@
       this.#stageObj = nextStep.children[0];
 
       // remove IDs [or make #namespaceIDs()]
-      // this.#removeIDs(stepTag.children[0]);
+      this.#removeIDs(stepTag.children[0]);
       // this.#namespaceIDs(stepTag.children[0], this.#opts.fix, this.#stepNum);
 
       // the tag is done with measurements
