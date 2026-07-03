@@ -14,8 +14,8 @@ mathro-batix [data-holder] {
   --frak-font-size: 0.75em;
   --frak-vertical-align: 65%;
 
-  --mbx-pow-size: 0.55em;
-  --mbx-log-size: 0.7em;
+  --mbx-expo-size: 0.55em;
+  --mbx-funk-size: 0.7em;
 }
 
 /* LAYOUT */
@@ -155,7 +155,7 @@ x {
   gap: 0.25em;
   justify-content: center;
   white-space: nowrap;
-  font-size: var(--mbx-pow-size, 0.55em);
+  font-size: var(--mbx-expo-size, 0.55em);
   margin-left: -0.35em;
 }
 [data-sup] {
@@ -505,7 +505,7 @@ svg,
   --vapor-shadow: var(--vapor-f1), var(--vapor-f2), var(--vapor-f3);
   --vapor-filter: drop-shadow(var(--vapor-f1)) drop-shadow(var(--vapor-f2))
     drop-shadow(var(--vapor-f3));
-      --vapor-f1: 0 0 5px var(--back-color);
+  --vapor-f1: 0 0 5px var(--back-color);
 
   --transp-f1: 0 0 5px transparent;
   --transp-f2: 0 0 40px transparent;
@@ -1228,10 +1228,18 @@ x:has(> [data-root="back"]) {
 }
 /* #endregion */
 
-/* #region LOG */
-[data-log-text] {
-  font-size: var(--mbx-log-size, 0.75em);
+/* #region FUNK */
+[data-funk-text] {
+  font-size: var(--mbx-funk-size, 0.75em);
+  letter-spacing: -0.1em;
   /* transform: translateY(-0.25em); */
+}
+[data-funk-text="W"] {
+  font-family: "Luckiest Guy";
+}
+[data-funk-text] + [data-sup] {
+  font-size: calc(0.75 * var(--mbx-expo-size));
+  margin-left: -0.5em;
 }
 /* #endregion */
 
@@ -1541,4 +1549,34 @@ x:has(> [data-inline-frak-holder="anim"]) {
     d: path("M0 95L5 100L100 5L95 0Z");
   }
 }
+/* #endregion */
+
+/* #region RAZE */
+[data-raze] {
+  /* background-color: hsla(0, 100%, 60%, 0.2); */
+  position: relative;
+  display: inline-flex;
+  flex-direction: row;
+  gap: 0.25em;
+  justify-content: center;
+  white-space: nowrap;
+
+  will-change: margin, transform, font-size;
+  animation: mbx-raze-keys linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-raze-keys {
+  from {
+    font-size: 1em;
+    margin-left: 0em;
+    transform: translateY(0em);
+  }
+  to {
+    font-size: var(--mbx-expo-size, 0.55em);
+    margin-left: -0.35em;
+    transform: translateY(-0.8em);
+  }
+}
+
 /* #endregion */

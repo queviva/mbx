@@ -111,9 +111,10 @@
         this.#makeMoveSkills(),
         this.#makeWrapSkills(),
         this.#makeGroinkSkills(),
-        this.#makeLogSkills(),
+        this.#makeFunkSkills(),
         this.#makeJestorSkills(),
         this.#makeRootSkills(),
+        this.#makeRazeSkills(),
         this.#makeFrakSkills(),
         this.#makeExitSkills(),
         this.#makeFadeSkills(),
@@ -287,6 +288,20 @@
             }
             return this.#API;
           },
+          team: (id, vals = {}) => {
+            if (!id) return this.#API;
+            const bats = this.#batties;
+            const team = this.#makeTag("x", "", {
+              team: "",
+              id: id,
+              ...vals,
+            });
+            bats[0].replaceWith(team);
+            for (const bat of bats) {
+              team.append(bat);
+            }
+            return this.#API.spot(id);
+          },
           insertBefore: (id) => {
             const beef = this.#API.pick(id);
             if (!beef) return this.#API;
@@ -317,7 +332,7 @@
           },
           alter: (html) => {
             for (const bat of this.#batties) {
-              bat.replaceChildren(this.#strip(html));
+              bat.replaceWith(this.#makeTag("x", html));
             }
             return this.#API;
           },
@@ -717,48 +732,64 @@
             for (const bat of stage.querySelectorAll("[data-grow]")) {
               const val = bat.getAttribute("data-grow");
               if (val === "fore") this.#unWrap("grow", stage);
-              else if (val === "back") bat.remove();
+              else if (val === "back") {
+                const sub = stage.querySelector(`#${bat.getAttribute("data-subject")}`);
+                bat.remove();
+                sub.remove();
+              }
             }
           },
         ],
       };
     }
 
-    #makeLogSkills() {
-      return {
-        short: {},
-        api: {
-          log: (base) => {
-            const batties = this.#batties;
-            for (const bat of this.#batties) {
-              bat.setAttribute("data-logged", bat.id);
-              this.#API
-                .mount(
-                  `${bat.id}-log-open`,
-                  `<x>
-                    <x><x data-log-text>log</x></x>
-                    <x data-sub>${base}</x>
-                   </x>
-                   <x style="margin-left:-0.2em;" data-parens-left>(</x>`,
-                  //{ log: "" },
-                )
-                .grow()
-                .insertBefore(bat.id);
-              this.#API
-                .mount(
-                  `${bat.id}-log-close`,
-                  `<x data-parens-rite>)</x>`,
-                  // { log: "" }
-                )
-                .grow()
-                .insertAfter(bat.id);
-            }
-            this.#batties = batties;
-            return this.#API;
-          },
+    #makeFunkSkills() {
+      const skills = ["log", "ln", "W"];
+      const invers = ["sin", "cos", "tan", "sec", "cos", "cot", "trig"];
+
+      const api = {};
+      const short = {};
+      const clean = [];
+
+      const makeHTML = {
+        open: (id, skill, base) => {
+          const type = invers.includes(skill) ? "data-sup" : "data-sub";
+          const bTag = base ? `<x ${type}>${base}</x>` : "";
+          return `
+           <x id="${id}-${skill}-open-text">
+             <x>
+               <x data-funk-text="${skill}">${skill}</x>
+               ${bTag}
+             </x>
+             <x style="margin: 0 -0.2em;">(</x>
+           </x>
+         `;
         },
-        clean: [],
+        close: (id, skill) => {
+          return `<x id="${id}-${skill}-close-text" data-parens-rite>)</x>`;
+        },
       };
+
+      for (const skill of [...skills, ...invers]) {
+        api[skill] = (base = null) => {
+          const textIDs = [];
+          for (const bat of this.#batties) {
+            bat.setAttribute(`data-${skill}-funk`, bat.id);
+            this.#API
+              .mount(`${bat.id}-${skill}-open`, makeHTML.open(bat.id, skill, base))
+              .grow()
+              .insertBefore(bat.id);
+            this.#API
+              .mount(`${bat.id}-${skill}-close`, makeHTML.close(bat.id, skill))
+              .grow()
+              .insertAfter(bat.id);
+            textIDs.push(`${bat.id}-${skill}-open-text`, `${bat.id}-${skill}-close-text`);
+          }
+          return this.#API.spot(...textIDs);
+        };
+      }
+
+      return { api: api, short: short, clean: clean };
     }
 
     #makeJestorSkills() {
@@ -964,12 +995,24 @@
     }
 
     #makeRootSkills() {
+      const skills = ["root"];
+
       const api = {};
       const short = {};
       const clean = [];
+
       api["root"] = (id) => {
         const bat0 = this.#batties[0];
         id = id || `${this.#opts.fix}${crypto.randomUUID()}`;
+        const holder = this.#makeTag("x");
+        const root = this.#makeTag("x", "", {
+          id: CSS.escape(id),
+          root: "fore",
+        });
+        const terms = this.#makeTag("x", "", {
+          source: CSS.escape(id),
+          ["root-terms"]: "",
+        });
         const lines = this.#makeTag(
           "x",
           `
@@ -984,16 +1027,7 @@
             ["root-lines"]: "",
           },
         );
-        const terms = this.#makeTag("x", "", {
-          source: CSS.escape(id),
-          ["root-terms"]: "",
-        });
-        const root = this.#makeTag("x", "", {
-          id: CSS.escape(id),
-          root: "fore",
-        });
         root.append(lines, terms);
-        const holder = this.#makeTag("x");
         holder.append(root);
         bat0.replaceWith(holder);
         for (const el of this.#batties) {
@@ -1014,6 +1048,30 @@
           }
         }
       });
+
+      return { api: api, short: short, clean: clean };
+    }
+
+    #makeRazeSkills() {
+      const skills = ["raze"];
+
+      const api = {};
+      const short = {};
+      const clean = [];
+
+      for (const skill of skills) {
+        api[skill] = (id, html) => {
+          this.#API.team(`${id}-${skill}`, { [`${skill}`]: id });
+          this.#API.mount(id, html).insertBefore(`${id}-${skill}`).grow();
+          return this.#API;
+        };
+        clean.push((stage) => {
+          for (const bat of stage.querySelectorAll(`[data-${skill}]`)) {
+            bat.removeAttribute(`data-${skill}`);
+            bat.setAttribute("data-sup", "");
+          }
+        })
+      }
 
       return { api: api, short: short, clean: clean };
     }
@@ -1211,7 +1269,7 @@
       this.#stageObj = nextStep.children[0];
 
       // remove IDs [or make #namespaceIDs()]
-      this.#removeIDs(stepTag.children[0]);
+      // this.#removeIDs(stepTag.children[0]);
       // this.#namespaceIDs(stepTag.children[0], this.#opts.fix, this.#stepNum);
 
       // the tag is done with measurements

@@ -24,7 +24,7 @@
       }
       @media screen and (orientation: portrait) {
         rat-batix {
-          /* font-size: 2.25em; */
+          font-size: 0.8em;
         }
       }
     </style>
@@ -35,6 +35,35 @@
 
     <script id="ROUTINES">
       const routineTwo = {
+        intro: `
+          <b data-logo>MATHROBATIX</b>
+          illuminated acrobatic gestural mathematics
+        `,
+        steps: [
+          {
+            load: `
+            <x id="T3">3</x>
+            <x id="T4">+ 4</x>
+            <x id="EQ">=</x>
+            <x id="lnx">ln(x)</x>
+            `,
+            note: "funk of all evil",
+            acts: (X) => {
+              X.spot("T3", "T4").raze("e-99","e");
+              X.spot("lnx").raze("e-88", "e");
+            }
+          },
+          {
+            acts: (X) => {
+            }
+          },
+          {
+            acts: (X) => {
+            }
+          }
+        ]
+      };
+      const XXXroutineTwo = {
         intro: `
           <b data-logo>MATHROBATIX</b>
           illuminated acrobatic gestural mathematics
@@ -97,7 +126,11 @@
               X.spot("T-all").flash().during(0, 0.4);
               X.spot("T-exclaim").vaporize().shrink().around("-200% 50%").during(0.3, 1);
               X.spot("P1", "T-all").doppel();
-              X.spot("P1-doppel", "T-all-doppel").vault().during(0.3, 1).moveAfter("T-plus").during(0.3, 1);
+              X.spot("P1-doppel", "T-all-doppel")
+                .vault()
+                .during(0.3, 1)
+                .moveAfter("T-plus")
+                .during(0.3, 1);
             },
           },
           {
@@ -176,10 +209,7 @@
             square root both sides
             `,
             acts: (X) => {
-              X.spot("P1", "P2")
-                .vaporize().during(0, 0.7)
-                .shrink().during(0.5, 1)
-              ;
+              X.spot("P1", "P2").vaporize().during(0, 0.7).shrink().during(0.5, 1);
               X.mount("Tpm", "&#177;").insertBefore("T9").grow();
               X.spot("T9").root("T9-root");
             },
@@ -190,7 +220,7 @@
               X.mount("T3", "3");
               X.spot("T9").xfade("T3");
               X.spot("T9-root").unRoot();
-            }
+            },
           },
           {
             load: `
@@ -203,10 +233,10 @@
             &#177; 3
             `,
             acts: (X) => {
-              X.mount("Tminus","-").viva();
+              X.mount("Tminus", "-").viva();
               X.spot("Tplus").xfade("Tminus");
               X.spot("Tplus2").spin().vault().moveAfter("EQ");
-            }
+            },
           },
           {
             load: `
@@ -214,8 +244,7 @@
             - 2
             <x id="Tplusminus">&#177;</x>
             <x id="Tplus-a">+</x>
-            <x id="T3-a">3</x>
-            <x id="comma">,</x>
+            <x id="T3-a">3</x><x id="comma" style="margin-left:-0.125em;">,</x>
             <x id="Tminus-b">-</x>
             <x id="T2-b">2</x>
             <x id="Tminus-c">-</x>
@@ -224,17 +253,16 @@
 
             `,
             acts: (X) => {
-              X.spot("comma","Tminus-b","T2-b","Tminus-c","T3-b","B2").unfurl();
+              X.spot("comma", "Tminus-b", "T2-b", "Tminus-c", "T3-b", "B2").unfurl();
               X.spot("B1").grow();
               X.spot("Tplusminus").xfade("Tplus-a");
-            }
+            },
           },
           {
             load: `
             x = {
              <x id="T23-a">- 2 + 3</x>
-             <x id="T1">1</x>
-             ,
+             <x id="T1">1</x><x style="margin-left:-0.125em">,</x>
              <x id="T23-b">- 2 - 3</x>
              <x id="T-5">-5</x>
             }
@@ -242,8 +270,8 @@
             acts: (X) => {
               X.spot("T23-a").absorb("T1");
               X.spot("T23-b").absorb("T-5");
-            }
-          }
+            },
+          },
         ],
       };
 
