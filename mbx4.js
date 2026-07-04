@@ -378,14 +378,15 @@
             }
             return this.#API;
           },
-          unfurl: () => {
+          unfurl: (s = 0, e = 1) => {
+            const d = e - s;
             const batties = this.#batties;
             const total = batties.length;
             for (const [i, bat] of batties.entries()) {
               this.#API
                 .spot(bat.id)
                 .grow()
-                .during(i / total, 1);
+                .during(s + (i / total) * d, e);
             }
             this.#batties = batties;
             return this.#API;
@@ -718,6 +719,7 @@
         });
         for (const bat of this.#batties) {
           this.#measureElements(bat.children[0]);
+          bat.innerHTML = `<x>${bat.innerHTML}</x>`;
         }
         return this.#API;
       };
@@ -771,6 +773,7 @@
       };
 
       for (const skill of [...skills, ...invers]) {
+        const fixy = `${this.#opts.fix}-${skill}`;
         api[skill] = (base = null) => {
           const textIDs = [];
           for (const bat of this.#batties) {
@@ -786,6 +789,20 @@
             textIDs.push(`${bat.id}-${skill}-open-text`, `${bat.id}-${skill}-close-text`);
           }
           return this.#API.spot(...textIDs);
+        };
+        short[fixy] = (bat) => {
+          bat.id ||= `${this.#opts.fix}-${crypto.randomUUID()}`;
+          const base = bat.getAttribute("base");
+          const tag = this.#makeTag("x", bat.innerHTML, {
+            [`${skill}`]: "",
+            id: bat.id,
+          });
+          this.#API
+            .mount(`${bat.id}-${skill}-open`, makeHTML.open(bat.id, skill, base))
+            .insertBefore(bat.id)
+            .mount(`${bat.id}-${skill}-close`, makeHTML.close(bat.id, skill))
+            .insertAfter(bat.id);
+          return tag;
         };
       }
 
@@ -1061,16 +1078,26 @@
 
       for (const skill of skills) {
         api[skill] = (id, html) => {
-          this.#API.team(`${id}-${skill}`, { [`${skill}`]: id });
+          this.#API.team(`${id}-${skill}`, { [`${skill}`]: "fore" });
           this.#API.mount(id, html).insertBefore(`${id}-${skill}`).grow();
           return this.#API;
         };
+        api[camel(skill)] = () => {
+          for (const bat of this.#batties) {
+            bat.setAttribute(`data-${skill}`, "back");
+          }
+          return this.#API;
+        };
         clean.push((stage) => {
-          for (const bat of stage.querySelectorAll(`[data-${skill}]`)) {
+          for (const bat of stage.querySelectorAll(`[data-${skill}="fore"]`)) {
             bat.removeAttribute(`data-${skill}`);
             bat.setAttribute("data-sup", "");
           }
-        })
+          for (const bat of stage.querySelectorAll(`[data-${skill}="back"]`)) {
+            bat.removeAttribute(`data-${skill}`);
+            bat.removeAttribute("data-sup");
+          }
+        });
       }
 
       return { api: api, short: short, clean: clean };
@@ -1269,7 +1296,7 @@
       this.#stageObj = nextStep.children[0];
 
       // remove IDs [or make #namespaceIDs()]
-      // this.#removeIDs(stepTag.children[0]);
+      this.#removeIDs(stepTag.children[0]);
       // this.#namespaceIDs(stepTag.children[0], this.#opts.fix, this.#stepNum);
 
       // the tag is done with measurements

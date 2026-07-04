@@ -1566,6 +1566,9 @@ x:has(> [data-inline-frak-holder="anim"]) {
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
+[data-raze="back"] {
+  animation-direction: reverse;
+}
 @keyframes mbx-raze-keys {
   from {
     font-size: 1em;

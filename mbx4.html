@@ -42,25 +42,54 @@
         steps: [
           {
             load: `
-            <x id="T3">3</x>
-            <x id="T4">+ 4</x>
+            <x>x</x>
+            <x data-sup>
+             <x id="pow-half">(1 /// 2)</x>
+             <x data-sup>
+              <x id="pow2-a">2</x>
+             </x>
+            </x>
             <x id="EQ">=</x>
-            <x id="lnx">ln(x)</x>
+            <x id="T3">3</x>
+            <x id="pow2-b" data-sup>2</x>
             `,
             note: "funk of all evil",
             acts: (X) => {
-              X.spot("T3", "T4").raze("e-99","e");
-              X.spot("lnx").raze("e-88", "e");
+              X.spot("pow2-a", "pow2-b").grow();
             }
           },
           {
             acts: (X) => {
+              X.spot("pow2-a").moveBefore("pow-half");
             }
           },
           {
+            load: `
+            x
+            <x data-sup>
+             <x id="g-1">2(1 /// 2)</x>
+             <x id="g-2">1</x>
+            </x>
+            = 3^2
+            `,
             acts: (X) => {
+              X.spot("g-1").spin("720deg").xfade("g-2");
             }
-          }
+          },
+          {
+            load: `
+            x<x id="pow1" data-sup>1</x>
+            <x id="g-1">= 3^2</x>
+            <x id="EQ">=</x>
+            <x id="T9">9</x>
+            `,
+            acts: (X) => {
+              X.spot("pow1").vaporize().shrink().during(0.75);
+              X.spot("g-1").shrink().during(0.5);
+              X.spot("EQ", "T9").unfurl(0, 0.5);
+            }
+          },
+          {}
         ]
       };
       const XXXroutineTwo = {
