@@ -695,6 +695,7 @@
         "vaporize",
         "materialize",
         "flash",
+        "blink",
         "tuck",
         "vault",
         "spin",
@@ -993,14 +994,14 @@
         });
       }
 
-      api["ciprokate"] = () => {
+      api["ciprokate"] = (dir = 1) => {
         const batties = this.#batties;
-        this.#API.spin("180deg");
+        this.#API.spin(`${180 * dir}deg`);
         for (const bat of batties) {
           bat.setAttribute("data-ciprokate", "");
           const [num, den] = bat.querySelectorAll("[data-numerator], [data-denominator]");
           this.#batties = [num, den];
-          this.#API.spin("-180deg");
+          this.#API.spin(`${-180 * dir}deg`);
         }
         this.#batties = batties;
         return this.#API;
@@ -1065,7 +1066,7 @@
             source: id,
           },
         );
-        const order = this.#makeTag("x", base, {
+        const order = this.#makeTag("x", base||"", {
           ["root-order"]: "",
           source: id,
         });

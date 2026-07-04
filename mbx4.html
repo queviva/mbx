@@ -32,9 +32,59 @@
 
   <body>
     <rat-batix id="two" data-mbx='{"xxx_color":300}'></rat-batix>
+    <rat-batix id="one" data-mbx='{"color":300}'></rat-batix>
 
     <script id="ROUTINES">
       const routineTwo = {
+        intro: `
+          <b data-logo>MATHROBATIX</b>
+          illuminated acrobatic gestural mathematics
+        `,
+        stage: `
+          <mbx-frak id="frak-1">
+            <x id="T5">5</x><x>x<x id="pow2" data-sup>2</x></x>
+          </mbx-frak>
+          <x id="EQ">=</x>
+          <mbx-frak id="frak-2">
+            <x>3</x><x id="T2">2</x>
+          </mbx-frak>
+        `,
+        steps: [
+          {
+            note: "yes, you can do this",
+            acts: (X) => {
+              // X.spot("T5").spin("-720deg");
+              X.spot("frak-1").bulk("2").blink().ciprokate();
+              X.spot("frak-2").bulk("0.75").blink().ciprokate(-1);
+            }
+          },
+          {
+            note: "un frak that",
+            acts: (X) => {
+              X.mount("Tdot", "&middot;").insertAfter("T2").grow();
+              X.spot("frak-1").unFrak();
+              X.spot("T5").moveAfter("Tdot");
+            }
+          },
+          {
+            note: "perfection",
+            acts: (X) => {
+              X.mount("T10", "10");
+              X.spot("T2", "Tdot", "T5").team("team-1").spin().xfade("T10");
+              X.spot("pow2").vaporize().shrink();
+              X.spot("frak-2").root();
+            }
+          },
+          {
+            note: "plus or minus",
+            acts: (X) => {
+              X.mount("Tporm", "&#177;").insertAfter("EQ").grow();
+              X.mount("good", "").good();
+            }
+          }
+        ]
+      };
+      const KKKroutineTwo = {
         intro: `
           <b data-logo>MATHROBATIX</b>
           illuminated acrobatic gestural mathematics
@@ -140,7 +190,7 @@
               <x>flip the sign, flop the side</x>
             `,
             acts: (X) => {
-              X.spot("Tminus").xfade("Tplus");
+              X.spot("Tminus").xfade("Tplus").viva();
               X.spot("Tminus9").spin().vault()
                 .moveAfter("frak-1");
             }
@@ -214,11 +264,11 @@
           },
           {
             load: `
-            <x>x = 9</x><x id="rat">rat</x>
+            <x>x = 9</x><x id="good"></x>
             `,
             note: "looks good",
             acts: (X) => {
-              // X.spot("rat").good();
+              X.spot("good").good();
             },
           },
         ],
@@ -435,6 +485,10 @@
         ],
       };
 
+      const one = document.getElementById("one");
+      one.addEventListener("mbx-ready", (e) => {
+        one.loadRoutine(ZZZroutineTwo);
+      });
       const two = document.getElementById("two");
       two.addEventListener("mbx-ready", (e) => {
         two.loadRoutine(routineTwo);

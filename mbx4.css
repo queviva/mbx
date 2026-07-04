@@ -401,6 +401,7 @@ x:has(> [data-grow="back"]) {
 /* #region VIVA */
 svg,
 .mbx-wink,
+[data-blink],
 [data-viva],
 [data-filter="viva"] {
   --viva-f1: 0 0 3px hsl(var(--mbx-h), 90%, 80%);
@@ -632,6 +633,51 @@ path[data-materialize] {
     filter: none;
     opacity: 1;
   }
+}
+
+/* #endregion */
+
+/* #region BLiNK */
+[data-blink] {
+  will-change: color, text-shadow;
+  animation: mbx-blink-keys linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-blink-keys {
+  0% {
+    color: inherit;
+    text-shadow: none;
+  }
+  50% {
+    color: var(--white-color);
+    text-shadow: var(--viva-shadow);
+  }
+  100% {
+    color: inherit;
+    text-shadow: none;
+  }
+}
+[data-blink] path {
+  will-change: filter;
+  animation: mbx-blink-path-keys linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-blink-path-keys {
+  0% {
+    fill: currentColor;
+    filter: none;
+  }
+  50% {
+    fill: currentColor;
+    filter: var(--viva-filter);
+  }
+  100% {
+    fill: currentColor;
+    filter: none;
+  }
+
 }
 
 /* #endregion */
