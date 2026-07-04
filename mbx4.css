@@ -1468,6 +1468,31 @@ x:has(> [data-root="back"]) {
 }
 /* #endregion */
 
+
+
+/* #region good */
+[data-good-svg] {
+  width: 100px;
+  height: 100px;
+}
+[data-good] {
+  animation: mbx-good-keys linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+[data-jest=""] [data-good] {
+  d: path("M30 60L40 80Q63 45 100 15L110 10Q50 60 40 110Q23 95 15 80 Z");
+}
+@keyframes mbx-good-keys {
+  0% {
+    d: path("M30 60L40 80Q63 45 100 15L110 10Q50 60 40 110Q23 95 15 80 Z");
+  }
+  100% {
+    d: path("M30 60L40 80Q63 45 100 15L110 10Q50 60 40 110Q23 95 15 80 Z");
+  }
+}
+/* #endregion */
+
 /* #region TITE */
 [data-tite] {
   /* margin-left: -0.125em; */

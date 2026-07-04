@@ -403,6 +403,13 @@
             bat.removeAttribute("data-vert");
             return bat;
           },
+          "[data-good]": (bat) => {
+            bat.innerHTML = `
+             <svg data-good-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <path />
+             </svg>
+            `;
+          },
           "mbx-tite": (bat) => {
             const val = bat.getAttribute("val");
             return this.#makeTag("x", `<x data-tite>${bat.innerHTML}</x>`, {
@@ -811,14 +818,14 @@
 
     #makeJestorSkills() {
       const skills = {
-        draw: ["cank", "xout"],
+        draw: ["cank", "xout", "good"],
         clip: ["cirk", "brak"],
       };
 
       const makeHTML = {
         draw: (html, skill) => {
           return `
-           <x>${html}</x>
+           <x data-${skill}-text>${html}</x>
            <svg data-${skill}-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             <path data-main data-${skill} />
            </svg>
@@ -827,7 +834,7 @@
         clip: (html, skill) => {
           const clipID = `${this.#opts.fix}-${crypto.randomUUID()}`;
           return `
-           <x>${html}</x>
+           <x data-${skill}-text>${html}</x>
            <svg data-${skill}-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             <clipPath data-clip id="${clipID}"><path data-main data-${skill}/></clipPath>
             <path data-${skill}-base clip-path="url(#${clipID})" />
@@ -1008,6 +1015,13 @@
         }
       });
 
+      api["inlineFrak"] = () => {
+        for (const bat of this.#batties) {
+          const [num, den] = bat.querySelectorAll("[data-numerator], [data-denominator]");
+          if (!num || !den) continue;
+          log(num, den);
+        }
+      }
       return { api: api, short: short, clean: clean };
     }
 

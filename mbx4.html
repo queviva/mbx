@@ -44,7 +44,12 @@
             load: `
             <x>x</x>
             <x data-sup>
-             <x id="pow-half">(1 /// 2)</x>
+             <x id="pow-half">
+              <mbx-frak id="frak-1">
+                <x>1</x>
+                <x>2</x>
+              </mbx-frak>
+             </x>
              <x data-sup>
               <x id="pow2-a">2</x>
              </x>
@@ -55,6 +60,7 @@
             `,
             note: "funk of all evil",
             acts: (X) => {
+              X.spot("frak-1").inlineFrak();
               X.spot("pow2-a", "pow2-b").grow();
             }
           },
@@ -89,7 +95,14 @@
               X.spot("EQ", "T9").unfurl(0, 0.5);
             }
           },
-          {}
+          {
+            load: `
+            x = 9 <mbx-good id="rat"></mbx-good> 
+            `,
+            note: "looks good",
+            acts: (X) => {
+            }
+          }
         ]
       };
       const XXXroutineTwo = {
