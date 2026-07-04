@@ -39,16 +39,133 @@
           <b data-logo>MATHROBATIX</b>
           illuminated acrobatic gestural mathematics
         `,
+        stage: `
+            <x id="P1" data-parens-left>(</x>
+             <x id="T3x">3x</x>
+             <x id="T3x-fax">
+              <x id="T3-m">3</x>
+              <x id="Tx-m">x</x>
+             </x>
+             -
+             <x id="T27">27</x>
+             <x id="T27-fax">
+              <x id="T3-a">3</x>
+              <x id="T3-b">3</x>
+              <x id="T3-c">3</x>
+             </x>
+            <x id="P2" data-parens-rite>)</x>
+            =
+            <x id="T5">5</x>
+        `,
+        steps: [
+          {
+            note: `
+            <x>twenty-seven is three ...</x>
+            <x>times three times three</x>
+            `,
+            acts: (X) => {
+              X.spot("T3x").faxx("T3x-fax");
+              X.spot("T27").faxx("T27-fax");
+            },
+          },
+          {
+            acts: (X) => {
+              X.mount("catch", "<x data-catch><x id='catch-3'>3</x>").insertAfter("P2").grow();
+              X.spot("T3-m").spin().vault("1.4em").moveAfter("catch-3");
+              X.spot("T3-b").spin().vault().moveAfter("catch-3");
+              X.mount("T9", "9");
+              X.spot("T27").xfade("T9");
+              X.mount("Tx", "x");
+              X.spot("T3x").xfade("Tx");
+            },
+            note: `
+              faktor a three from each term
+            `
+          },
+          {
+            note: `
+            <x>only x remains from 3x</x>
+            <x>three times three is nine</x>
+            `,
+            acts: (X) => {
+              X.spot("T3x-faxx").unFaxx();
+              X.spot("T27-faxx").unFaxx();
+            },
+          },
+          {
+            load: `
+            (x - 9)
+            <x id="T3">3</x>
+            =
+            <x id="T5">5</x>
+            <x id="catch-3" data-catch>
+             <x id="C3">3</x>
+            </x>
+            `,
+            note: "this is incredible",
+            acts: (X) => {
+              X.spot("T5").frak("catch-3");
+              X.spot("T3").moveAfter("C3");
+            }
+          },
+          {
+            load: `
+            <x id="P1"><x data-parens-left>(</x></x>
+            x - 9
+            <x id="P2"><x data-parens-rite>)</x></x>
+            = <mbx-frak><x>5</x><x>3</x></mbx-frak>
+            `,
+            note: "drop the parenthesises",
+            acts: (X) => {
+              X.spot("P1", "P2")
+                .vaporize().during(0, 0.8)
+                .shrink().during(0.5, 1)
+              ;
+            }
+          },
+          {
+            load: `
+            x
+            <x id="Tminus9">
+             <x id="Tminus">-</x>
+             <x id="Tplus">+</x>
+             9
+            </x>
+            =
+            <mbx-frak id="frak-1">
+             <x>5</x><x>3</x>
+            </mbx-frak>
+            `,
+            note: `
+              <x>flip the sign, flop the side</x>
+            `,
+            acts: (X) => {
+              X.spot("Tminus").xfade("Tplus");
+              X.spot("Tminus9").spin().vault()
+                .moveAfter("frak-1");
+            }
+          },
+          {
+            note: "you're so good!!!",
+            acts: (X) => {
+              X.mount("good","");
+              X.spot("good").good();
+            }
+          }
+        ],
+      };
+      const ZZZroutineTwo = {
+        intro: `
+          <b data-logo>MATHROBATIX</b>
+          illuminated acrobatic gestural mathematics
+        `,
         steps: [
           {
             load: `
             <x>x</x>
             <x data-sup>
              <x id="pow-half">
-              <mbx-frak id="frak-1">
-                <x>1</x>
-                <x>2</x>
-              </mbx-frak>
+              (1 /// 2)
              </x>
              <x data-sup>
               <x id="pow2-a">2</x>
@@ -62,12 +179,12 @@
             acts: (X) => {
               X.spot("frak-1").inlineFrak();
               X.spot("pow2-a", "pow2-b").grow();
-            }
+            },
           },
           {
             acts: (X) => {
               X.spot("pow2-a").moveBefore("pow-half");
-            }
+            },
           },
           {
             load: `
@@ -80,7 +197,7 @@
             `,
             acts: (X) => {
               X.spot("g-1").spin("720deg").xfade("g-2");
-            }
+            },
           },
           {
             load: `
@@ -93,17 +210,18 @@
               X.spot("pow1").vaporize().shrink().during(0.75);
               X.spot("g-1").shrink().during(0.5);
               X.spot("EQ", "T9").unfurl(0, 0.5);
-            }
+            },
           },
           {
             load: `
-            x = 9 <mbx-good id="rat"></mbx-good> 
+            <x>x = 9</x><x id="rat">rat</x>
             `,
             note: "looks good",
             acts: (X) => {
-            }
-          }
-        ]
+              // X.spot("rat").good();
+            },
+          },
+        ],
       };
       const XXXroutineTwo = {
         intro: `

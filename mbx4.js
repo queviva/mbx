@@ -112,8 +112,9 @@
         this.#makeWrapSkills(),
         this.#makeGroinkSkills(),
         this.#makeFunkSkills(),
-        this.#makeJestorSkills(),
+        this.#makeJestSkills(),
         this.#makeRootSkills(),
+        this.#makeFaxxSkills(),
         this.#makeRazeSkills(),
         this.#makeFrakSkills(),
         this.#makeExitSkills(),
@@ -227,7 +228,7 @@
           bat.innerHTML = `<x data-${type}>${bat.innerHTML}</x>`;
           targ = bat.children[0];
         }
-        targ.setAttribute("data-subject", bat.id);
+        targ.setAttribute("data-source", bat.id);
         if (vals) {
           for (const [key, value] of Object.entries(vals)) {
             /^--/.test(key)
@@ -457,8 +458,8 @@
                 bat.style.setProperty("--ani-start", s);
                 bat.style.setProperty("--ani-end", e);
                 const id = bat.getAttribute("data-logged");
-                const open = this.#stageObj.querySelector(`[data-subject="${id}-log-open"]`);
-                const close = this.#stageObj.querySelector(`[data-subject="${id}-log-close"]`);
+                const open = this.#stageObj.querySelector(`[data-source="${id}-log-open"]`);
+                const close = this.#stageObj.querySelector(`[data-source="${id}-log-close"]`);
                 for (const log of [open, close]) {
                   log.style.setProperty("--ani-start", s);
                   log.style.setProperty("--ani-end", e);
@@ -701,6 +702,7 @@
         "colorize",
         "clearFilter",
         "salute",
+        "retreat",
       ];
       const permas = [];
 
@@ -742,7 +744,7 @@
               const val = bat.getAttribute("data-grow");
               if (val === "fore") this.#unWrap("grow", stage);
               else if (val === "back") {
-                const sub = stage.querySelector(`#${bat.getAttribute("data-subject")}`);
+                const sub = stage.querySelector(`#${bat.getAttribute("data-source")}`);
                 bat.remove();
                 sub.remove();
               }
@@ -816,7 +818,7 @@
       return { api: api, short: short, clean: clean };
     }
 
-    #makeJestorSkills() {
+    #makeJestSkills() {
       const skills = {
         draw: ["cank", "xout", "good"],
         clip: ["cirk", "brak"],
@@ -1021,7 +1023,7 @@
           if (!num || !den) continue;
           log(num, den);
         }
-      }
+      };
       return { api: api, short: short, clean: clean };
     }
 
@@ -1032,10 +1034,14 @@
       const short = {};
       const clean = [];
 
-      api["root"] = (id) => {
+      api["root"] = (base = null) => {
         const bat0 = this.#batties[0];
-        id = id || `${this.#opts.fix}${crypto.randomUUID()}`;
-        const holder = this.#makeTag("x");
+        const id = `${bat0.id}-root`;
+        const holder = this.#makeTag("x", "", {
+          id: `${id}-holder`,
+          source: id,
+          ["root-holder"]: "",
+        });
         const root = this.#makeTag("x", "", {
           id: CSS.escape(id),
           root: "fore",
@@ -1056,9 +1062,15 @@
           `,
           {
             ["root-lines"]: "",
+            source: id,
           },
         );
+        const order = this.#makeTag("x", base, {
+          ["root-order"]: "",
+          source: id,
+        });
         root.append(lines, terms);
+        if (base) root.append(order);
         holder.append(root);
         bat0.replaceWith(holder);
         for (const el of this.#batties) {
@@ -1076,6 +1088,57 @@
           const val = bat.getAttribute("data-root");
           if (val) {
             bat.setAttribute("data-root", "");
+          }
+        }
+      });
+
+      return { api: api, short: short, clean: clean };
+    }
+
+    #makeFaxxSkills() {
+      const api = {};
+      const short = {};
+      const clean = [];
+
+      api["faxx"] = (id) => {
+        // only one faxx box at a time
+        const bat = this.#batties[0];
+        const box = this.#stageObj.querySelector(`#${CSS.escape(id)}`);
+        if (!bat || !box) return;
+        const fax = this.#makeTag("x", "", { id: `${bat.id}-faxx`, faxx: "fore" });
+        bat.replaceWith(fax);
+        fax.append(bat, box);
+        const batWide = bat.getBoundingClientRect().width;
+        const boxWide = box.getBoundingClientRect().width;
+        fax.style.setProperty(`--${this.#opts.fix}-start-wide`, batWide + "px");
+        fax.style.setProperty(`--${this.#opts.fix}-end-wide`, Math.max(batWide, boxWide) + "px");
+        this.#API.spot(bat.id).ghost().spot(box.id).viva().salute();
+
+        return this.#API.spot(fax.id);
+      };
+      api[camel("faxx")] = () => {
+        for (const fax of this.#batties) {
+          fax.setAttribute("data-faxx", "back");
+          const [bat, box] = fax.children;
+          if (!bat || !box) continue;
+          const batWide = bat.getBoundingClientRect().width;
+          const boxWide = box.getBoundingClientRect().width;
+          fax.style.setProperty(`--${this.#opts.fix}-start-wide`, batWide + "px");
+          fax.style.setProperty(`--${this.#opts.fix}-end-wide`, Math.max(batWide, boxWide) + "px");
+          this.#API.spot(bat.id).setFilter("ghost").clearFilter();
+          this.#API.spot(box.id).retreat();
+        }
+        return this.#API;
+      };
+      clean.push((stage) => {
+        for (const bat of stage.querySelectorAll("[data-faxx]")) {
+          const val = bat.getAttribute("data-faxx");
+          if (val === "fore") {
+            bat.setAttribute("data-faxx", "");
+          } else if (val === "back") {
+            bat.children[0].style.textShadow = "none";
+            bat.children[0].style.color = "inherit";
+            bat.replaceWith(bat.children[0]);
           }
         }
       });
