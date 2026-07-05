@@ -738,6 +738,7 @@
         api: {
           grow: (v) => groink("fore", v),
           shrink: (v) => groink("back", v),
+          foink: (v) => this.#wrap("foink", { ...(v ? { [`--${this.#opts.fix}-foink-val`]: v } : {}) }),
         },
         clean: [
           (stage) => {
@@ -749,6 +750,13 @@
                 bat.remove();
                 sub.remove();
               }
+            }
+            for (const bat of stage.querySelectorAll("[data-foink]")) {
+              const val = bat.style.getPropertyValue(`--${this.#opts.fix}-foink-val`);
+              const src = bat.getAttribute("data-source");
+              const top = stage.querySelector(`[id="${src}"]`);
+              top.style.fontSize = val;
+              this.#unWrap("foink", stage);
             }
           },
         ],
@@ -1048,7 +1056,7 @@
           root: "fore",
         });
         const terms = this.#makeTag("x", "", {
-          source: CSS.escape(id),
+          source: id, 
           ["root-terms"]: "",
         });
         const lines = this.#makeTag(

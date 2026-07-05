@@ -319,6 +319,20 @@ x:has(> [data-grow="back"]) {
 }
 /* #endregion */
 
+/* #region FOINK */
+[data-foink] {
+  will-change: font-size;
+  animation: mbx-foink-keys linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-foink-keys {
+  to {
+    font-size: var(--mbx-foink-val, 0.35em);
+  }
+}
+/* #endregion */
+
 /* #region SPIN */
 [data-spin] {
   animation: mbx-spin linear both;
@@ -403,6 +417,7 @@ svg,
 .mbx-wink,
 [data-blink],
 [data-viva],
+[data-root],
 [data-filter="viva"] {
   --viva-f1: 0 0 3px hsl(var(--mbx-h), 90%, 80%);
   --viva-f2: 0 0 8px hsl(var(--mbx-h), 100%, 58%);
@@ -637,7 +652,7 @@ path[data-materialize] {
 
 /* #endregion */
 
-/* #region BLiNK */
+/* #region BLINK */
 [data-blink] {
   will-change: color, text-shadow;
   animation: mbx-blink-keys linear both;
@@ -1182,7 +1197,7 @@ x:has(> [data-root="back"]) {
   top: -0.5em;
   font-family: "Luckiest Guy";
   font-size: 0.35em;
-  transform-origin: 50% 50%;
+  transform-origin: 0% 0%;
 }
 [data-root="fore"] [data-root-order],
 [data-root="back"] [data-root-order] {
@@ -1193,6 +1208,7 @@ x:has(> [data-root="back"]) {
 }
 [data-root="fore"] [data-root-order] {
   color: var(--white-color);
+  filter: var(--viva-filter);
   animation-direction: normal;
 }
 [data-root="back"] [data-root-order] {

@@ -41,9 +41,40 @@
           illuminated acrobatic gestural mathematics
         `,
         stage: `
+          <x id="Tx">x</x>
+          <x id="pow2" data-sup>2</x>
+          <x id="plus-a">+</x>
+          <x id="T3x">4x</x>
+          <x id="plus-b">+</x>
+          <x id="T9">9</x>
+          <x id="EQ">=</x>
+          <x id="T5">5</x>
+        `,
+        steps: [
+          {
+            note: "I am the ratmaster",
+            acts: (X) => {
+              X.spot("pow2", "plus-a", "T3x", "plus-b", "T9", "EQ", "T5").unfurl();
+            }
+          },
+          {
+            acts: (X) => {
+            }
+          },
+          {}
+        ],
+      };
+      const MMMroutineTwo = {
+        intro: `
+          <b data-logo>MATHROBATIX</b>
+          illuminated acrobatic gestural mathematics
+        `,
+        stage: `
+          <x style="z-index:10;">
           <mbx-frak id="frak-1">
             <x id="T5">5</x><x>x<x id="pow2" data-sup>2</x></x>
           </mbx-frak>
+          </x>
           <x id="EQ">=</x>
           <mbx-frak id="frak-2">
             <x>3</x><x id="T2">2</x>
@@ -56,7 +87,7 @@
               // X.spot("T5").spin("-720deg");
               X.spot("frak-1").bulk("2").blink().ciprokate();
               X.spot("frak-2").bulk("0.75").blink().ciprokate(-1);
-            }
+            },
           },
           {
             note: "un frak that",
@@ -64,7 +95,7 @@
               X.mount("Tdot", "&middot;").insertAfter("T2").grow();
               X.spot("frak-1").unFrak();
               X.spot("T5").moveAfter("Tdot");
-            }
+            },
           },
           {
             note: "perfection",
@@ -73,16 +104,16 @@
               X.spot("T2", "Tdot", "T5").team("team-1").spin().xfade("T10");
               X.spot("pow2").vaporize().shrink();
               X.spot("frak-2").root();
-            }
+            },
           },
           {
             note: "plus or minus",
             acts: (X) => {
               X.mount("Tporm", "&#177;").insertAfter("EQ").grow();
               X.mount("good", "").good();
-            }
-          }
-        ]
+            },
+          },
+        ],
       };
       const KKKroutineTwo = {
         intro: `
@@ -130,7 +161,7 @@
             },
             note: `
               faktor a three from each term
-            `
+            `,
           },
           {
             note: `
@@ -156,7 +187,7 @@
             acts: (X) => {
               X.spot("T5").frak("catch-3");
               X.spot("T3").moveAfter("C3");
-            }
+            },
           },
           {
             load: `
@@ -167,11 +198,8 @@
             `,
             note: "drop the parenthesises",
             acts: (X) => {
-              X.spot("P1", "P2")
-                .vaporize().during(0, 0.8)
-                .shrink().during(0.5, 1)
-              ;
-            }
+              X.spot("P1", "P2").vaporize().during(0, 0.8).shrink().during(0.5, 1);
+            },
           },
           {
             load: `
@@ -191,17 +219,16 @@
             `,
             acts: (X) => {
               X.spot("Tminus").xfade("Tplus").viva();
-              X.spot("Tminus9").spin().vault()
-                .moveAfter("frak-1");
-            }
+              X.spot("Tminus9").spin().vault().moveAfter("frak-1");
+            },
           },
           {
             note: "you're so good!!!",
             acts: (X) => {
-              X.mount("good","");
+              X.mount("good", "");
               X.spot("good").good();
-            }
-          }
+            },
+          },
         ],
       };
       const ZZZroutineTwo = {
@@ -420,13 +447,13 @@
             `,
             acts: (X) => {
               X.spot("P1", "P2").vaporize().during(0, 0.7).shrink().during(0.5, 1);
-              X.mount("Tpm", "&#177;").insertBefore("T9").grow();
-              X.spot("T9").root("T9-root");
+              X.spot("T9").root();
             },
           },
           {
             acts: (X) => {
               X.spot("P1", "P2").dismount();
+              X.mount("Tpm", "&#177;").insertAfter("EQ").grow();
               X.mount("T3", "3");
               X.spot("T9").xfade("T3");
               X.spot("T9-root").unRoot();
@@ -450,7 +477,7 @@
           },
           {
             load: `
-            x = <x id="B1">{</x>
+            x = <x id="B1" data-parens-left>{</x>
             - 2
             <x id="Tplusminus">&#177;</x>
             <x id="Tplus-a">+</x>
@@ -459,23 +486,24 @@
             <x id="T2-b">2</x>
             <x id="Tminus-c">-</x>
             <x id="T3-b">3</x>
-            <x id="B2">}</x>
+            <x id="B2" data-parens-rite>}</x>
 
             `,
             acts: (X) => {
               X.spot("comma", "Tminus-b", "T2-b", "Tminus-c", "T3-b", "B2").unfurl();
               X.spot("B1").grow();
+              X.spot("Tplusminus").blink().during(0, 0.4);
               X.spot("Tplusminus").xfade("Tplus-a");
             },
           },
           {
             load: `
-            x = {
+            x = <x data-parens-left>{</x>
              <x id="T23-a">- 2 + 3</x>
              <x id="T1">1</x><x style="margin-left:-0.125em">,</x>
              <x id="T23-b">- 2 - 3</x>
              <x id="T-5">-5</x>
-            }
+            <x data-parens-rite>}</x>
             `,
             acts: (X) => {
               X.spot("T23-a").absorb("T1");
@@ -487,7 +515,7 @@
 
       const one = document.getElementById("one");
       one.addEventListener("mbx-ready", (e) => {
-        one.loadRoutine(ZZZroutineTwo);
+        one.loadRoutine(XXXroutineTwo);
       });
       const two = document.getElementById("two");
       two.addEventListener("mbx-ready", (e) => {
