@@ -38,11 +38,11 @@
           <x data-logo>MATHROBATIX</x>
           illuminated acrobatic gestural mathematics
         `,
+        stage: `
+         <x id="Tx"><b>X</b></x>
+        `,
         steps: [
           {
-            load: `
-             <x id="Tx"><b>X</b></x>
-            `,
             acts: (X) => {
               X.spot("Tx")
                 .flash().during(0, 0.2)
@@ -55,7 +55,7 @@
         ],
       };
     </script>
-    <script id="loader">
+    <script id="LOADER">
       const mbx1 = document.getElementById("mbx1");
       mbx1.addEventListener("mbx-ready", (e) => {
         mbx1.loadRoutine(routine);
