@@ -110,13 +110,14 @@
         this.#makeDurationSkills(),
         this.#makeMoveSkills(),
         this.#makeWrapSkills(),
-        this.#makeGroinkSkills(),
+        this.#makeGrowSkills(),
         this.#makeFunkSkills(),
         this.#makeJestSkills(),
         this.#makeRootSkills(),
         this.#makeFaxxSkills(),
         this.#makeRazeSkills(),
         this.#makeFrakSkills(),
+        this.#makeDistSkills(),
         this.#makeExitSkills(),
         this.#makeFadeSkills(),
       ];
@@ -367,11 +368,17 @@
               val = 1;
             }
             for (const bat of this.#batties) {
-              const holder = this.#makeTag("x", "", { doppel: "", source: bat.id });
+              const holder = this.#makeTag("x", "", {
+                id: `${bat.id}-doppel`,
+                doppel: "",
+                source: bat.id,
+              });
               bat.replaceWith(holder);
               for (let i = 0; i < val; i++) {
                 const dop = this.#makeTag("x", bat.innerHTML, {
-                  id: `${bat.id}-doppel${val > 1 ? `-${i + 1}` : ""}`,
+                  // id: `${bat.id}-doppel${val > 1 ? `-${i + 1}` : ""}`,
+                  id: `${bat.id}-doppel-${i}`,
+                  source: bat.id,
                 });
                 holder.append(dop);
               }
@@ -465,6 +472,11 @@
                   log.style.setProperty("--ani-end", e);
                 }
                 // continue;
+              }
+              if (bat.hasAttribute("data-grow")) {
+                bat.style.setProperty("--ani-start", s);
+                bat.style.setProperty("--ani-end", e);
+                continue;
               }
               let fc = bat;
               if (bat.children[0]) {
@@ -721,46 +733,34 @@
       return { api: api, short: short, clean: clean };
     }
 
-    #makeGroinkSkills() {
+    #makeGrowSkills() {
+      const api = {};
+      const short = {};
+      const clean = [];
+
       const groink = (dir, v) => {
-        this.#wrap("grow", {
-          grow: dir,
-          ...(v && { [`--${this.#opts.fix}-grow-scale`]: v }),
-        });
         for (const bat of this.#batties) {
-          this.#measureElements(bat.children[0]);
-          bat.innerHTML = `<x>${bat.innerHTML}</x>`;
+          this.#measureElements(bat);
+          bat.setAttribute("data-grow", dir);
         }
         return this.#API;
       };
-      return {
-        short: {},
-        api: {
-          grow: (v) => groink("fore", v),
-          shrink: (v) => groink("back", v),
-          foink: (v) => this.#wrap("foink", { ...(v ? { [`--${this.#opts.fix}-foink-val`]: v } : {}) }),
-        },
-        clean: [
-          (stage) => {
-            for (const bat of stage.querySelectorAll("[data-grow]")) {
-              const val = bat.getAttribute("data-grow");
-              if (val === "fore") this.#unWrap("grow", stage);
-              else if (val === "back") {
-                const sub = stage.querySelector(`#${bat.getAttribute("data-source")}`);
-                bat.remove();
-                sub.remove();
-              }
-            }
-            for (const bat of stage.querySelectorAll("[data-foink]")) {
-              const val = bat.style.getPropertyValue(`--${this.#opts.fix}-foink-val`);
-              const src = bat.getAttribute("data-source");
-              const top = stage.querySelector(`[id="${src}"]`);
-              top.style.fontSize = val;
-              this.#unWrap("foink", stage);
-            }
-          },
-        ],
-      };
+
+      api["grow"] = (v) => groink("fore", v);
+      api["shrink"] = (v) => groink("back", v);
+
+      clean.push((stage) => {
+        for (const bat of stage.querySelectorAll("[data-grow]")) {
+          const val = bat.getAttribute("data-grow");
+          bat.removeAttribute("data-grow");
+          bat.removeAttribute("style");
+          if (val === "back") {
+            bat.remove();
+          }
+        }
+      });
+
+      return { api: api, short: short, clean: clean };
     }
 
     #makeFunkSkills() {
@@ -1002,11 +1002,11 @@
         });
       }
 
-      api["ciprokate"] = (dir = 1) => {
+      api["kate"] = (dir = 1) => {
         const batties = this.#batties;
         this.#API.spin(`${180 * dir}deg`);
         for (const bat of batties) {
-          bat.setAttribute("data-ciprokate", "");
+          bat.setAttribute("data-kate", "");
           const [num, den] = bat.querySelectorAll("[data-numerator], [data-denominator]");
           this.#batties = [num, den];
           this.#API.spin(`${-180 * dir}deg`);
@@ -1015,14 +1015,14 @@
         return this.#API;
       };
       clean.push((stage) => {
-        for (const bat of stage.querySelectorAll("[data-ciprokate]")) {
+        for (const bat of stage.querySelectorAll("[data-kate]")) {
           const [num, den] = bat.querySelectorAll("[data-numerator], [data-denominator]");
           num.removeAttribute("data-numerator");
           num.setAttribute("data-denominator", "");
           den.removeAttribute("data-denominator");
           den.setAttribute("data-numerator", "");
           swapElements(num, den);
-          bat.removeAttribute("data-ciprokate");
+          bat.removeAttribute("data-kate");
         }
       });
 
@@ -1056,7 +1056,7 @@
           root: "fore",
         });
         const terms = this.#makeTag("x", "", {
-          source: id, 
+          source: id,
           ["root-terms"]: "",
         });
         const lines = this.#makeTag(
@@ -1074,7 +1074,7 @@
             source: id,
           },
         );
-        const order = this.#makeTag("x", base||"", {
+        const order = this.#makeTag("x", base || "", {
           ["root-order"]: "",
           source: id,
         });
@@ -1185,6 +1185,39 @@
           }
         });
       }
+
+      return { api: api, short: short, clean: clean };
+    }
+
+    #makeDistSkills() {
+      const api = {};
+      const short = {};
+      const clean = [];
+
+      api["dist"] = (id) => {
+        const coef = this.#API.pick(CSS.escape(id));
+        if (!coef) return;
+
+        const batties = this.#batties;
+        const total = batties.length;
+
+        const co_txt = coef.innerText;
+        this.#API.spot(id).doppel(total);
+        this.#API.spot(id).flash().during(0, 0.3);
+        this.#API.spot(`${id}-doppel`).shrink().during(0.7, 1);
+
+        for (let i = 0; i < total; i++) {
+          // this.#API.spot(`${id}-doppel-${i}`).viva();
+          const batID = batties[i].id;
+          const batDot = batID + "-dot";
+          this.#API.mount(batDot, `<x data-viva style="margin-inline:-0.2em;">&middot</x>`).insertBefore(batID);
+          this.#API.spot(batDot).grow().during(0.7, 1);
+          this.#API.spot(`${id}-doppel-${i}`).spin().vault().moveBefore(batDot).during(0.3, 1);
+        }
+
+        this.#API.batties = [];
+        return this.#API;
+      };
 
       return { api: api, short: short, clean: clean };
     }

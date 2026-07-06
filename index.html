@@ -1,4 +1,65 @@
-<html>
-  <head><title>MathrobatiX</title></head>
-  <body style="background-color:#ea0"></body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>MathrobatiX</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="mbx4.js"></script>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding-top: 30vh;
+        padding-bottom: 100vh;
+        background-color: #111;
+      }
+      mathro-batix {
+        width: 100%;
+        font-size: 1.25rem;
+        background-color: #111;
+      }
+      @media screen and (orientation: portrait) {
+        mathro-batix {
+          font-size: 0.8em;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <mathro-batix id="mbx1" data-mbx='{"xxx_color":300}'></mathro-batix>
+
+    <script id="ROUTINES">
+      const routine = {
+        intro: `
+          <x data-logo>MATHROBATIX</x>
+          illuminated acrobatic gestural mathematics
+        `,
+        steps: [
+          {
+            load: `
+             <x id="Tx"><b>X</b></x>
+            `,
+            acts: (X) => {
+              X.spot("Tx")
+                .flash().during(0, 0.2)
+                .spin().during(0.2, 0.6)
+                .bulk("2").during(0.2, 0.6)
+                .cirk().during(0.6, 1)
+              ;
+            },
+          },
+        ],
+      };
+    </script>
+    <script id="loader">
+      const mbx1 = document.getElementById("mbx1");
+      mbx1.addEventListener("mbx-ready", (e) => {
+        mbx1.loadRoutine(routine);
+      });
+    </script>
+  </body>
 </html>

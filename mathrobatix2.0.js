@@ -451,8 +451,7 @@
           spotter.#measureElements(absEl.children[0], absEl.children[1]);
 
           return api.spot(...ids);
-        },
-        dist: (id) => {
+        },        dist: (id) => {
           const targets = spotter.#targets;
           const total = targets.length;
           const coeff = api.pick(id);
