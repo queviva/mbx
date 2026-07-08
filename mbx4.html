@@ -41,115 +41,61 @@
           illuminated acrobatic gestural mathematics
         `,
         steps: [
-          { // distributive property
+          { // expo sub|sup|tite
             load: `
-            <x id="T3">3</x>
-            <x data-parens-left>(</x>
-             <x id="Tx-a">x</x>
-             +
-             <x id="T7">7</x>
-            <x data-parens-rite>)</x>
-            = y
-            `,
-            note: "distribute",
-            acts: (X) => {
-              X.spot("Tx-a", "T7").dist("T3");
-            },
-          },
-          { // definition of log
-            load: `
-             <x data-note>if</x>
-             <x data-doppel>
-              <x id="Ty-a">y</x>
-              <x id="Ty-b">y</x>
-             </x>
-             <x id="EQ-a">=</x>
-             <x data-doppel>
-              <x id="Tn-a">n</x>
-              <x id="Tn-b">n</x>
-             </x>
-             <x id="powx" data-sup>
-              <x data-doppel>
-               <x id="Tx-a">x</x>
-               <x id="Tx-b">x</x>
+            3
+            <x data-sup>
+             <x id="tite-1">
+              <x data-tite>
+               <x>9x^2 </x><x id="shrink9">+ 9</x>
               </x>
              </x>
-             <x data-team id="team-1">
-             <x data-note>then</x>
-             <mbx-log base="<x data-catch><x id='catch-n'>n</x></x>">
-              <x data-catch>
-               <x id="catch-y">y</x>
-              </x>
-             </mbx-log>
-             <x id="EQ-b">=</x>
-             <x data-catch><x id="catch-x">x</x></x>
-             </x>
-            `,
-            note: `
-            <x>the power you raise n to,</x>
-            <x>in order to get y, is x</x>
-            `,
-            acts: (X) => {
-              X.spot("Tn-a").flash().during(0, 0.2);
-              X.spot("Tn-b").tuck("0.3em").blink().during(0, 0.33);
-              X.spot("Tn-b").moveAfter("catch-n").during(0.1, 0.33);
-              X.spot("Ty-a").flash().during(0.25, 0.4);
-              X.spot("Ty-b").vault().blink().during(0.33, 0.66);
-              X.spot("Ty-b").moveAfter("catch-y").during(0.33, 0.66);
-              X.spot("Tx-a").flash().during(0.55, 0.7);
-              X.spot("Tx-b").blink().spin("-720deg").vault().during(0.66, 0.99);
-              X.spot("Tx-b").moveAfter("catch-x").during(0.66, 0.99);
-            },
-          },
-          { // evaluate function
-            load: `
-            <i>f</i><x data-parens-left>(</x>
-            <x id="Tx-a">x</x>
-            <x id="doppel-3" data-doppel>
-             <x id="T3-a">3</x>
-             <x id="T3-b">3</x>
-             <x id="T3-c">3</x>
-             <x id="T3-d">3</x>
             </x>
-            <x data-parens-rite>)</x>
-            =
-            <mbx-frak id="frak-1">
-             <x>
-              <x>
-               <x style="gap:0.125em;">
-               <x>2</x>
-               <x id="Tdot">&middot;</x>
-               <x id="Tx-b">x</x>
-               <x id="catcher-num" data-catch>
-                <x id="catch-3">3</x>
-               </x>
-               <x data-sup>2</x>
-               </x>
-              </x>
-              + 5
-             </x>
-             <x>
-              <x id="Tx-c">x</x>
-              <x id="catcher-den" data-catch>
-                <x id="catch-3-b">3</x>
-              </x>
-             </x>
-            </mbx-frak>
+            <x id="EQ">=</x>
+            <x id="T3x2">3x^2</x>
+            <x id="Tplus">+</x>
+            <x id="T1">1</x>
             `,
-            note: "find f(3)",
+            note: "sub | sup | tite",
             acts: (X) => {
-              X.spot("Tdot").grow().during(0.65, 0.75);
-              X.spot("Tx-a").xfade("doppel-3").during(0, 0.3);
-              X.spot("Tx-b").xfade("catcher-num").during(0.8, 0.9);
-              X.spot("T3-a").flash().during(0.3, 0.5);
-              X.spot("T3-b").materialize().during(0.35, 0.38);
-              X.spot("T3-b").moveAfter("catch-3").during(0.5, 1);
-
-              X.spot("Tx-c").xfade("catcher-den").during(0.8, 0.9);
-              X.spot("T3-c").materialize().during(0.35, 0.38);
-              X.spot("T3-c").moveAfter("catch-3-b").during(0.5, 1);
-            },
+              X.spot("shrink9").shrink();
+              X.spot("T3x2").shrink();
+              X.spot("tite-1").spin().viva().moveAfter("EQ");
+            }
           },
+          {note: "retains options"},
+          { // blur move
+            load: `
+            <x id="T3yx">
+             <x data-tite>
+              <x>3</x>
+              <x data-doppel>
+               <x id="Ty-a">y</x>
+               <x id="Ty-b">y</x>
+               <x id="Ty-c">y</x>
+              </x>
+              <x>x</x>
+             </x>
+            </x>
+            <x> + 9 = </x>
+            <x id="T3catch-y-k">
+             <x data-tite>
+              <x>3</x>
+              <x data-catch>
+               <x id="catch-1"></x>
+              </x>
+              <x>k</x>
+             </x>
+            </x>
+            `,
+            note: "why why why",
+            acts: (X) => {
+              X.spotAll().blur();
+              X.spot("Ty-a").blink().bulk(2.2).moveAfter("catch-1").during(0,  0.8);
+              X.spot("Ty-b").blink().bulk(2.2).moveAfter("catch-1").during(0.1, 0.9);
+              X.spot("Ty-c").blink().bulk(2.2).moveAfter("catch-1").during(0.2, 1.0);
+            }
+          }
         ],
       };
       const MMMroutineTwo = {
@@ -390,7 +336,7 @@
       };
       const XXXroutineTwo = {
         intro: `
-          <b data-logo>MATHROBATIX</b>
+          <x data-logo>MATHROBATIX</x>
           illuminated acrobatic gestural mathematics
         `,
         stage: `
@@ -605,9 +551,11 @@
         ],
       };
 
+    </script>
+    <script id="LOADER">
       const one = document.getElementById("one");
       one.addEventListener("mbx-ready", (e) => {
-        one.loadRoutine(XXXroutineTwo);
+        // one.loadRoutine(XXXroutineTwo);
       });
       const two = document.getElementById("two");
       two.addEventListener("mbx-ready", (e) => {

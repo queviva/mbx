@@ -80,6 +80,22 @@
   const devOpts = sieve(defOpts, parseData(script.dataset[defOpts.fix]));
   // #endregion
 
+  // #region BATTIES
+  class Batties {
+    constructor(arr = []) {
+      const target = Array.isArray(arr) ? arr : [];
+      return new Proxy(target, {
+        get: (t, p) =>
+          p === "replaceWith"
+            ? (n) => Array.isArray(n) && ((t.length = 0), t.push(...n))
+            : typeof t[p] === "function"
+              ? t[p].bind(t)
+              : t[p],
+      });
+    }
+  }
+  // #endregion
+
   // #region SPOTTER
   class Spotter {
     // #region PRIVATE FIELDS
@@ -91,6 +107,7 @@
     #stepNum = 0;
     #stageObj = null;
     #batties = [];
+    #battiesInstance = new Batties([]);
     #allowed = new Set(["id"]);
     #SKILLS = [];
     #API = {};
@@ -125,7 +142,15 @@
       this.#RO = this.#makeResizeObserver();
     }
 
+    get #bitties() {
+      return this.#battiesInstance;
+    }
+
     // #region SPOT UTILS
+    #forEachBat(callback) {
+      [...(this.#batties || [])].forEach(callback);
+    }
+
     #markup(html) {
       return html
         .trim()
@@ -202,7 +227,8 @@
       for (const { el, rect } of rects) {
         const style = el.style;
         for (const prop of props) {
-          style.setProperty(`--${this.#opts.fix}-${prop}`, Math.round(rect[prop]) + "px");
+          // style.setProperty(`--${this.#opts.fix}-${prop}`, Math.round(rect[prop]) + "px");
+          style.setProperty(`--${this.#opts.fix}-${prop}`, rect[prop] + "px");
         }
       }
     }
@@ -267,20 +293,20 @@
             return this.#stageObj?.querySelector(`[id="${CSS.escape(id)}"]`) || null;
           },
           spot: (...ids) => {
-            const unique = [...new Set(ids)];
+            const unique = [...new Set(ids)].filter((id) => id != null && id !== "");
             this.#batties = unique.map((id) => this.#API.pick(id)).filter((bat) => bat !== null);
             return this.#API;
           },
           spotAll: () => {
-            this.#batties = [...this.#stageObj.querySelectorAll("*")];
+            this.#batties = this.#stageObj ? [...this.#stageObj.querySelectorAll("*")] : [];
             return this.#API;
           },
           spotStage: () => {
-            this.#batties = [this.#stageObj];
+            this.#batties = this.#stageObj ? [this.#stageObj] : [];
             return this.#API;
           },
-          mount: (id, html, vals) => {
-            const bat = this.#makeTag("x", html, { ...vals, id });
+          mount: (id, html, vals = {}) => {
+            const bat = this.#makeTag("x", html, { ...vals, id: CSS.escape(id) });
             this.#stageObj?.append(bat);
             return this.#API.spot(bat.id);
           },
@@ -291,22 +317,19 @@
             return this.#API;
           },
           team: (id, vals = {}) => {
-            if (!id) return this.#API;
-            const bats = this.#batties;
-            const team = this.#makeTag("x", "", {
-              team: "",
-              id: id,
-              ...vals,
-            });
-            bats[0].replaceWith(team);
-            for (const bat of bats) {
+            if (!id || !this.#batties.length) return this.#API;
+            id = CSS.escape(id);
+            const team = this.#makeTag("x", "", { team: "", id, ...vals });
+            const batties = this.#batties;
+            batties[0].replaceWith(team);
+            for (const bat of batties) {
               team.append(bat);
             }
             return this.#API.spot(id);
           },
           insertBefore: (id) => {
             const beef = this.#API.pick(id);
-            if (!beef) return this.#API;
+            if (!beef || !beef.parentNode) return this.#API;
             for (const bat of this.#batties) {
               beef.parentNode.insertBefore(bat, beef);
             }
@@ -314,7 +337,7 @@
           },
           insertAfter: (id) => {
             const beef = this.#API.pick(id);
-            if (!beef) return this.#API;
+            if (!beef || !beef.parentNode) return this.#API;
             for (const bat of this.#batties) {
               beef.parentNode.insertBefore(bat, beef.nextSibling);
             }
@@ -328,19 +351,21 @@
           },
           show: () => {
             for (const bat of this.#batties) {
-              bat.style.display = "revert";
+              bat.style.display = "";
             }
             return this.#API;
           },
           alter: (html) => {
             for (const bat of this.#batties) {
-              bat.replaceWith(this.#makeTag("x", html));
+              const clone = bat.cloneNode(false);
+              clone.innerHTML = html;
+              bat.replaceWith(clone);
             }
             return this.#API;
           },
           around: (v) => {
             for (const bat of this.#batties) {
-              bat.children[0].style.setProperty("transform-origin", v);
+              bat?.children[0]?.style.setProperty("transform-origin", v);
             }
             return this.#API;
           },
@@ -356,9 +381,12 @@
             }
             return this.#API;
           },
-          setVar: (prop, val) => {
+          setProp: (prop, val = {}) => {
             for (const bat of this.#batties) {
-              bat.children[0].style.setProperty(`--${this.#opts.fix}-${prop}`, val);
+              for (const [key, value] of Object.entries(vals)) {
+                bat.style.setProperty(key, value);
+              }
+              // bat.style.setProperty(`--${this.#opts.fix}-${prop}`, val);
             }
             return this.#API;
           },
@@ -376,7 +404,6 @@
               bat.replaceWith(holder);
               for (let i = 0; i < val; i++) {
                 const dop = this.#makeTag("x", bat.innerHTML, {
-                  // id: `${bat.id}-doppel${val > 1 ? `-${i + 1}` : ""}`,
                   id: `${bat.id}-doppel-${i}`,
                   source: bat.id,
                 });
@@ -387,14 +414,14 @@
             return this.#API;
           },
           unfurl: (s = 0, e = 1) => {
-            const d = e - s;
+            const duration = e - s;
+            if (duration <= 0) return this.#API;
+
             const batties = this.#batties;
             const total = batties.length;
             for (const [i, bat] of batties.entries()) {
-              this.#API
-                .spot(bat.id)
-                .grow()
-                .during(s + (i / total) * d, e);
+              const start = s + (i / total) * duration;
+              this.#API.spot(bat.id).grow().during(start, e);
             }
             this.#batties = batties;
             return this.#API;
@@ -518,10 +545,6 @@
       // put the blank in the original spot
       prime.parentNode.insertBefore(blank, prime);
 
-      const rect = blank.getBoundingClientRect();
-      blank.style.setProperty("--blank-w", rect.width + "px");
-      blank.style.setProperty("--blank-h", rect.height + "px");
-
       // store the prime mover inside the blank
       blank.append(prime);
 
@@ -530,10 +553,15 @@
     }
 
     async #measureMovers(stage) {
-      const all = stage.querySelectorAll(":not([data-move])");
+      const all = stage.querySelectorAll("*");
       const movers = stage.querySelectorAll("[data-move]");
+      const growers = stage.querySelectorAll("[data-grow]");
       const origBlanks = stage.querySelectorAll(`[data-blank="origin"]`);
       const destBlanks = stage.querySelectorAll(`[data-blank="destiny"]`);
+
+      const moversMap = new Map(
+        Array.from(movers, (bat) => [bat.getAttribute("data-source"), bat]),
+      );
 
       const orig = { blanks: new Map(), rects: new Map(), fonts: new Map() };
       const dest = { blanks: new Map(), rects: new Map(), fonts: new Map() };
@@ -565,6 +593,14 @@
         }
       }
 
+      for (const blank of orig.blanks.values()) {
+        blank.style.removeProperty("--mbx-width");
+      }
+
+      for (const blank of dest.blanks.values()) {
+        blank.style.removeProperty("--mbx-width");
+      }
+
       // force layout HAKC !!!
       await raf();
 
@@ -572,6 +608,7 @@
       for (const [id, blank] of orig.blanks.entries()) {
         orig.rects.set(id, blank.getBoundingClientRect());
         orig.fonts.set(id, parseFloat(getComputedStyle(blank).fontSize));
+        this.#measureElements(blank);
       }
 
       // set all animations to final state
@@ -588,6 +625,7 @@
       for (const [id, blank] of dest.blanks.entries()) {
         dest.rects.set(id, blank.getBoundingClientRect());
         dest.fonts.set(id, parseFloat(getComputedStyle(blank).fontSize));
+        this.#measureElements(blank);
       }
 
       // set the deltas for the move animation
@@ -623,6 +661,7 @@
           anim.play();
         }
       }
+
       return true;
     }
 
@@ -671,8 +710,43 @@
         ],
       };
     }
-
+    // probably don't use this one
     #makeResizeObserver() {
+      const pending = new Map(); // target → rafId
+      const debounceTimers = new Map(); // target → timeoutId
+
+      return new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const target = entry.target;
+
+          // 1. Cancel any pending RAF
+          if (pending.has(target)) {
+            cancelAnimationFrame(pending.get(target));
+            pending.delete(target);
+          }
+
+          // 2. Clear any existing debounce timer
+          if (debounceTimers.has(target)) {
+            log("CANKED!!!");
+            clearTimeout(debounceTimers.get(target));
+          }
+
+          // 3. Debounce + schedule on next frame
+          const timer = setTimeout(() => {
+            const frameId = requestAnimationFrame(() => {
+              this.#measureMovers(target);
+              pending.delete(target);
+            });
+
+            pending.set(target, frameId);
+            debounceTimers.delete(target);
+          }, 100); // ~1 frame at 60fps - adjust if needed (10-20ms)
+
+          debounceTimers.set(target, timer);
+        }
+      });
+    }
+    #XXX_makeResizeObserver() {
       return new ResizeObserver((entries) => {
         for (const entry of entries) {
           const target = entry.target;
@@ -686,11 +760,11 @@
           target.setAttribute("data-resized", ++count);
 
           if (this.#resizeFrames.has(target)) {
+            log("CANKED!!!");
             cancelAnimationFrame(this.#resizeFrames.get(target));
           }
 
           const frameId = requestAnimationFrame(() => {
-            // log(count, target.id);
             this.#measureMovers(target);
             this.#resizeFrames.delete(target);
           });
@@ -706,6 +780,7 @@
         "ghost",
         "vaporize",
         "materialize",
+        "blur",
         "flash",
         "blink",
         "tuck",
@@ -786,7 +861,7 @@
          `;
         },
         close: (id, skill) => {
-          return `<x id="${id}-${skill}-close-text" data-parens-rite>)</x>`;
+          return `<x id="${id}-${skill}-close-text" data-tite-rite>)</x>`;
         },
       };
 
@@ -1163,15 +1238,14 @@
       const clean = [];
 
       for (const skill of skills) {
-        api[skill] = (id, html) => {
+        api[skill] = (id) => {
           this.#API.team(`${id}-${skill}`, { [`${skill}`]: "fore" });
-          this.#API.mount(id, html).insertBefore(`${id}-${skill}`).grow();
+          this.#API.spot(id).insertBefore(`${id}-${skill}`).grow();
           return this.#API;
         };
-        api[camel(skill)] = () => {
-          for (const bat of this.#batties) {
-            bat.setAttribute(`data-${skill}`, "back");
-          }
+        api[camel(skill)] = (id) => {
+          this.#API.team(`${id}-${skill}`, { [`${skill}`]: "back" });
+          this.#API.spot(id).insertBefore(`${id}-${skill}`).shrink();
           return this.#API;
         };
         clean.push((stage) => {
@@ -1210,12 +1284,13 @@
           // this.#API.spot(`${id}-doppel-${i}`).viva();
           const batID = batties[i].id;
           const batDot = batID + "-dot";
-          this.#API.mount(batDot, `<x data-viva style="margin-inline:-0.2em;">&middot</x>`).insertBefore(batID);
+          this.#API
+            .mount(batDot, `<x data-viva style="margin-inline:-0.2em;">&middot</x>`)
+            .insertBefore(batID);
           this.#API.spot(batDot).grow().during(0.7, 1);
           this.#API.spot(`${id}-doppel-${i}`).spin().vault().moveBefore(batDot).during(0.3, 1);
         }
 
-        this.#API.batties = [];
         return this.#API;
       };
 

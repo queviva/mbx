@@ -39,17 +39,25 @@
           illuminated acrobatic gestural mathematics
         `,
         stage: `
-         <x id="Tx"><b>X</b></x>
+          <x id="Tx-a">x</x>
+          <x id="pow2-a">
+           <x data-sup>2</x>
+          </x>
+          <x id="plus-b">+</x>
+          <x data-tite>
+           <x id="T3-b">3</x>
+           <x id="Tx-b">x</x>
+          </x>
+          <x id="Tplus-c">+</x>
+          <x id="T5-c">5</x>
+          <x id="EQ">=</x>
+          <x id="T9-d">9</x>
         `,
         steps: [
           {
+            note: "let's solve for x",
             acts: (X) => {
-              X.spot("Tx")
-                .flash().during(0, 0.2)
-                .spin().during(0.2, 0.6)
-                .bulk("2").during(0.2, 0.6)
-                .cirk().during(0.6, 1)
-              ;
+              X.spot("pow2-a", "plus-b", "T3-b", "Tx-b", "Tplus-c", "T5-c", "EQ", "T9-d").unfurl();
             },
           },
         ],

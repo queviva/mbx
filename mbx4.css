@@ -129,6 +129,10 @@ x {
   margin-bottom: 30vh;
 }
 [data-step] > :nth-child(1) {
+  /* !!! try to set this, PER STEP, in js   !!! */
+  /* !!! contain: layout paint for defaults !!! */
+  /* !!! contain: layout style for big moves !!!*/
+  contain: layout style;
   position: relative;
   display: flex;
   flex-direction: row;
@@ -136,8 +140,10 @@ x {
   align-items: baseline;
   justify-content: center;
   overflow: visible;
-  height: 1lh;
+  min-height: 1lh;
+  height: max-content;
   font-family: "Times New Roman", Times, serif;
+  color: var(--main-color);
   view-timeline: --anim-timeline block;
 }
 [data-step] > :nth-child(2) {
@@ -147,16 +153,21 @@ x {
 /* #endregion */
 
 /* #region SUP|SUB */
-[data-sub],
-[data-sup] {
+[data-sup],
+[data-sub] {
+  /* background-color: hsl(0, 100%, 20%); */
   position: relative;
   display: inline-flex;
   flex-direction: row;
-  gap: 0.25em;
   justify-content: center;
   white-space: nowrap;
   font-size: var(--mbx-expo-size, 0.55em);
-  margin-left: -0.35em;
+  margin-inline-start: -0.365em; 
+}
+[data-sup] > x,
+[data-sub] > x {
+  gap: 0em;
+  /* letter-spacing: -0.1em; */
 }
 [data-sup] {
   /* background-color: hsla(0,100%,60%,0.2); */
@@ -169,6 +180,34 @@ x {
 }
 /* #endregion */
 
+/* #region TITE */
+[data-tite] {
+  gap: 0;
+  word-spacing: -0.125em;
+}
+[data-tite] > [data-tite-left],
+[data-tite] > [data-tite-rite],
+[data-tite] > [data-sup],
+[data-tite] > [data-sub] {
+  margin-inline: 0;
+}
+
+[data-tite] > [data-blank],
+[data-tite] > [data-grow] {
+  --mbx-grow-margin: 0em;
+}
+[data-tite-left] {
+  /* background-color: hsla(0,100%,50%,0.2); */
+  margin-inline-start: -0.125em;
+  margin-inline-end: -0.25em;
+}
+[data-tite-rite] {
+  /* background-color: hsla(200,100%,50%,0.2); */
+  margin-inline-end: -0.125em;
+  margin-inline-start: -0.25em;
+}
+/* #endregion */
+
 /* #region BLANK */
 [data-blank] {
   /* background-color: hsla(40, 100%, 90%, 0.15); */
@@ -176,12 +215,15 @@ x {
   display: inline-grid;
   grid-template-areas: stack;
   gap: 0;
-  /* overflow: hidden; */
+
+  will-change: margin-inline, left, width, height;
+  animation: mbx-grow linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+  overflow: hidden;
 }
 [data-blank] > x {
   grid-area: stack;
-  margin: 0 0;
-  padding: 0 0;
 }
 [data-blank] > x:nth-child(1) {
   /* !!! invisible color HAKC !!! */
@@ -190,49 +232,11 @@ x {
 }
 [data-blank="origin"] {
   /* background-color: hsl(200, 100%, 20%); */
-  /* color: hsl(200, 100%, 10%); */
-  will-change: margin, left, width, height;
-  animation: mbx-blank-origin linear both;
-  animation-timeline: --anim-timeline;
-  animation-range: var(--animation-range);
-}
-@keyframes mbx-blank-origin {
-  from {
-    margin: 0 0;
-    left: 0;
-    width: var(--blank-w);
-    /* height: var(--blank-h); */
-  }
-  to {
-    margin: 0 -0.125em;
-    left: -0.2em;
-    width: 0px;
-    /* height: 0px; */
-  }
+  animation-direction: reverse;
 }
 [data-blank="destiny"] {
   /* background-color: hsl(0, 100%, 20%); */
-  /* color: hsl(0, 100%, 10%); */
-  position: relative;
-  will-change: margin, left, width, height;
-  animation: mbx-blank-destiny linear both;
-  animation-timeline: --anim-timeline;
-  animation-range: var(--animation-range);
-}
-@keyframes mbx-blank-destiny {
-  from {
-    margin: 0 -0.125em;
-    left: 0;
-    width: 0px;
-    /* height: var(--blank-h); */
-  }
-  to {
-    margin: 0 0;
-    left: 0;
-    width: 150px;
-    width: var(--blank-w);
-    /* height: 0px; */
-  }
+  animation-direction: normal;
 }
 /* #endregion */
 
@@ -242,7 +246,7 @@ x {
   position: absolute;
   /* z-index: 10; */
   will-change: left, top, width, height, font;
-  animation: mbx-move linear both;
+  animation: mbx-move ease-in-out both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
@@ -266,10 +270,11 @@ x {
 }
 /* #endregion */
 
-/* #region GROW|SHRINK */
+/* #region GROW */
 [data-grow] {
   /* color: #fff; */
-  /* background-color: hsla(100, 100%, 50%, .2); */
+  /* background-color: hsla(100, 100%, 50%, 0.2); */
+  will-change: transform, width, margin-inline, opacity;
   animation: mbx-grow linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
@@ -283,15 +288,15 @@ x {
 @keyframes mbx-grow {
   from {
     transform: scale(0);
-    opacity: 0;
     width: 0;
-    margin-inline: -0.125em;
+    margin-inline: var(--mbx-grow-margin, -0.125em);
+    opacity: 0;
   }
   to {
     transform: scale(1);
-    opacity: 1;
     width: var(--mbx-width);
     margin-inline: 0;
+    opacity: 1;
   }
 }
 /* #endregion */
@@ -305,7 +310,7 @@ x {
 }
 @keyframes mbx-foink-keys {
   to {
-    font-size: var(--mbx-foink-val, 0.35em);
+    font-size: var(--mbx-foink-val, var(--frak-font-size, 0.35em));
   }
 }
 /* #endregion */
@@ -629,6 +634,43 @@ path[data-materialize] {
 
 /* #endregion */
 
+/* #region BLUR */
+[data-blur] {
+  will-change: color, text-shadow;
+  animation: mbx-blur-keys linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-blur-keys {
+  0% {
+    filter: none;
+  }
+  50% {
+    filter: blur(var(--mbx-blur-val, 0.04em));
+  }
+  100% {
+    filter: none;
+  }
+}
+[data-blur] path {
+  will-change: filter;
+  animation: mbx-blur-path-keys linear both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-blur-path-keys {
+  0% {
+    filter: none;
+  }
+  50% {
+    filter: blur(var(--mbx-blur-val, 0.05em));
+  }
+  100% {
+    filter: none;
+  }
+}
+/* #endregion */
+
 /* #region BLINK */
 [data-blink] {
   will-change: color, text-shadow;
@@ -670,7 +712,6 @@ path[data-materialize] {
     filter: none;
   }
 }
-
 /* #endregion */
 
 /* #region FLASH */
@@ -788,21 +829,6 @@ path[data-materialize] {
 }
 /* #endregion */
 
-/* #region PARENS */
-[data-parens-left] {
-  /* background-color: hsla(0,100%,50%,0.2); */
-  display: inline;
-  position: relative;
-  margin-inline-end: -0.21em;
-}
-[data-parens-rite] {
-  /* background-color: hsla(200,100%,50%,0.2); */
-  display: inline;
-  position: relative;
-  margin-inline-start: -0.21em;
-}
-/* #endregion */
-
 /* #region MIDDOT */
 [data-middot] {
   /* content: "\00B7"; */
@@ -917,14 +943,7 @@ path[data-materialize] {
 /* #endregion */
 
 /* #region DIST */
-[data-coeff] > [data-shrink] {
-  --ani-start: 0.5;
-}
-[data-term] [data-vaporize] {
-  position: absolute;
-  font-weight: bold;
-  color: var(--back-color);
-  --ani-end: 0.85;
+[data-dist] {
 }
 /* #endregion */
 
@@ -1130,7 +1149,7 @@ path[data-materialize] {
 }
 /* #endregion */
 
-/* #region ROOT of ALL EVIL */
+/* #region ROOT */
 x:has(> [data-root]) {
   margin-left: 0.5em;
   margin-right: 0.25em;
@@ -1402,7 +1421,7 @@ x:has(> [data-root="back"]) {
 }
 /* #endregion */
 
-/* #region JESTS*/
+/* #region JEST */
 [data-jest] > svg {
   position: absolute;
   width: 100%;
@@ -1580,12 +1599,6 @@ x:has(> [data-root="back"]) {
 }
 /* #endregion */
 
-/* #region TITE */
-[data-tite] {
-  gap: var(--mbx-tite-val, 0.125em);
-}
-/* #endregion */
-
 /* #region DOPPEL */
 [data-doppel] {
   /* background-color: hsl(0, 100%, 20%); */
@@ -1669,7 +1682,7 @@ x:has(> [data-inline-frak-holder="anim"]) {
   justify-content: center;
   white-space: nowrap;
 
-  will-change: margin, transform, font-size;
+  will-change: margin-inline, transform, font-size;
   animation: mbx-raze-keys linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
@@ -1680,12 +1693,12 @@ x:has(> [data-inline-frak-holder="anim"]) {
 @keyframes mbx-raze-keys {
   from {
     font-size: 1em;
-    margin-left: 0em;
+    margin-inline-start: 0em;
     transform: translateY(0em);
   }
   to {
     font-size: var(--mbx-expo-size, 0.55em);
-    margin-left: -0.35em;
+    margin-inline-start: -0.35em;
     transform: translateY(-0.8em);
   }
 }
