@@ -31,11 +31,11 @@
   </head>
 
   <body>
-    <rat-batix id="two" data-mbx='{"xxx_color":300}'></rat-batix>
     <rat-batix id="one" data-mbx='{"color":300}'></rat-batix>
+    <rat-batix id="two" data-mbx='{"xxx_color":300}'></rat-batix>
 
     <script id="ROUTINES">
-      const routineTwo = {
+      const routineTesting = {
         intro: `
           <x data-logo>MATHROBATIX</x>
           illuminated acrobatic gestural mathematics
@@ -43,52 +43,80 @@
         steps: [
           {
             load: `
-            <mbx-frak id="frak-1">
-             <x>
-              <x id="tan-5">5</x>
-             </x>
-             <x>
-              <mbx-sin base="2" id="sin-3">3</mbx-sin>
-             </x>
+            y +
+            <mbx-frak>
+             <x><mbx-sin base="2" id="T2x">2x</mbx-sin></x>
+             <x>7</x>
             </mbx-frak>
             +
-            <mbx-frak id="frak-2">
-             <x>
-              <x id="T5x">5x</x>
-             </x>
-             <x id="T2">2</x>
-            </mbx-frak>
+            5
             `,
-            note: "funk funks",
+            note: "erroneous funks",
             acts: (X) => {
-              X.spot("tan-5").tan("-1");
-              X.spot("T5x").colorize("green");
-              X.spot("frak-2")
-                .foink("0.75em")
-                .vert("-0.1em")
-              ;
-              X.spot("sin-3").spin();
+              X.spot("T2x-sin-open", "T2x-sin-close").grow();
+              // X.spot("tan-5").tan("-1");
+              // X.spot("T5x").colorize("green");
+              // X.spot("frak-2").foink("0.75em").vert("-0.1em");
+              // X.spot("frak-2").ln();
               // X.spot("frak-2").ln();
               // X.spot("frak-2-ln").spin();
-            }
+            },
           },
           {},
+        
+        ],
+      };
+      const routineDemo = {
+        intro: `
+          <x data-logo>MATHROBATIX</x>
+          illuminated acrobatic gestural mathematics
+        `,
+        steps: [
+          { // unfurl
+            load: `
+            <x id="Tx-a">x</x>
+            <x id="pow-2-a"><x data-sup>2</x></x>
+            <x id="plus-b">+</x>
+            <x id="T3x-b" data-tite>
+             <x id="T3-b">3</x>
+             <x id="Tx-b">x</x>
+            </x>
+            <x id="plus-c">+</x>
+            <x id="T5-c">5</x>
+            <x id="EQ">=</x>
+            <x id="T0-d">0</x>
+            `,
+            note: `
+              <x>solving for x</x>
+              <x>can get tricky</x>
+            `,
+            acts: (X) => {
+              X.spot("Tx-a").viva();
+              X.spot("pow-2-a", "plus-b", "T3x-b","plus-c","T5-c","EQ","T0-d").unfurl();
+            },
+          },
           { // default distribution
             load: `
             <x id="T3">3</x>
             <x data-tite-left>(</x>
             <x id="Tx">x</x> + <x id="T1">1</x>
             <x data-tite-rite>)</x>
-            = 5
+            `,
+            note: `
+            a widely-used, popular distribution
+            <x data-rant>
+              speaking of widely-used and popular
+              distributions, that happens to also 
+              be the goal of MathroBatiX itself
+            </x>
             `,
             acts: (X) => {
               X.spot("Tx", "T1").dist("T3");
               X.spot("T3-doppel-0").blink().during(0.3, 1);
               X.spot("T3-doppel-1").blink().during(0.3, 1);
               X.spot("T3").vaporize();
-            }
+            },
           },
-          {note: "retains options"},
           { // blur move
             load: `
             <x id="T3yx">
@@ -102,7 +130,7 @@
               <x>x</x>
              </x>
             </x>
-            <x> + 9 = </x>
+            <x> + 9 &ne; </x>
             <x id="T3catch-y-k">
              <x data-tite>
               <x>3</x>
@@ -113,14 +141,17 @@
              </x>
             </x>
             `,
-            note: "why why why",
+            note: `
+            <x>probably never need to</x>
+            <x>but you could</x>
+            `,
             acts: (X) => {
               X.spotAll().blur();
-              X.spot("Ty-a").blink().bulk(2.2).moveAfter("catch-1").during(0,  0.8);
+              X.spot("Ty-a").blink().bulk(2.2).moveAfter("catch-1").during(0, 0.8);
               X.spot("Ty-b").blink().bulk(2.2).moveAfter("catch-1").during(0.1, 0.9);
               X.spot("Ty-c").blink().bulk(2.2).moveAfter("catch-1").during(0.2, 1.0);
-            }
-          }
+            },
+          },
         ],
       };
       const MMMroutineTwo = {
@@ -412,7 +443,7 @@
             </x>
             = 5 <x id="T-plus">+</x>
              <x id="T-exclaim">!?!</x>
-            
+
             `,
             note: `
             <x>but what do we add?!? ...</x>
@@ -432,7 +463,7 @@
           },
           {
             load: `
-            (x + 
+            (x +
             <x id="T4-half-a" data-tite>
              4<mbx-half id="T-half-a"></mbx-half>
             </x>
@@ -522,7 +553,7 @@
           },
           {
             load: `
-            x 
+            x
             <x id="Tplus2">
              <x id="Tplus">+</x>
              <x id="T2">2</x>
@@ -575,16 +606,16 @@
           },
         ],
       };
-
     </script>
+
     <script id="LOADER">
       const one = document.getElementById("one");
       one.addEventListener("mbx-ready", (e) => {
-        // one.loadRoutine(XXXroutineTwo);
+        one.loadRoutine(routineTesting);
       });
       const two = document.getElementById("two");
       two.addEventListener("mbx-ready", (e) => {
-        two.loadRoutine(routineTwo);
+        // two.loadRoutine(routineDemo);
       });
     </script>
 

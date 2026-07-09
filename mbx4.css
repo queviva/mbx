@@ -316,7 +316,7 @@ x {
 /* #region GROW */
 [data-grow] {
   /* color: #fff; */
-  background-color: hsla(100, 100%, 50%, 0.2);
+  /* background-color: hsla(100, 100%, 50%, 0.2); */
   will-change: transform, width, margin-inline, opacity;
   animation: mbx-grow linear both;
   animation-timeline: --anim-timeline;
@@ -1379,7 +1379,7 @@ x:has(> [data-root="back"]) {
   border: 0.4px solid orange;
 }
 [data-XXX-expo] {
-  border: 0.4px solid green;
+  /* border: 0.4px solid green; */
   position: relative;
   display: inline-grid;
   grid-template: 1fr 1fr;

@@ -864,15 +864,17 @@
           const type = invers.includes(skill) ? "data-sup" : "data-sub";
           const bTag = base ? `<x ${type}>${base}</x>` : "";
           return `
-           <x id="${id}-open-text" data-tite>
-            <x data-funk-text="${skill}">${skill}</x>
-            ${bTag}
-            <x>(</x>
+           <x id="${id}-${skill}-open">
+            <x data-tite>
+             <x data-funk-text="${skill}">${skill}</x>
+             ${bTag}
+             <x>(</x>
+            </x>
            </x>
          `;
         },
         close: (id, skill) => {
-          return `<x id="${id}-close-text">)</x>`;
+          return `<x id="${id}-${skill}-close">)</x>`;
         },
       };
 
