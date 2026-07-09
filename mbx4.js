@@ -381,7 +381,7 @@
             }
             return this.#API;
           },
-          setProp: (prop, val = {}) => {
+          setProp: (prop, vals = {}) => {
             for (const bat of this.#batties) {
               for (const [key, value] of Object.entries(vals)) {
                 bat.style.setProperty(key, value);
@@ -710,6 +710,7 @@
         ],
       };
     }
+
     // probably don't use this one
     #makeResizeObserver() {
       const pending = new Map(); // target → rafId
@@ -787,22 +788,35 @@
         "vault",
         "spin",
         "bulk",
-        "colorize",
         "clearFilter",
         "salute",
         "retreat",
       ];
-      const permas = [];
+      const permas = new Map([
+        ["foink", "font-size"],
+        ["colorize", "color"],
+      ]);
 
       const api = {};
       const short = {};
       const clean = [];
 
-      for (const skill of [...skills, ...permas]) {
+      for (const skill of [...skills, ...permas.keys()]) {
         const fixy = `${this.#opts.fix}-${skill}`;
         api[skill] = (val) => this.#wrap(skill, { ...(val ? { [`--${fixy}-val`]: val } : {}) });
         short[fixy] = (bat) => this.#unShort(skill, bat);
-        if (!permas.includes(skill)) clean.push((stage) => this.#unWrap(skill, stage));
+        if (!permas.has(skill)) {
+          clean.push((stage) => this.#unWrap(skill, stage));
+        } else {
+          clean.push((stage) => {
+            for (const bat of stage.querySelectorAll(`[data-${skill}]`)) {
+              const top = stage.querySelector(`#${bat.getAttribute("data-source")}`);
+              const sty = getComputedStyle(bat);
+              top.style.setProperty(permas.get(skill), sty.getPropertyValue(`--${fixy}-val`));
+            }
+            this.#unWrap(skill, stage);
+          });
+        }
       }
 
       return { api: api, short: short, clean: clean };
@@ -840,7 +854,7 @@
 
     #makeFunkSkills() {
       const skills = ["log", "ln", "W"];
-      const invers = ["sin", "cos", "tan", "sec", "cos", "cot", "trig"];
+      const invers = ["sin", "cos", "tan", "sec", "csc", "cot", "trig"];
 
       const api = {};
       const short = {};
@@ -851,50 +865,61 @@
           const type = invers.includes(skill) ? "data-sup" : "data-sub";
           const bTag = base ? `<x ${type}>${base}</x>` : "";
           return `
-           <x id="${id}-${skill}-open-text">
-             <x>
-               <x data-funk-text="${skill}">${skill}</x>
-               ${bTag}
-             </x>
-             <x style="margin: 0 -0.2em;">(</x>
+           <x id="${id}-open-text" data-tite>
+            <x data-funk-text="${skill}">${skill}</x>
+            ${bTag}
+            <x>(</x>
            </x>
          `;
         },
         close: (id, skill) => {
-          return `<x id="${id}-${skill}-close-text" data-tite-rite>)</x>`;
+          return `<x id="${id}-close-text">)</x>`;
         },
       };
 
       for (const skill of [...skills, ...invers]) {
         const fixy = `${this.#opts.fix}-${skill}`;
         api[skill] = (base = null) => {
-          const textIDs = [];
-          for (const bat of this.#batties) {
-            bat.setAttribute(`data-${skill}-funk`, bat.id);
-            this.#API
-              .mount(`${bat.id}-${skill}-open`, makeHTML.open(bat.id, skill, base))
-              .grow()
-              .insertBefore(bat.id);
-            this.#API
-              .mount(`${bat.id}-${skill}-close`, makeHTML.close(bat.id, skill))
-              .grow()
-              .insertAfter(bat.id);
-            textIDs.push(`${bat.id}-${skill}-open-text`, `${bat.id}-${skill}-close-text`);
-          }
-          return this.#API.spot(...textIDs);
+          if (this.#batties.length <= 0) return;
+          const bat0 = this.#batties[0];
+          const bat1 = this.#batties.at(-1);
+          const teamID = `${bat0.id}-${skill}`;
+          this.#API.team(teamID);
+          this.#API
+            .mount(`${teamID}-open`, makeHTML.open(teamID, skill, base))
+            .grow()
+            .insertBefore(bat0.id);
+          this.#API
+            .mount(`${teamID}-close`, makeHTML.close(teamID, skill))
+            .grow()
+            .insertAfter(bat1.id);
+          // this.#API
+          // .spot(`${teamID}-open`, teamID, `${teamID}-close`)
+          // .team(`${bat0.id}-${skill}`, { tite: "" });
+          return this.#API;
         };
         short[fixy] = (bat) => {
           bat.id ||= `${this.#opts.fix}-${crypto.randomUUID()}`;
           const base = bat.getAttribute("base");
-          const tag = this.#makeTag("x", bat.innerHTML, {
-            [`${skill}`]: "",
-            id: bat.id,
-          });
+          const tag = this.#makeTag(
+            "x",
+            `<x data-tite>
+             ${makeHTML.open(bat.id, skill, base)}
+             ${bat.innerHTML}
+             ${makeHTML.close(bat.id, skill)}
+            </x>`,
+            {
+              id: bat.id,
+              [`${skill}`]: "",
+            },
+          );
+          /*
           this.#API
             .mount(`${bat.id}-${skill}-open`, makeHTML.open(bat.id, skill, base))
             .insertBefore(bat.id)
             .mount(`${bat.id}-${skill}-close`, makeHTML.close(bat.id, skill))
             .insertAfter(bat.id);
+          */
           return tag;
         };
       }
@@ -1277,17 +1302,17 @@
 
         const co_txt = coef.innerText;
         this.#API.spot(id).doppel(total);
-        this.#API.spot(id).flash().during(0, 0.3);
-        this.#API.spot(`${id}-doppel`).shrink().during(0.7, 1);
+        // this.#API.spot(id).flash().during(0, 0.3);
+        this.#API.spot(id).vaporize().during(0.05, 0.7);
+        this.#API.spot(`${id}-doppel`).shrink().during(0.6, 1);
 
         for (let i = 0; i < total; i++) {
-          // this.#API.spot(`${id}-doppel-${i}`).viva();
           const batID = batties[i].id;
           const batDot = batID + "-dot";
           this.#API
-            .mount(batDot, `<x data-viva style="margin-inline:-0.2em;">&middot</x>`)
+            .mount(batDot, `<x style="margin-inline:-0.35em;">&middot</x>`)
             .insertBefore(batID);
-          this.#API.spot(batDot).grow().during(0.7, 1);
+          this.#API.spot(batDot).viva().grow().during(0.7, 1);
           this.#API.spot(`${id}-doppel-${i}`).spin().vault().moveBefore(batDot).during(0.3, 1);
         }
 
@@ -1484,13 +1509,15 @@
       const nextStep = this.#makeTag("x", stepTag.innerHTML, { step: "" });
 
       // run cleanups
+      this.#holder.append(nextStep);
       this.#runCleanups(nextStep);
+      nextStep.remove();
 
       // reset the stage to the cleaned version
       this.#stageObj = nextStep.children[0];
 
       // remove IDs [or make #namespaceIDs()]
-      this.#removeIDs(stepTag.children[0]);
+      // this.#removeIDs(stepTag.children[0]);
       // this.#namespaceIDs(stepTag.children[0], this.#opts.fix, this.#stepNum);
 
       // the tag is done with measurements

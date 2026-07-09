@@ -41,26 +41,48 @@
           illuminated acrobatic gestural mathematics
         `,
         steps: [
-          { // expo sub|sup|tite
+          {
             load: `
-            3
-            <x data-sup>
-             <x id="tite-1">
-              <x data-tite>
-               <x>9x^2 </x><x id="shrink9">+ 9</x>
-              </x>
+            <mbx-frak id="frak-1">
+             <x>
+              <x id="tan-5">5</x>
              </x>
-            </x>
-            <x id="EQ">=</x>
-            <x id="T3x2">3x^2</x>
-            <x id="Tplus">+</x>
-            <x id="T1">1</x>
+             <x>
+              <mbx-sin base="2" id="sin-3">3</mbx-sin>
+             </x>
+            </mbx-frak>
+            +
+            <mbx-frak id="frak-2">
+             <x>
+              <x id="T5x">5x</x>
+             </x>
+             <x id="T2">2</x>
+            </mbx-frak>
             `,
-            note: "sub | sup | tite",
+            note: "funk funks",
             acts: (X) => {
-              X.spot("shrink9").shrink();
-              X.spot("T3x2").shrink();
-              X.spot("tite-1").spin().viva().moveAfter("EQ");
+              X.spot("tan-5").tan("-1");
+              X.spot("frak-2").foink("0.75em");
+              X.spot("T5x").colorize("green");
+              // X.spot("sin-3").spin();
+              // X.spot("frak-2").ln();
+              // X.spot("frak-2-ln").spin();
+            }
+          },
+          {},
+          { // default distribution
+            load: `
+            <x id="T3">3</x>
+            <x data-tite-left>(</x>
+            <x id="Tx">x</x> + <x id="T1">1</x>
+            <x data-tite-rite>)</x>
+            = 5
+            `,
+            acts: (X) => {
+              X.spot("Tx", "T1").dist("T3");
+              X.spot("T3-doppel-0").blink().during(0.3, 1);
+              X.spot("T3-doppel-1").blink().during(0.3, 1);
+              X.spot("T3").vaporize();
             }
           },
           {note: "retains options"},

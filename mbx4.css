@@ -273,7 +273,7 @@ x {
 /* #region GROW */
 [data-grow] {
   /* color: #fff; */
-  /* background-color: hsla(100, 100%, 50%, 0.2); */
+  background-color: hsla(100, 100%, 50%, 0.2);
   will-change: transform, width, margin-inline, opacity;
   animation: mbx-grow linear both;
   animation-timeline: --anim-timeline;
@@ -1320,15 +1320,15 @@ x:has(> [data-root="back"]) {
 /* #region FUNK */
 [data-funk-text] {
   font-size: var(--mbx-funk-size, 0.75em);
-  letter-spacing: -0.1em;
-  /* transform: translateY(-0.25em); */
+  letter-spacing: -0.075em;
+  /* transform: translateY(-0.15em); */
 }
 [data-funk-text="W"] {
   font-family: "Luckiest Guy";
 }
 [data-funk-text] + [data-sup] {
   font-size: calc(0.75 * var(--mbx-expo-size));
-  margin-left: -0.5em;
+  /* margin-inline-start: -0.5em; */
 }
 /* #endregion */
 
