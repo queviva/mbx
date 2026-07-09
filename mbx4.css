@@ -152,6 +152,49 @@ x {
 }
 /* #endregion */
 
+/* #region COMM|RANT */
+[data-comm],
+[data-rant] {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0px 10px;
+  width: 100%;
+  font-size: 0.5em;
+  font-style: italic;
+  text-align: center;
+  text-wrap: wrap;
+  color: var(--grey-color);
+}
+[data-comm] [data-rant] {
+  position: absolute;
+  top: calc(100% + 5px);
+  display: inline-block;
+  padding: 0 3em;
+  text-align: justify;
+  font-style: normal;
+  font-size: 0.7em;
+  background-color: var(--back-color);
+  opacity: 0;
+  z-index: 10;
+  max-height: 10em;
+  white-space: wrap;
+  overflow-y: auto;
+  transition: opacity ease-in 600ms;
+}
+[data-comm]:hover [data-rant] {
+  opacity: 0.85;
+  transition: opacity ease-out 400ms;
+  pointer-events: auto;
+}
+[data-comm] em {
+  font-style: normal;
+  line-height: 2lh;
+}
+/* #endregion */
+
 /* #region SUP|SUB */
 [data-sup],
 [data-sub] {
@@ -297,6 +340,19 @@ x {
     width: var(--mbx-width);
     margin-inline: 0;
     opacity: 1;
+  }
+}
+/* #endregion */
+
+/* #region VERT */
+[data-vert] {
+  animation: mbx-vert ease-in-out both;
+  animation-timeline: --anim-timeline;
+  animation-range: var(--animation-range);
+}
+@keyframes mbx-vert {
+  to {
+    transform: translateY(var(--mbx-vert-val, 0));
   }
 }
 /* #endregion */
@@ -832,6 +888,7 @@ path[data-materialize] {
 /* #region MIDDOT */
 [data-middot] {
   /* content: "\00B7"; */
+  /* ??? should be margin-inline ??? */
   margin-left: -0.12em;
   margin-right: -0.12em;
 }
@@ -944,49 +1001,6 @@ path[data-materialize] {
 
 /* #region DIST */
 [data-dist] {
-}
-/* #endregion */
-
-/* #region COMM|RANT */
-[data-comm],
-[data-rant] {
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 0px 10px;
-  width: 100%;
-  font-size: 0.5em;
-  font-style: italic;
-  text-align: center;
-  text-wrap: wrap;
-  color: var(--grey-color);
-}
-[data-comm] [data-rant] {
-  position: absolute;
-  top: calc(100% + 5px);
-  display: inline-block;
-  padding: 0 3em;
-  text-align: justify;
-  font-style: normal;
-  font-size: 0.7em;
-  background-color: var(--back-color);
-  opacity: 0;
-  z-index: 10;
-  max-height: 10em;
-  white-space: wrap;
-  overflow-y: auto;
-  transition: opacity ease-in 600ms;
-}
-[data-comm]:hover [data-rant] {
-  opacity: 0.85;
-  transition: opacity ease-out 400ms;
-  pointer-events: auto;
-}
-[data-comm] em {
-  font-style: normal;
-  line-height: 2lh;
 }
 /* #endregion */
 

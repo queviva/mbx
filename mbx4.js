@@ -433,11 +433,6 @@
     #makeSimpleShorts() {
       return {
         short: {
-          "[data-vert]": (bat) => {
-            bat.style.transform = `translateY(${bat.dataset.vert || 0})`;
-            bat.removeAttribute("data-vert");
-            return bat;
-          },
           "[data-good]": (bat) => {
             bat.innerHTML = `
              <svg data-good-svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
@@ -795,6 +790,7 @@
       const permas = new Map([
         ["foink", "font-size"],
         ["colorize", "color"],
+        ["vert", "translate"],
       ]);
 
       const api = {};
@@ -812,7 +808,10 @@
             for (const bat of stage.querySelectorAll(`[data-${skill}]`)) {
               const top = stage.querySelector(`#${bat.getAttribute("data-source")}`);
               const sty = getComputedStyle(bat);
-              top.style.setProperty(permas.get(skill), sty.getPropertyValue(`--${fixy}-val`));
+              top.style.setProperty(
+                permas.get(skill),
+                (skill === "vert" ? "0 " : "") + sty.getPropertyValue(`--${fixy}-val`),
+              );
             }
             this.#unWrap(skill, stage);
           });
