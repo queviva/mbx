@@ -139,7 +139,10 @@
         this.#makeFadeSkills(),
       ];
       this.#makeAPI_SHORT_CLEAN();
-      this.#RO = this.#makeResizeObserver();
+      // this.#RO = this.#makeResizeObserver();
+      window.addEventListener("orientationchange", (e) => {
+        log("change orientals");
+      });
     }
 
     get #bitties() {
@@ -147,10 +150,6 @@
     }
 
     // #region SPOT UTILS
-    #forEachBat(callback) {
-      [...(this.#batties || [])].forEach(callback);
-    }
-
     #markup(html) {
       return html
         .trim()
@@ -678,7 +677,8 @@
 
         this.#stageObj.setAttribute("data-resized", "0");
         this.#stageObj.setAttribute("data-stepNum", this.#stepNum);
-        this.#RO.observe(this.#stageObj); // note: observe calls #measureMovers
+        // this.#RO.observe(this.#stageObj); // note: observe calls #measureMovers
+        this.#measureMovers(this.#stageObj);
 
         return this.#API;
       };
@@ -706,43 +706,7 @@
       };
     }
 
-    // probably don't use this one
     #makeResizeObserver() {
-      const pending = new Map(); // target → rafId
-      const debounceTimers = new Map(); // target → timeoutId
-
-      return new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const target = entry.target;
-
-          // 1. Cancel any pending RAF
-          if (pending.has(target)) {
-            cancelAnimationFrame(pending.get(target));
-            pending.delete(target);
-          }
-
-          // 2. Clear any existing debounce timer
-          if (debounceTimers.has(target)) {
-            log("CANKED!!!");
-            clearTimeout(debounceTimers.get(target));
-          }
-
-          // 3. Debounce + schedule on next frame
-          const timer = setTimeout(() => {
-            const frameId = requestAnimationFrame(() => {
-              this.#measureMovers(target);
-              pending.delete(target);
-            });
-
-            pending.set(target, frameId);
-            debounceTimers.delete(target);
-          }, 100); // ~1 frame at 60fps - adjust if needed (10-20ms)
-
-          debounceTimers.set(target, timer);
-        }
-      });
-    }
-    #XXX_makeResizeObserver() {
       return new ResizeObserver((entries) => {
         for (const entry of entries) {
           const target = entry.target;
@@ -822,6 +786,7 @@
     }
 
     #makeGrowSkills() {
+      const skills = ["tite"];
       const api = {};
       const short = {};
       const clean = [];
@@ -847,6 +812,29 @@
           }
         }
       });
+
+      for (const skill of skills) {
+        api[skill] = (v) => {
+          for (const bat of this.#batties) {
+            this.#wrap(skill, { [`${skill}`]: "fore" });
+          }
+        };
+        api[camel(skill)] = (v) => {
+          for (const bat of this.#batties) {
+            this.#wrap(skill, { [`${skill}`]: "back" });
+          }
+        };
+        clean.push((stage) => {
+          for (const bat of stage.querySelectorAll(`[data-${skill}]`)) {
+            const val = bat.getAttribute(`data-${skill}`);
+            if (val === "fore") {
+              bat.setAttribute(`data-${skill}`, "");
+            } else if (val === "back") {
+              bat.removeAttribute(`data-${skill}`);
+            }
+          }
+        });
+      }
 
       return { api: api, short: short, clean: clean };
     }
@@ -1206,52 +1194,69 @@
     }
 
     #makeFaxxSkills() {
+      const skills = ["faxx", "hint"];
+
       const api = {};
       const short = {};
       const clean = [];
 
-      api["faxx"] = (id) => {
-        // only one faxx box at a time
-        const bat = this.#batties[0];
-        const box = this.#stageObj.querySelector(`#${CSS.escape(id)}`);
-        if (!bat || !box) return;
-        const fax = this.#makeTag("x", "", { id: `${bat.id}-faxx`, faxx: "fore" });
-        bat.replaceWith(fax);
-        fax.append(bat, box);
-        const batWide = bat.getBoundingClientRect().width;
-        const boxWide = box.getBoundingClientRect().width;
-        fax.style.setProperty(`--${this.#opts.fix}-start-wide`, batWide + "px");
-        fax.style.setProperty(`--${this.#opts.fix}-end-wide`, Math.max(batWide, boxWide) + "px");
-        this.#API.spot(bat.id).ghost().spot(box.id).viva().salute();
-
-        return this.#API.spot(fax.id);
+      const makeHTML = {
+        faxx: (bat, box) => {
+          this.#API.spot(bat.id).ghost();
+          this.#API.spot(box.id).viva().salute();
+        },
+        hint: (bat, box) => {
+          this.#API.spot(bat.id).vaporize();
+          this.#API.spot(box.id).viva().during(0, 0.5).salute().during(0, 0.8);
+        },
       };
-      api[camel("faxx")] = () => {
-        for (const fax of this.#batties) {
-          fax.setAttribute("data-faxx", "back");
-          const [bat, box] = fax.children;
-          if (!bat || !box) continue;
+
+      for (const skill of skills) {
+        api[skill] = (id) => {
+          // only one faxx box at a time
+          const bat = this.#batties[0];
+          const box = this.#stageObj.querySelector(`#${CSS.escape(id)}`);
+          if (!bat || !box) return;
+          const fax = this.#makeTag("x", "", { id: `${bat.id}-${skill}`, [`${skill}`]: "fore" });
+          bat.replaceWith(fax);
+          fax.append(bat, box);
           const batWide = bat.getBoundingClientRect().width;
           const boxWide = box.getBoundingClientRect().width;
           fax.style.setProperty(`--${this.#opts.fix}-start-wide`, batWide + "px");
           fax.style.setProperty(`--${this.#opts.fix}-end-wide`, Math.max(batWide, boxWide) + "px");
-          this.#API.spot(bat.id).setFilter("ghost").clearFilter();
-          this.#API.spot(box.id).retreat();
-        }
-        return this.#API;
-      };
-      clean.push((stage) => {
-        for (const bat of stage.querySelectorAll("[data-faxx]")) {
-          const val = bat.getAttribute("data-faxx");
-          if (val === "fore") {
-            bat.setAttribute("data-faxx", "");
-          } else if (val === "back") {
-            bat.children[0].style.textShadow = "none";
-            bat.children[0].style.color = "inherit";
-            bat.replaceWith(bat.children[0]);
+          makeHTML[skill](bat, box);
+          return this.#API.spot(fax.id);
+        };
+        api[camel(skill)] = () => {
+          for (const fax of this.#batties) {
+            fax.setAttribute(`data-${skill}`, "back");
+            const [bat, box] = fax.children;
+            if (!bat || !box) continue;
+            const batWide = bat.getBoundingClientRect().width;
+            const boxWide = box.getBoundingClientRect().width;
+            fax.style.setProperty(`--${this.#opts.fix}-start-wide`, batWide + "px");
+            fax.style.setProperty(
+              `--${this.#opts.fix}-end-wide`,
+              Math.max(batWide, boxWide) + "px",
+            );
+            this.#API.spot(bat.id).setFilter("ghost").clearFilter();
+            this.#API.spot(box.id).retreat();
           }
-        }
-      });
+          return this.#API;
+        };
+        clean.push((stage) => {
+          for (const bat of stage.querySelectorAll(`[data-${skill}]`)) {
+            const val = bat.getAttribute(`data-${skill}`);
+            if (val === "fore") {
+              bat.setAttribute(`data-${skill}`, "");
+            } else if (val === "back") {
+              bat.children[0].style.textShadow = "none";
+              bat.children[0].style.color = "inherit";
+              bat.replaceWith(bat.children[0]);
+            }
+          }
+        });
+      }
 
       return { api: api, short: short, clean: clean };
     }
@@ -1518,7 +1523,7 @@
       this.#stageObj = nextStep.children[0];
 
       // remove IDs [or make #namespaceIDs()]
-      // this.#removeIDs(stepTag.children[0]);
+      this.#removeIDs(stepTag.children[0]);
       // this.#namespaceIDs(stepTag.children[0], this.#opts.fix, this.#stepNum);
 
       // the tag is done with measurements

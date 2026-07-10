@@ -41,29 +41,115 @@
           illuminated acrobatic gestural mathematics
         `,
         steps: [
+          /*
           {
             load: `
-            y +
-            <mbx-frak>
-             <x><mbx-sin base="2" id="T2x">2x</mbx-sin></x>
-             <x>7</x>
-            </mbx-frak>
-            +
-            5
+             <mbx-sin base="2" id="T2x">
+              x<x data-sup>
+                <mbx-frak id="T5">
+                  <x>1</x>
+                  <x><x id="deno-2">2</x></x>
+                </mbx-frak>
+              </x>
+             </mbx-sin>
+             +
+             <x id="T27">27</x>
+             <x id="Tplus1">
+              <x id="Tplus">+</x>
+              <x id="Tminus">-</x>
+              <x id="T101">1</x>
+             </x>
+             <x id="EQ">=</x>
+             <x id="T9">9</x>
             `,
             note: "erroneous funks",
             acts: (X) => {
-              X.spot("T2x-sin-open", "T2x-sin-close").grow();
-              // X.spot("tan-5").tan("-1");
-              // X.spot("T5x").colorize("green");
-              // X.spot("frak-2").foink("0.75em").vert("-0.1em");
-              // X.spot("frak-2").ln();
-              // X.spot("frak-2").ln();
-              // X.spot("frak-2-ln").spin();
+              X.spot("T5").materialize().grow().during(0.5, 1);
+              X.mount("T3fax", "3 3 3").spot("T27").faxx("T3fax");
+              X.mount("T7", "7").spin().spot("T2x").frak("T7");
+              X.spot("T2x-sin-open").cirk().during(0.7, 1);
+              X.spot("T2x-sin-open").grow().during(0, 0.7);
+              X.spot("T2x-sin-close").grow().during(0, 0.7);
+              X.spot("Tminus").viva();
+              X.spot("Tplus").xfade("Tminus");
+              X.spot("Tplus1").spin().vault();//.moveAfter("T9");
+              X.spot("EQ").xout().during(0.7, 1);
+              X.mount("e-99", "e").spot("T9").raze("e-99");
             },
           },
           {},
-        
+          */
+          {
+            load: `
+            <x id="group-1">
+             <x>x^2</x>
+             <x>+ 2x</x>
+             <x>+ 1</x>
+             <x>= 0</x>
+            </x>
+            <x id="member">
+             (x + ?)(x + ?) 
+            </x>
+            `,
+            note: `
+            remember that thing?
+            `,
+            acts: (X) => {
+              X.spot("group-1").hint("member");
+            },
+          },
+          {},
+          {
+            load: `
+            <x>D</x>
+            <x id="Tplus">+</x>
+            <x id="Tplus1">
+              <x>3</x> + <x>B</x>
+            </x>
+            +
+            <x id="TK"> 
+             K
+             <x data-sup>
+              <x data-catch>
+               <x id="catch-1"></x>
+              </x>
+             </x>
+            </x>
+            `,
+            note: `
+              if you move you lose
+            `,
+            acts: (X) => {
+              X.mount("T2", "2").spot("TK").frak("T2");
+              X.spot("Tplus").shrink();
+              X.spot("Tplus1").tite();
+              X.spot("Tplus1").moveAfter("catch-1");
+            },
+          },
+          {},
+          {
+            load: `
+            <x data-tite-left>(</x>
+            <x id="Tx">x</x>
+            +
+            <x id="T1">1</x>
+            <x data-tite-rite>)</x>
+            <x data-doppel>
+             <x id="T3-a">3</x>
+             <x id="T3-b">3</x>
+             <x id="T3-c">3</x>
+            </x>
+            `,
+            note: `distribution`,
+            acts: (X) => {
+              // X.spot("Tx", "T1").dist("T3");
+              X.spot("T3-c").vaporize();
+              X.spot("T3-b").moveAfter("Tx");
+              X.spot("T3-a").moveAfter("T1");
+            }
+          },
+          {},
+          {load: `x`, note:`done`},
         ],
       };
       const routineDemo = {
@@ -615,7 +701,7 @@
       });
       const two = document.getElementById("two");
       two.addEventListener("mbx-ready", (e) => {
-        // two.loadRoutine(routineDemo);
+        two.loadRoutine(routineDemo);
       });
     </script>
 
