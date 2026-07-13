@@ -33,6 +33,15 @@ mathro-batix [data-holder] {
   font-size: var(--font-size);
 }
 
+/* FILTERS */
+mathro-batix [data-holder] {
+  --viva-f1: 0 0 3px hsl(var(--mbx-h), 90%, 80%);
+  --viva-f2: 0 0 8px hsl(var(--mbx-h), 100%, 58%);
+  --viva-f3: 0 0 24px hsl(var(--mbx-h), 100%, 55%);
+  --viva-shadow: var(--viva-f1), var(--viva-f2), var(--viva-f3);
+  --viva-filter: drop-shadow(var(--viva-f1)) drop-shadow(var(--viva-f2)) drop-shadow(var(--viva-f3));
+}
+
 /* FONTS */
 @font-face {
   font-family: "Luckiest Guy";
@@ -285,6 +294,7 @@ x {
 [data-blank] {
   /* background-color: hsla(40, 100%, 90%, 0.15); */
   /* color: hsla(200, 100%, 20%, 0.85); */
+  color: #fff;
   display: inline-grid;
   grid-template-areas: stack;
   gap: 0;
@@ -300,22 +310,23 @@ x {
 }
 [data-blank] > x:nth-child(1) {
   /* !!! invisible color HAKC !!! */
-  color: hsla(0, 0%, 0%, 0);
-  opacity: 0;
+  /* color: hsla(0, 0%, 0%, 0); */
+  /* opacity: 0; */
 }
 [data-blank="origin"] {
-  /* background-color: hsl(200, 100%, 20%); */
+  background-color: hsl(200, 100%, 20%);
   animation-direction: reverse;
 }
 [data-blank="destiny"] {
-  /* background-color: hsl(0, 100%, 20%); */
+  background-color: hsl(0, 100%, 20%);
   animation-direction: normal;
 }
 /* #endregion */
 
 /* #region MOVE */
 [data-move] {
-  /* color: hsla(var(--mbx-h), 80%, 60%, 0.2); */
+  background-color: hsla(155, 70%, 60%, 0.5);
+  color: hsla(var(--mbx-h), 80%, 60%, 0.6);
   position: absolute;
   /* z-index: 10; */
   will-change: left, top, width, height, font;
@@ -483,18 +494,6 @@ x {
 /* #endregion */
 
 /* #region VIVA */
-svg,
-.mbx-wink,
-[data-blink],
-[data-viva],
-[data-root],
-[data-filter="viva"] {
-  --viva-f1: 0 0 3px hsl(var(--mbx-h), 90%, 80%);
-  --viva-f2: 0 0 8px hsl(var(--mbx-h), 100%, 58%);
-  --viva-f3: 0 0 24px hsl(var(--mbx-h), 100%, 55%);
-  --viva-shadow: var(--viva-f1), var(--viva-f2), var(--viva-f3);
-  --viva-filter: drop-shadow(var(--viva-f1)) drop-shadow(var(--viva-f2)) drop-shadow(var(--viva-f3));
-}
 [data-viva] {
   text-shadow: none;
   animation: mbx-viva linear both;
@@ -1369,14 +1368,12 @@ x:has(> [data-root="back"]) {
 [data-funk-text] {
   font-size: var(--mbx-funk-size, 0.75em);
   letter-spacing: -0.075em;
-  /* transform: translateY(-0.15em); */
 }
 [data-funk-text="W"] {
   font-family: "Luckiest Guy";
 }
 [data-funk-text] + [data-sup] {
   font-size: calc(0.75 * var(--mbx-expo-size));
-  /* margin-inline-start: -0.5em; */
 }
 /* #endregion */
 
@@ -1502,9 +1499,13 @@ x:has(> [data-root="back"]) {
 
 /* #region CANK */
 [data-cank] {
+  will-change: path;
   animation: mbx-cank-keys linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
+}
+[data-cank-svg] {
+  rotate: var(--mbx-cank-val, 0);
 }
 [data-jest=""] [data-cank] {
   d: path("M   0 8 L 98 100 L 100 92 L 2 0 Z");
@@ -1652,6 +1653,7 @@ x:has(> [data-root="back"]) {
   /* background-color: hsl(0, 100%, 20%); */
   display: inline-grid;
   grid-template-areas: "stack";
+  grid-template-columns: 100%;
   justify-items: center;
   align-items: center;
   gap: 0;
@@ -1790,7 +1792,9 @@ x:has(> [data-inline-frak-holder="anim"]) {
 /* #endregion */
 
 /* #region FAXX|HINT */
+[data-unHint],
 [data-hint],
+[data-unFaxx],
 [data-faxx] {
   position: relative;
   display: inline-grid;
@@ -1804,12 +1808,19 @@ x:has(> [data-inline-frak-holder="anim"]) {
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
+[data-unHint] > x,
 [data-hint] > x,
+[data-unFaxx] > x,
 [data-faxx] > x {
   grid-area: stack;
 }
 [data-faxx] > x:nth-of-type(1) {
 }
+[data-hint] > x:nth-of-type(2),
+[data-unHint] > x:nth-of-type(2){
+ font-size: 0.7em;
+}
+[data-unFaxx] > x:nth-of-type(2),
 [data-faxx] > x:nth-of-type(2) {
   font-size: 0.55em;
 }
@@ -1830,6 +1841,7 @@ x:has(> [data-inline-frak-holder="anim"]) {
   }
 }
 
+[data-hint=""],
 [data-faxx=""] {
   animation: none;
 }
@@ -1837,6 +1849,9 @@ x:has(> [data-inline-frak-holder="anim"]) {
   color: transparent;
   text-shadow: var(--ghost-shadow);
   opacity: 0.5;
+}
+[data-hint=""] > x:nth-of-type(2) {
+  color: transparent;
 }
 [data-faxx="back"] > x:nth-of-type(2),
 [data-faxx=""] > x:nth-of-type(2) {

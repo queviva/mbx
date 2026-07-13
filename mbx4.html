@@ -31,7 +31,7 @@
   </head>
 
   <body>
-    <rat-batix id="one" data-mbx='{"color":300}'></rat-batix>
+    <rat-batix id="one" data-mbx='{"xxx_color":300}'></rat-batix>
     <rat-batix id="two" data-mbx='{"xxx_color":300}'></rat-batix>
 
     <script id="ROUTINES">
@@ -41,115 +41,62 @@
           illuminated acrobatic gestural mathematics
         `,
         steps: [
-          /*
           {
             load: `
-             <mbx-sin base="2" id="T2x">
-              x<x data-sup>
-                <mbx-frak id="T5">
-                  <x>1</x>
-                  <x><x id="deno-2">2</x></x>
-                </mbx-frak>
-              </x>
-             </mbx-sin>
-             +
-             <x id="T27">27</x>
-             <x id="Tplus1">
-              <x id="Tplus">+</x>
-              <x id="Tminus">-</x>
-              <x id="T101">1</x>
-             </x>
-             <x id="EQ">=</x>
-             <x id="T9">9</x>
+            <x id="T3x" data-tite>
+             <x id="T3">3</x>
+             <x id="Tx">x</x>
+            </x>
+            =
+            <x id="T9">9</x>
+
+            <x id="T3-a">3</x>
+            <x id="T3-b">3</x>
+
+            <x id="T3-faxx">
+             <x id="T3-faxx-a">3</x>
+             <x id="T3-faxx-b">3</x>
+            </x>
             `,
-            note: "erroneous funks",
+            note: "divide both sides by three", 
             acts: (X) => {
-              X.spot("T5").materialize().grow().during(0.5, 1);
-              X.mount("T3fax", "3 3 3").spot("T27").faxx("T3fax");
-              X.mount("T7", "7").spin().spot("T2x").frak("T7");
-              X.spot("T2x-sin-open").cirk().during(0.7, 1);
-              X.spot("T2x-sin-open").grow().during(0, 0.7);
-              X.spot("T2x-sin-close").grow().during(0, 0.7);
-              X.spot("Tminus").viva();
-              X.spot("Tplus").xfade("Tminus");
-              X.spot("Tplus1").spin().vault();//.moveAfter("T9");
-              X.spot("EQ").xout().during(0.7, 1);
-              X.mount("e-99", "e").spot("T9").raze("e-99");
+              X.spot("T3-faxx").hide();
+              X.spot("T3x").frak("T3-a");
+              X.spot("T9").frak("T3-b");
             },
           },
-          {},
-          */
           {
-            load: `
-            <x id="group-1">
-             <x>x^2</x>
-             <x>+ 2x</x>
-             <x>+ 1</x>
-             <x>= 0</x>
-            </x>
-            <x id="member">
-             (x + ?)(x + ?) 
-            </x>
-            `,
-            note: `
-            remember that thing?
-            `,
+            note: "cankel the threes from the x and reduce",
             acts: (X) => {
-              X.spot("group-1").hint("member");
-            },
-          },
-          {},
-          {
-            load: `
-            <x>D</x>
-            <x id="Tplus">+</x>
-            <x id="Tplus1">
-              <x>3</x> + <x>B</x>
-            </x>
-            +
-            <x id="TK"> 
-             K
-             <x data-sup>
-              <x data-catch>
-               <x id="catch-1"></x>
-              </x>
-             </x>
-            </x>
-            `,
-            note: `
-              if you move you lose
-            `,
-            acts: (X) => {
-              X.mount("T2", "2").spot("TK").frak("T2");
-              X.spot("Tplus").shrink();
-              X.spot("Tplus1").tite();
-              X.spot("Tplus1").moveAfter("catch-1");
-            },
-          },
-          {},
-          {
-            load: `
-            <x data-tite-left>(</x>
-            <x id="Tx">x</x>
-            +
-            <x id="T1">1</x>
-            <x data-tite-rite>)</x>
-            <x data-doppel>
-             <x id="T3-a">3</x>
-             <x id="T3-b">3</x>
-             <x id="T3-c">3</x>
-            </x>
-            `,
-            note: `distribution`,
-            acts: (X) => {
-              // X.spot("Tx", "T1").dist("T3");
-              X.spot("T3-c").vaporize();
-              X.spot("T3-b").moveAfter("Tx");
-              X.spot("T3-a").moveAfter("T1");
+              X.spot("Tx").flash();
+              X.spot("T3", "T3-a").cank().during(0, 0.3);
+              X.spot("T3").shrink().during(0.3, 1);
+              X.spot("T3x-frak").unFrak();
             }
           },
-          {},
-          {load: `x`, note:`done`},
+          {
+            note: "nine is three times three",
+            acts: (X) => {
+              X.spot("T3-faxx").show();
+              X.spot("T9").faxx("T3-faxx");
+            }
+          },
+          {
+            note: `cankel the threes from the nine and reduce`,
+            acts: (X) => {
+              X.spot("T3-b", "T3-faxx-a").cank().during(0, 0.3);
+              X.spot("T9-frak").unFrak();
+              X.mount("T9-red-3", "3").materialize();
+              X.spot("T9-faxx").xfade("T9-red-3");
+            }
+          },
+          {
+            note: "looks good to me!",
+            acts: (X) => {
+              X.spot("Tx").wink();
+              X.mount("good","").good().during(0, 0.5);
+            }
+          },
         ],
       };
       const routineDemo = {
@@ -701,7 +648,7 @@
       });
       const two = document.getElementById("two");
       two.addEventListener("mbx-ready", (e) => {
-        two.loadRoutine(routineDemo);
+        // two.loadRoutine(routineDemo);
       });
     </script>
 

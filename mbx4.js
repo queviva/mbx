@@ -499,6 +499,13 @@
                 bat.style.setProperty("--ani-end", e);
                 continue;
               }
+              if (bat.hasAttribute("data-faxx")) {
+                for (const child of bat.children) {
+                  child.style.setProperty("--ani-start", s);
+                  child.style.setProperty("--ani-end", e);
+                }
+                continue;
+              }
               let fc = bat;
               if (bat.children[0]) {
                 fc = bat.children[0].hasAttribute("data-grow") ? bat : bat.children[0];
@@ -548,13 +555,19 @@
 
     async #measureMovers(stage) {
       const all = stage.querySelectorAll("*");
-      const movers = stage.querySelectorAll("[data-move]");
-      const growers = stage.querySelectorAll("[data-grow]");
       const origBlanks = stage.querySelectorAll(`[data-blank="origin"]`);
       const destBlanks = stage.querySelectorAll(`[data-blank="destiny"]`);
 
-      const moversMap = new Map(
-        Array.from(movers, (bat) => [bat.getAttribute("data-source"), bat]),
+      const growers = stage.querySelectorAll(`[data-grow]`);
+      for (const grower of growers) {
+        log("grower:", grower.id);
+      }
+
+      const movers = new Map(
+        Array.from(stage.querySelectorAll("[data-move]"), (bat) => [
+          bat.getAttribute("data-source"),
+          bat,
+        ]),
       );
 
       const orig = { blanks: new Map(), rects: new Map(), fonts: new Map() };
@@ -623,8 +636,7 @@
       }
 
       // set the deltas for the move animation
-      for (const prime of movers) {
-        const id = prime.getAttribute("data-source");
+      for (const [id, prime] of movers.entries()) {
         const SR = stage.getBoundingClientRect();
         const OR = orig.rects.get(id);
         const DR = dest.rects.get(id);
@@ -720,7 +732,6 @@
           target.setAttribute("data-resized", ++count);
 
           if (this.#resizeFrames.has(target)) {
-            log("CANKED!!!");
             cancelAnimationFrame(this.#resizeFrames.get(target));
           }
 
@@ -840,78 +851,80 @@
     }
 
     #makeFunkSkills() {
-      const skills = ["log", "ln", "W"];
-      const invers = ["sin", "cos", "tan", "sec", "csc", "cot", "trig"];
-
       const api = {};
       const short = {};
       const clean = [];
 
       const makeHTML = {
-        open: (id, skill, base) => {
-          const type = invers.includes(skill) ? "data-sup" : "data-sub";
-          const bTag = base ? `<x ${type}>${base}</x>` : "";
+        open: (id, skill, sup, base) => {
+          const kind = sup === "sup" ? "data-sup" : "data-sub";
+          const bTag = base ? `<x ${kind}>${base}</x>` : "";
           return `
-           <x id="${id}-${skill}-open">
-            <x data-tite>
-             <x data-funk-text="${skill}">${skill}</x>
-             ${bTag}
-             <x>(</x>
-            </x>
-           </x>
-         `;
+              <x data-tite>
+               <x data-funk-text="${skill}">${skill}</x>
+               ${bTag}
+               <x>(</x>
+              </x>
+            `;
         },
         close: (id, skill) => {
-          return `<x id="${id}-${skill}-close">)</x>`;
+          return `<x>)</x>`;
+        },
+        funk: (skill, base, sup, dir) => {
+          const bat = this.#batties?.[0];
+          if (!bat?.id) return;
+
+          const skillID = `${bat.id}-${skill}`;
+          const groink =
+            dir === "fore"
+              ? () => this.#API.grow()
+              : dir === "back"
+                ? () => this.#API.shrink()
+                : () => {};
+
+          this.#API
+            .mount(`${skillID}-open`, makeHTML.open(bat.id, skill, sup, base), {
+              [`funk-open`]: "",
+            })
+            .insertBefore(bat.id);
+
+          groink();
+
+          this.#API
+            .mount(`${skillID}-close`, makeHTML.close(bat.id, skill), {
+              [`funk-close`]: ""
+            })
+            .insertAfter(bat.id);
+
+          groink();
+
+          this.#API.spot(`${skillID}-open`, bat.id, `${skillID}-close`).team(skillID, { tite: "" });
+          this.#API.spot(skillID);
+          this.#wrap("funk", { tite: "" });
+          return this.#API.spot(skillID);
         },
       };
 
-      for (const skill of [...skills, ...invers]) {
-        const fixy = `${this.#opts.fix}-${skill}`;
-        api[skill] = (base = null) => {
-          if (this.#batties.length <= 0) return;
-          const bat0 = this.#batties[0];
-          const bat1 = this.#batties.at(-1);
-          const teamID = `${bat0.id}-${skill}`;
-          this.#API.team(teamID);
-          this.#API
-            .mount(`${teamID}-open`, makeHTML.open(teamID, skill, base))
-            .grow()
-            .insertBefore(bat0.id);
-          this.#API
-            .mount(`${teamID}-close`, makeHTML.close(teamID, skill))
-            .grow()
-            .insertAfter(bat1.id);
-          // this.#API
-          // .spot(`${teamID}-open`, teamID, `${teamID}-close`)
-          // .team(`${bat0.id}-${skill}`, { tite: "" });
-          return this.#API;
-        };
-        short[fixy] = (bat) => {
-          bat.id ||= `${this.#opts.fix}-${crypto.randomUUID()}`;
-          const base = bat.getAttribute("base");
-          const tag = this.#makeTag(
-            "x",
-            `<x data-tite>
-             ${makeHTML.open(bat.id, skill, base)}
-             ${bat.innerHTML}
-             ${makeHTML.close(bat.id, skill)}
-            </x>`,
-            {
-              id: bat.id,
-              [`${skill}`]: "",
-            },
-          );
-          /*
-          this.#API
-            .mount(`${bat.id}-${skill}-open`, makeHTML.open(bat.id, skill, base))
-            .insertBefore(bat.id)
-            .mount(`${bat.id}-${skill}-close`, makeHTML.close(bat.id, skill))
-            .insertAfter(bat.id);
-          */
-          return tag;
-        };
-      }
+      api["funk"] = (skill = "ln", base) => makeHTML.funk(skill, base, "sub", "fore");
+      api["funkSup"] = (skill = "ln", base) => makeHTML.funk(skill, base, "sup", "fore");
+      api["unFunk"] = (skill = "ln", base) => makeHTML.funk(skill, base, "sub", "back");
+      api["unFunkSup"] = (skill = "ln", base) => makeHTML.funk(skill, base, "sup", "back");
+
+      const fixy = `${this.#opts.fix}-funk`;
+      short[fixy] = (bat) => {
+        bat.id ||= `${fixy}-${crypto.randomUUID()}`;
+        const skill = bat.getAttribute("skill") || "";
+        const sup = bat.getAttribute("sup");
+        const sub = bat.getAttribute("sub");
+        const tag = this.#makeTag("x", bat.innerHTML, { id: bat.id });
+        bat.replaceWith(tag);
+        this.#API.spot(bat.id);
+        if (sub) {
+          makeHTML.funk(skill, sub, "sub", "");
+        } else {
+          makeHTML.funk(skill, sup, "sup", "");
+        }
+      };
 
       return { api: api, short: short, clean: clean };
     }
@@ -1201,59 +1214,67 @@
       const clean = [];
 
       const makeHTML = {
+        all: (skill, dir, id) => {
+          // only one bat allowed
+          const bat = this.#batties[0];
+          const box = this.#stageObj.querySelector(`#${CSS.escape(id)}`);
+          if (!bat || !box) return;
+
+          const fax = this.#makeTag("x", "", { id: `${bat.id}-${skill}`, [`${skill}`]: dir });
+          bat.replaceWith(fax);
+          fax.append(bat, box);
+
+          const batWide = bat.getBoundingClientRect().width;
+          const boxWide = box.getBoundingClientRect().width;
+
+          const start = dir === "fore" ? batWide : boxWide;
+          const end = (dir === "fore" ? Math.max : Math.min)(batWide, boxWide);
+
+          fax.style.setProperty(`--${this.#opts.fix}-start-wide`, start + "px");
+          fax.style.setProperty(`--${this.#opts.fix}-end-wide`, end + "px");
+          makeHTML[skill](bat, box);
+
+          return this.#API.spot(fax.id);
+        },
         faxx: (bat, box) => {
           this.#API.spot(bat.id).ghost();
           this.#API.spot(box.id).viva().salute();
         },
         hint: (bat, box) => {
-          this.#API.spot(bat.id).vaporize();
-          this.#API.spot(box.id).viva().during(0, 0.5).salute().during(0, 0.8);
+          this.#API.spot(bat.id).ghost();
+          this.#API.spot(box.id).viva().salute();
+        },
+        unHint: (bat, box) => {
+          this.#API.spot(bat.id).setFilter("vaporize").clearFilter();
+          this.#API.spot(box.id).retreat();
+        },
+        unFaxx: (bat, box) => {
+          this.#API.spot(bat.id).setFilter("ghost").clearFilter();
+          this.#API.spot(box.id).retreat();
         },
       };
 
       for (const skill of skills) {
         api[skill] = (id) => {
-          // only one faxx box at a time
-          const bat = this.#batties[0];
-          const box = this.#stageObj.querySelector(`#${CSS.escape(id)}`);
-          if (!bat || !box) return;
-          const fax = this.#makeTag("x", "", { id: `${bat.id}-${skill}`, [`${skill}`]: "fore" });
-          bat.replaceWith(fax);
-          fax.append(bat, box);
-          const batWide = bat.getBoundingClientRect().width;
-          const boxWide = box.getBoundingClientRect().width;
-          fax.style.setProperty(`--${this.#opts.fix}-start-wide`, batWide + "px");
-          fax.style.setProperty(`--${this.#opts.fix}-end-wide`, Math.max(batWide, boxWide) + "px");
-          makeHTML[skill](bat, box);
-          return this.#API.spot(fax.id);
+          return makeHTML.all(skill, "fore", id);
         };
-        api[camel(skill)] = () => {
-          for (const fax of this.#batties) {
-            fax.setAttribute(`data-${skill}`, "back");
-            const [bat, box] = fax.children;
-            if (!bat || !box) continue;
-            const batWide = bat.getBoundingClientRect().width;
-            const boxWide = box.getBoundingClientRect().width;
-            fax.style.setProperty(`--${this.#opts.fix}-start-wide`, batWide + "px");
-            fax.style.setProperty(
-              `--${this.#opts.fix}-end-wide`,
-              Math.max(batWide, boxWide) + "px",
-            );
-            this.#API.spot(bat.id).setFilter("ghost").clearFilter();
-            this.#API.spot(box.id).retreat();
-          }
-          return this.#API;
+        api[camel(skill)] = (id) => {
+          return makeHTML.all(camel(skill), "back", id);
         };
         clean.push((stage) => {
           for (const bat of stage.querySelectorAll(`[data-${skill}]`)) {
             const val = bat.getAttribute(`data-${skill}`);
             if (val === "fore") {
               bat.setAttribute(`data-${skill}`, "");
-            } else if (val === "back") {
-              bat.children[0].style.textShadow = "none";
-              bat.children[0].style.color = "inherit";
-              bat.replaceWith(bat.children[0]);
             }
+          }
+        });
+        clean.push((stage) => {
+          for (const bat of stage.querySelectorAll(`[data-${camel(skill)}]`)) {
+            bat.children[0].style.textShadow = "none";
+            bat.children[0].style.color = "currentColor";
+            bat.children[1].remove();
+            this.#unWrap(camel(skill), stage);
           }
         });
       }
@@ -1308,7 +1329,6 @@
 
         const co_txt = coef.innerText;
         this.#API.spot(id).doppel(total);
-        // this.#API.spot(id).flash().during(0, 0.3);
         this.#API.spot(id).vaporize().during(0.05, 0.7);
         this.#API.spot(`${id}-doppel`).shrink().during(0.6, 1);
 
