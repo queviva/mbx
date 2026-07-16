@@ -171,7 +171,7 @@ x {
   position: relative;
   display: flex;
   flex-direction: row;
-  gap: 0.25em;
+  gap: var(--mbx-gap, 0.25);
   align-items: baseline;
   justify-content: center;
   overflow: visible;
@@ -262,6 +262,7 @@ x {
 /* #region TITE */
 [data-tite] {
   /* background-color: #909; */
+  width: auto;
   gap: 0;
   word-spacing: 0;
 }
@@ -319,6 +320,7 @@ x {
   color: #fff;
   display: inline-grid;
   grid-template-areas: stack;
+  grid-template-columns: 100%;
   gap: 0;
 
   will-change: margin-inline, left, width, height;
@@ -336,11 +338,11 @@ x {
   /* opacity: 0; */
 }
 [data-blank="origin"] {
-  background-color: hsl(200, 100%, 20%);
+  background-color: hsla(200, 100%, 80%, 0.2);
   animation-direction: reverse;
 }
 [data-blank="destiny"] {
-  background-color: hsl(0, 100%, 20%);
+  background-color: hsla(0, 100%, 70%, 0.2);
   animation-direction: normal;
 }
 /* #endregion */
@@ -377,34 +379,44 @@ x {
 /* #endregion */
 
 /* #region GROW */
-[data-grow] {
+[data-tite]:has([data-grow]) {
+  --mbx-grow-margin: 0;
+  border: 1px solid;
+}
+x:has(> [data-grow]) {
   /* color: #fff; */
-  /* background-color: hsla(100, 100%, 50%, 0.2); */
+  background-color: hsla(40, 100%, 60%, 0.2);
+  interpolate-size: allow-keywords;
+}
+x:has(> [data-grow="fore"]),
+x:has(> [data-grow="back"]) {
   will-change: transform, width, margin-inline, opacity;
   animation: mbx-grow linear both;
   animation-timeline: --anim-timeline;
   animation-range: var(--animation-range);
 }
-[data-grow="fore"] {
+x:has(> [data-grow="fore"]) {
   animation-direction: normal;
 }
-[data-grow="back"] {
+x:has(> [data-grow="back"]) {
   animation-direction: reverse;
 }
+
 @keyframes mbx-grow {
   from {
     transform: scale(0);
     width: 0;
     /* height: 0; */
     margin-inline: var(--mbx-grow-margin, -0.125em);
-    opacity: 0;
+    /* opacity: 0; */
   }
   to {
     transform: scale(1);
-    width: var(--mbx-width);
+    width: auto;
+    /* width: var(--mbx-width); */
     /* height: var(--mbx-height); */
     margin-inline: 0;
-    opacity: 1;
+    /* opacity: 1; */
   }
 }
 /* #endregion */
@@ -1644,7 +1656,8 @@ x:has(> [data-root="back"]) {
 
 /* #region DOPPEL */
 [data-doppel] {
-  /* background-color: hsl(0, 100%, 20%); */
+  /* background-color: hsla(0, 100%, 50%, 0.4); */
+  border: 1px solid hsla(0, 100%, 50%, 0.4);
   display: inline-grid;
   grid-template-areas: "stack";
   grid-template-columns: 100%;

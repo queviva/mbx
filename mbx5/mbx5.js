@@ -72,7 +72,7 @@
   const defOpts = {
     tag: "mathro-batix",
     fix: "mbx",
-    css: "mbx4.css",
+    css: "mbx5.css",
     color: 33,
     timeout: 5000,
   };
@@ -244,8 +244,8 @@
       }
     }
 
-    #wrap(type, vals) {
-      for (const bat of this.#batties) {
+    #wrap(batties, type, vals) {
+      for (const bat of batties) {
         let targ;
         if (bat.tagName === "path") {
           bat.setAttribute(`data-${type}`, "");
@@ -263,13 +263,12 @@
           }
         }
       }
-      return this.#API;
     }
 
-    #unWrap(type, stage) {
-      for (const bat of stage.querySelectorAll(`[data-${type}]`)) {
+    #unWrap(stage, skill) {
+      for (const bat of stage.querySelectorAll(`[data-${skill}]`)) {
         if (bat.tagName === "path") {
-          bat.removeAttribute(`data-${type}`);
+          bat.removeAttribute(`data-${skill}`);
         } else {
           bat.replaceWith(...[...bat.childNodes]);
         }
@@ -277,8 +276,8 @@
     }
 
     #unShort = (skill, bat) => {
-      this.#batties = bat.children;
-      this.#wrap(skill);
+      log("bat in unshort", bat, bat.children)
+      this.#wrap([bat], skill);
       return [...bat.children];
     };
 
@@ -767,10 +766,13 @@
 
       for (const skill of [...skills, ...permas.keys()]) {
         const fixy = `${this.#opts.fix}-${skill}`;
-        api[skill] = (val) => this.#wrap(skill, { ...(val ? { [`--${fixy}-val`]: val } : {}) });
+        api[skill] = (val) => {
+          this.#wrap(this.#batties, skill, { ...(val ? { [`--${fixy}-val`]: val } : {}) });
+          return this.#API;
+        }
         short[fixy] = (bat) => this.#unShort(skill, bat);
         if (!permas.has(skill)) {
-          clean.push((stage) => this.#unWrap(skill, stage));
+          clean.push((stage) => this.#unWrap(stage, skill));
         } else {
           clean.push((stage) => {
             for (const bat of stage.querySelectorAll(`[data-${skill}]`)) {
@@ -781,7 +783,7 @@
                 (skill === "vert" ? "0 " : "") + sty.getPropertyValue(`--${fixy}-val`),
               );
             }
-            this.#unWrap(skill, stage);
+            this.#unWrap(stage, skill);
           });
         }
       }
@@ -790,21 +792,10 @@
     }
 
     #makeGrowSkills() {
-      const skills = ["tite"];
+      const skills = ["grow", "tite"];
       const api = {};
       const short = {};
       const clean = [];
-
-      const groink = (dir, v) => {
-        for (const bat of this.#batties) {
-          this.#measureElements(bat);
-          bat.setAttribute("data-grow", dir);
-        }
-        return this.#API;
-      };
-
-      api["grow"] = (v) => groink("fore", v);
-      api["shrink"] = (v) => groink("back", v);
 
       clean.push((stage) => {
         for (const bat of stage.querySelectorAll("[data-grow]")) {
@@ -820,14 +811,14 @@
       for (const skill of skills) {
         const fixy = `${this.#opts.fix}-${skill}`;
         api[skill] = (v) => {
-          for (const bat of this.#batties) {
-            this.#wrap(skill, { [`${skill}`]: "fore" });
-          }
+          this.#measureElements(...this.#batties);
+          this.#wrap(this.#batties, skill, { [`${skill}`]: "fore" });
+          return this.#API;
         };
         api[camel(skill)] = (v) => {
-          for (const bat of this.#batties) {
-            this.#wrap(skill, { [`${skill}`]: "back" });
-          }
+          this.#measureElements(...this.#batties);
+          this.#wrap(this.#batties, skill, { [`${skill}`]: "back" });
+          return this.#API;
         };
         short[fixy] = (bat) => {
           const val = bat.getAttribute("val");
@@ -839,6 +830,7 @@
         clean.push((stage) => {
           for (const bat of stage.querySelectorAll(`[data-${skill}]`)) {
             const val = bat.getAttribute(`data-${skill}`);
+            bat.removeAttribute("style");
             if (val === "fore") {
               bat.setAttribute(`data-${skill}`, "");
             } else if (val === "back") {
@@ -880,7 +872,7 @@
             dir === "fore"
               ? () => this.#API.grow()
               : dir === "back"
-                ? () => this.#API.shrink()
+                ? () => this.#API.unGrow()
                 : () => {};
 
           this.#API
@@ -901,7 +893,7 @@
 
           this.#API.spot(`${skillID}-open`, bat.id, `${skillID}-close`).team(skillID, { tite: "" });
           this.#API.spot(skillID);
-          this.#wrap("funk", { tite: "" });
+          this.#wrap(this.#batties, "funk", { tite: "" });
           return this.#API.spot(skillID);
         },
       };
@@ -1275,7 +1267,7 @@
             bat.children[0].style.textShadow = "none";
             bat.children[0].style.color = "currentColor";
             bat.children[1].remove();
-            this.#unWrap(camel(skill), stage);
+            this.#unWrap(stage, camel(skill));
           }
         });
       }
@@ -1298,7 +1290,7 @@
         };
         api[camel(skill)] = (id) => {
           this.#API.team(`${id}-${skill}`, { [`${skill}`]: "back" });
-          this.#API.spot(id).insertBefore(`${id}-${skill}`).shrink();
+          this.#API.spot(id).insertBefore(`${id}-${skill}`).unGrow();
           return this.#API;
         };
         clean.push((stage) => {
@@ -1331,7 +1323,7 @@
         const co_txt = coef.innerText;
         this.#API.spot(id).doppel(total);
         this.#API.spot(id).vaporize().during(0.05, 0.7);
-        this.#API.spot(`${id}-doppel`).shrink().during(0.6, 1);
+        this.#API.spot(`${id}-doppel`).unGrow().during(0.6, 1);
 
         for (let i = 0; i < total; i++) {
           const batID = batties[i].id;
@@ -1367,7 +1359,7 @@
               targ = bat.parentNode;
             } else {
               this.#API.spot(bat.id);
-              this.#wrap("exit");
+              this.#wrap(this.#batties, "exit");
               targ = bat.children[0];
             }
             bat.style.setProperty(`--${fixy}-val`, `${val}ms`);
@@ -1404,7 +1396,7 @@
 
         this.#API.mount(ID, "<x></x><x></x>");
 
-        this.#wrap(skill);
+        this.#wrap(this.#batties, skill);
 
         const EL = this.#API.pick(ID);
 

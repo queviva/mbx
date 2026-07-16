@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>mbx5.0 beta</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="mbx5.js" data-mbx='{"tag":"rat-batix","css":"mbx5.css"}'></script>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding-top: 30vh;
+        padding-bottom: 100vh;
+        background-color: #111;
+      }
+      rat-batix {
+        width: 100%;
+        font-size: 1.25rem;
+        background-color: #111;
+      }
+      @media screen and (orientation: portrait) {
+        rat-batix {
+          font-size: 0.8em;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <rat-batix id="one" data-mbx='{"xxx_color":300}'></rat-batix>
+    <rat-batix id="two" data-mbx='{"xxx_color":300}'></rat-batix>
+
+    <script id="ROUTINES">
+      const routineTesting = {
+        intro: `
+          <x data-logo>MATHROBATIX</x>
+          illuminated acrobatic gestural mathematics
+        `,
+        steps: [
+          {
+            load: `
+             <x data-tite>
+              <x id="T3">3</x>
+              <x id="Tx">x</x>
+             </x>
+             <x id="Tplus-a">+</x>
+             <x id="T2">2g</x>
+             <x id="Tplus-b">+</x>
+             <x id="T9">9</x>
+          `,
+            note: `prime movers`,
+            acts: (X) => {
+              X.spot("Tx")
+                .vaporize().during(0, 0.6)
+                .unGrow().during(0.5, 1)
+              ;
+              X.spot("Tplus-b").grow();
+              X.mount("e-99", "e^2");
+              X.spot("T2")
+                // .funkSup("sin", "-1").during(0, 0.4)
+                .frak("e-99")
+                .foink("0.55em")
+                .vert("-0.2em")
+              ;
+            },
+          },
+          {},
+        ],
+      };
+      const routineDemo = {
+        intro: `
+          <x data-logo>MATHROBATIX</x>
+          illuminated acrobatic gestural mathematics
+        `,
+        steps: [
+          {
+            // unfurl
+            load: `
+            <x id="Tx-a">x</x>
+            <x id="pow-2-a"><x data-sup>2</x></x>
+            <x id="plus-b">+</x>
+            <x id="T3x-b" data-tite>
+             <x id="T3-b">3</x>
+             <x id="Tx-b">x</x>
+            </x>
+            <x id="plus-c">+</x>
+            <x id="T5-c">5</x>
+            <x id="EQ">=</x>
+            <x id="T0-d">0</x>
+            `,
+            note: `
+              <x>solving for x</x>
+              <x>can get tricky</x>
+            `,
+            acts: (X) => {
+              X.spot("Tx-a").viva();
+              X.spot("pow-2-a", "plus-b", "T3x-b", "plus-c", "T5-c", "EQ", "T0-d").unfurl();
+            },
+          },
+          {
+            // default distribution
+            load: `
+            <x id="T3">3</x>
+            <x data-tite-left>(</x>
+            <x id="Tx">x</x> + <x id="T1">1</x>
+            <x data-tite-rite>)</x>
+            `,
+            note: `
+            a widely-used, popular distribution
+            <x data-rant>
+              speaking of widely-used and popular
+              distributions, that happens to also 
+              be the goal of MathroBatiX itself
+            </x>
+            `,
+            acts: (X) => {
+              X.spot("Tx", "T1").dist("T3");
+              X.spot("T3-doppel-0").blink().during(0.3, 1);
+              X.spot("T3-doppel-1").blink().during(0.3, 1);
+              X.spot("T3").vaporize();
+            },
+          },
+          {
+            // blur move
+            load: `
+            <x id="T3yx">
+             <x data-tite>
+              <x>3</x>
+              <x data-doppel>
+               <x id="Ty-a">y</x>
+               <x id="Ty-b">y</x>
+               <x id="Ty-c">y</x>
+              </x>
+              <x>x</x>
+             </x>
+            </x>
+            <x> + 9 &ne; </x>
+            <x id="T3catch-y-k">
+             <x data-tite>
+              <x>3</x>
+              <x data-catch>
+               <x id="catch-1"></x>
+              </x>
+              <x>k</x>
+             </x>
+            </x>
+            `,
+            note: `
+            <x>probably never need to</x>
+            <x>but you could</x>
+            `,
+            acts: (X) => {
+              X.spotAll().blur();
+              X.spot("Ty-a").blink().bulk(2.2).moveAfter("catch-1").during(0, 0.8);
+              X.spot("Ty-b").blink().bulk(2.2).moveAfter("catch-1").during(0.1, 0.9);
+              X.spot("Ty-c").blink().bulk(2.2).moveAfter("catch-1").during(0.2, 1.0);
+            },
+          },
+        ],
+      };
+ </script>
+
+    <script id="LOADER">
+      const one = document.getElementById("one");
+      one.addEventListener("mbx-ready", (e) => {
+        one.loadRoutine(routineTesting);
+      });
+      const two = document.getElementById("two");
+      two.addEventListener("mbx-ready", (e) => {
+        // two.loadRoutine(routineDemo);
+      });
+    </script>
+
+    <script id="DEBUGG">
+      const log = console.log;
+    </script>
+  </body>
+</html>

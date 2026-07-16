@@ -43,60 +43,28 @@
         steps: [
           {
             load: `
-            <x id="T3x" data-tite>
-             <x id="T3">3</x>
+           <x id="Tite-1">
+            <x>3</x>
+            <x>x</x>
+            <x>+</x>
+            <x id="T2">2</x>
+           </x>
+           <mbx-tite id="T3x">
+            <x id="T3">3</x>
+            <x data-sup data-tite>
              <x id="Tx">x</x>
             </x>
-            =
-            <x id="T9">9</x>
-
-            <x id="T3-a">3</x>
-            <x id="T3-b">3</x>
-
-            <x id="T3-faxx">
-             <x id="T3-faxx-a">3</x>
-             <x id="T3-faxx-b">3</x>
-            </x>
-            `,
-            note: "divide both sides by three", 
+           </mbx-tite>
+          `,
+            note: `prime movers`,
             acts: (X) => {
-              X.spot("T3-faxx").hide();
-              X.spot("T3x").frak("T3-a");
-              X.spot("T9").frak("T3-b");
+              X.mount("e-88", "e");
+              X.spot("T3x").funkSup("sin", "-1").frak("e-88")
+              // X.spot("T3x-holder").frak("e-88");
+              X.spot("T2").spin().vault().ghost().moveAfter("T3x-sin");
             },
           },
-          {
-            note: "cankel the threes from the x and reduce",
-            acts: (X) => {
-              X.spot("Tx").flash();
-              X.spot("T3", "T3-a").cank().during(0, 0.3);
-              X.spot("T3").shrink().during(0.3, 1);
-              X.spot("T3x-frak").unFrak();
-            }
-          },
-          {
-            note: "nine is three times three",
-            acts: (X) => {
-              X.spot("T3-faxx").show();
-              X.spot("T9").faxx("T3-faxx");
-            }
-          },
-          {
-            note: `cankel the threes from the nine and reduce`,
-            acts: (X) => {
-              X.spot("T3-b", "T3-faxx-a").cank().during(0, 0.3);
-              X.spot("T9-frak").unFrak();
-              X.mount("T9-red-3", "3").materialize();
-              X.spot("T9-faxx").xfade("T9-red-3");
-            }
-          },
-          {
-            note: "looks good to me!",
-            acts: (X) => {
-              X.spot("Tx").wink();
-              X.mount("good","").good().during(0, 0.5);
-            }
-          },
+          {},
         ],
       };
       const routineDemo = {
@@ -105,7 +73,8 @@
           illuminated acrobatic gestural mathematics
         `,
         steps: [
-          { // unfurl
+          {
+            // unfurl
             load: `
             <x id="Tx-a">x</x>
             <x id="pow-2-a"><x data-sup>2</x></x>
@@ -125,10 +94,11 @@
             `,
             acts: (X) => {
               X.spot("Tx-a").viva();
-              X.spot("pow-2-a", "plus-b", "T3x-b","plus-c","T5-c","EQ","T0-d").unfurl();
+              X.spot("pow-2-a", "plus-b", "T3x-b", "plus-c", "T5-c", "EQ", "T0-d").unfurl();
             },
           },
-          { // default distribution
+          {
+            // default distribution
             load: `
             <x id="T3">3</x>
             <x data-tite-left>(</x>
@@ -150,7 +120,8 @@
               X.spot("T3").vaporize();
             },
           },
-          { // blur move
+          {
+            // blur move
             load: `
             <x id="T3yx">
              <x data-tite>
@@ -183,6 +154,70 @@
               X.spot("Ty-a").blink().bulk(2.2).moveAfter("catch-1").during(0, 0.8);
               X.spot("Ty-b").blink().bulk(2.2).moveAfter("catch-1").during(0.1, 0.9);
               X.spot("Ty-c").blink().bulk(2.2).moveAfter("catch-1").during(0.2, 1.0);
+            },
+          },
+        ],
+      };
+      const QQQroutineTwo = {
+        intro: `
+          <x data-logo>MATHROBATIX</x>
+          illuminated acrobatic gestural mathematics
+        `,
+        steps: [
+          {
+            load: `
+            <x id="T3x" data-tite>
+             <x id="T3">3</x>
+             <x id="Tx">x</x>
+            </x>
+            =
+            <x id="T9">9</x>
+
+            <x id="T3-a">3</x>
+            <x id="T3-b">3</x>
+
+            <x id="T3-faxx">
+             <x id="T3-faxx-a">3</x>
+             <x id="T3-faxx-b">3</x>
+            </x>
+            `,
+            note: "divide both sides by three",
+            acts: (X) => {
+              X.spot("T3-faxx").hide();
+              X.spot("T3x").frak("T3-a");
+              X.spot("T9").frak("T3-b");
+            },
+          },
+          {
+            note: "cankel the threes from the x and reduce",
+            acts: (X) => {
+              X.spot("Tx").flash();
+              X.spot("T3", "T3-a").cank().during(0, 0.3);
+              X.spot("T3").shrink().during(0.3, 1);
+              X.spot("T3x-frak").unFrak();
+            },
+          },
+          {
+            note: "nine is three times three",
+            acts: (X) => {
+              X.spot("T3-faxx").show();
+              X.spot("T9").faxx("T3-faxx");
+            },
+          },
+          {
+            note: `cankel the threes from the nine and reduce`,
+            acts: (X) => {
+              X.spot("T3-b", "T3-faxx-a").cank().during(0, 0.3);
+              X.spot("T9-frak").unFrak();
+              X.mount("T9-red-3", "3").materialize();
+              X.spot("T9-faxx").xfade("T9-red-3");
+            },
+          },
+          {
+            note: "looks good to me!",
+            acts: (X) => {
+              X.spot("Tx").wink();
+              X.mount("good", "").good().during(0, 0.5);
             },
           },
         ],
