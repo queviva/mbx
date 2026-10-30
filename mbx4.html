@@ -44,8 +44,10 @@
           {
             load: `
            <x id="Tite-1">
-            <x>3</x>
-            <x>x</x>
+            <mbx-tite>
+             <x>3</x>
+             <x>x</x>
+            </mbx-tite>
             <x>+</x>
             <x id="T2">2</x>
            </x>
@@ -59,9 +61,10 @@
             note: `prime movers`,
             acts: (X) => {
               X.mount("e-88", "e");
-              X.spot("T3x").funkSup("sin", "-1").frak("e-88")
+              // X.spot("T3x").funkSup("sin", "-1").frak("e-88")
+              X.spot("T3x").funkSup("atan2").frak("e-88")
               // X.spot("T3x-holder").frak("e-88");
-              X.spot("T2").spin().vault().ghost().moveAfter("T3x-sin");
+              X.spot("T2").spin().vault().ghost().moveAfter("T3x-atan2");
             },
           },
           {},

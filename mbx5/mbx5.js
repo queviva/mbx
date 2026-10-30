@@ -262,7 +262,7 @@
       }
     }
 
-    #unShort = (skill, bat) => {
+    #unShort (skill, bat) {
       this.#wrap([bat], skill);
       return [...bat.children];
     };

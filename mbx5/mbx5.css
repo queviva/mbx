@@ -141,7 +141,7 @@ x {
   text-align: center;
   color: hsl(var(--mbx-hue), 100%, 85%);
   -webkit-text-stroke: 0.03em var(--main-color);
-  background-color: #111;
+  background-color: var(--mbx-back-color, #111);
 }
 @media screen and (orientation: portrait) {
   [data-logo] {
